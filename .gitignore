@@ -24,5 +24,6 @@ hs_err_pid*
 
 
 #intellij
-./.idea/*
+.idea/*
+server.iml
 workspace.xml
