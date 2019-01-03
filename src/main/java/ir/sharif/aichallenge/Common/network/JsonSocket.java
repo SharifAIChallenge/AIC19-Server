@@ -1,7 +1,8 @@
 package ir.sharif.aichallenge.Common.network;
 
 import com.google.gson.JsonObject;
-import util.Log;
+import ir.sharif.aichallenge.Common.util.Log;
+
 
 import java.io.IOException;
 import java.io.InputStream;

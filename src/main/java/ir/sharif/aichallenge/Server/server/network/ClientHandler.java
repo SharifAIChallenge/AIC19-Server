@@ -1,10 +1,10 @@
 package ir.sharif.aichallenge.Server.server.network;
 
-import model.Event;
-import network.Json;
-import network.JsonSocket;
-import network.data.Message;
-import util.Log;
+import ir.sharif.aichallenge.Common.model.Event;
+import ir.sharif.aichallenge.Common.network.Json;
+import ir.sharif.aichallenge.Common.network.JsonSocket;
+import ir.sharif.aichallenge.Common.network.data.Message;
+import ir.sharif.aichallenge.Common.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;

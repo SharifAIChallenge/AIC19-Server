@@ -3,7 +3,7 @@ package ir.sharif.aichallenge.TowerDefence.Factory;
 import ir.sharif.aichallenge.TowerDefence.GameObject.Unit;
 import ir.sharif.aichallenge.TowerDefence.GameObject.HeavyUnit;
 import ir.sharif.aichallenge.TowerDefence.GameObject.LightUnit;
-import Map.Path;
+import ir.sharif.aichallenge.TowerDefence.Map.Path;
 
 /**
  * Created by msi1 on 1/22/2018.

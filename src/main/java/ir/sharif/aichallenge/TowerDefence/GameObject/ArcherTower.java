@@ -1,7 +1,7 @@
 package ir.sharif.aichallenge.TowerDefence.GameObject;
 
-import Factory.Constants;
-import Map.*;
+import ir.sharif.aichallenge.TowerDefence.Factory.Constants;
+
 import java.util.ArrayList;
 
 /**

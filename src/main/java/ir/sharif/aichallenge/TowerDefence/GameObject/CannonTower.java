@@ -1,8 +1,9 @@
 package ir.sharif.aichallenge.TowerDefence.GameObject;
 
-import Factory.Constants;
-import Map.Path;
-import Map.RoadCell;
+
+import ir.sharif.aichallenge.TowerDefence.Factory.Constants;
+import ir.sharif.aichallenge.TowerDefence.Map.Path;
+import ir.sharif.aichallenge.TowerDefence.Map.RoadCell;
 
 import java.util.ArrayList;
 import java.util.Collection;
