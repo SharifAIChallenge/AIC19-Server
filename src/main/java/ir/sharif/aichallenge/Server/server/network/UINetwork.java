@@ -1,9 +1,9 @@
 package ir.sharif.aichallenge.Server.server.network;
 
-import network.JsonSocket;
-import network.data.Message;
-import server.config.Configs;
-import util.Log;
+import ir.sharif.aichallenge.Common.network.JsonSocket;
+import ir.sharif.aichallenge.Common.network.data.Message;
+import ir.sharif.aichallenge.Common.util.Log;
+import ir.sharif.aichallenge.Server.server.config.Configs;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;

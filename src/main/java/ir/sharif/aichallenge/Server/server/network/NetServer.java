@@ -1,6 +1,6 @@
 package ir.sharif.aichallenge.Server.server.network;
 
-import network.JsonSocket;
+import ir.sharif.aichallenge.Common.network.JsonSocket;
 
 /**
  * This class implements a network server. A <code>NetServer</code> runs a
