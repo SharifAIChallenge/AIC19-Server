@@ -1,10 +1,10 @@
 package ir.sharif.aichallenge.Server.server.core;
 
+import ir.sharif.aichallenge.Common.network.Json;
+import ir.sharif.aichallenge.Common.network.data.Message;
+import ir.sharif.aichallenge.Common.util.Log;
 import ir.sharif.aichallenge.Server.server.network.UINetwork;
-import network.Json;
-import network.data.Message;
 import ir.sharif.aichallenge.Server.server.config.Configs;
-import util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;

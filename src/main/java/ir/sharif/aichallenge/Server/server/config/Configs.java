@@ -1,7 +1,7 @@
 package ir.sharif.aichallenge.Server.server.config;
 
 import com.google.gson.JsonObject;
-import network.Json;
+import ir.sharif.aichallenge.Common.network.Json;
 
 import java.io.File;
 import java.io.FileNotFoundException;

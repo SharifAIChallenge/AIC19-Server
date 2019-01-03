@@ -1,8 +1,8 @@
 package ir.sharif.aichallenge.Server.server.core;
 
+import ir.sharif.aichallenge.Common.model.Event;
+import ir.sharif.aichallenge.Common.network.data.Message;
 import ir.sharif.aichallenge.Server.server.config.IntegerParam;
-import model.Event;
-import network.data.Message;
 
 /**
  * The abstract class representing the main game logic of the user's game.
