@@ -2,14 +2,13 @@ package ir.sharif.aichallenge.Server.server.core;
 
 //import Swarm.SwarmGameLogic;
 
+import ir.sharif.aichallenge.Common.model.Event;
+import ir.sharif.aichallenge.Common.network.data.Message;
+import ir.sharif.aichallenge.Common.util.Log;
 import ir.sharif.aichallenge.Server.server.network.ClientNetwork;
 import ir.sharif.aichallenge.Server.server.network.UINetwork;
-import model.Event;
-import network.data.Message;
 import ir.sharif.aichallenge.Server.server.config.ClientConfig;
 import ir.sharif.aichallenge.Server.server.config.Configs;
-import util.Log;
-
 import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;

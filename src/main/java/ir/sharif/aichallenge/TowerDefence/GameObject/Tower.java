@@ -1,8 +1,9 @@
 package ir.sharif.aichallenge.TowerDefence.GameObject;
 
-import Map.Cell;
-import Map.Map;
-import Map.RoadCell;
+
+import ir.sharif.aichallenge.TowerDefence.Map.Cell;
+import ir.sharif.aichallenge.TowerDefence.Map.Map;
+import ir.sharif.aichallenge.TowerDefence.Map.RoadCell;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -104,7 +105,7 @@ public abstract class Tower extends WarObject
 
     protected ArrayList<Unit> findNearestUnitToEnd(RoadCell cell)
     {
-        ArrayList<Unit> targets = new ArrayList<>();
+        ArrayList<Unit> targets = new ArrayList<Unit>();
         ArrayList<Unit> units = cell.getUnits();
         int minDistance = Integer.MAX_VALUE;
 

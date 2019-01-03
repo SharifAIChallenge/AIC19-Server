@@ -1,7 +1,8 @@
 package ir.sharif.aichallenge.TowerDefence.GameObject;
 
-import Factory.Constants;
-import Map.Path;
+
+import ir.sharif.aichallenge.TowerDefence.Factory.Constants;
+import ir.sharif.aichallenge.TowerDefence.Map.Path;
 
 /**
  * Created by msi1 on 1/21/2018.

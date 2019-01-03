@@ -1,8 +1,7 @@
 package ir.sharif.aichallenge.TowerDefence.GameObject;
 
-import Factory.Constants;
-import Factory.TowerFactory;
-import Map.*;
+import ir.sharif.aichallenge.TowerDefence.Factory.TowerFactory;
+import ir.sharif.aichallenge.TowerDefence.Map.*;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -24,7 +23,7 @@ public class Unit extends WarObject
     private Path path;
     private int currentCellIndex = 0;
     private boolean isAtGoal = false;
-    private HashMap<Integer, Tower> towersInVision = new HashMap<>();
+    private HashMap<Integer, Tower> towersInVision = new HashMap<Integer, Tower>();
 
     public Unit(int id, int level, int damage, int health, int tickPerTile, int visionRange, int killReward, Path path)
     {
@@ -96,7 +95,7 @@ public class Unit extends WarObject
 
     public ArrayList<Tower> findTowers(Map map)
     {
-        ArrayList<Tower> towersInRange = new ArrayList<>();
+        ArrayList<Tower> towersInRange = new ArrayList<Tower>();
 
         for (int i = 0; i < map.getWidth(); i++)
         {
