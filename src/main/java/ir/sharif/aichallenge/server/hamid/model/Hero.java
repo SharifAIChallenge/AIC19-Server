@@ -20,5 +20,5 @@ public class Hero {
 	private ArrayList<PowerAbiliy> powerAbiliys;
 	private int hp;
 	private Cell cell;
-	private Path recentPath;
+	private ArrayList<Path> recentPaths;
 }

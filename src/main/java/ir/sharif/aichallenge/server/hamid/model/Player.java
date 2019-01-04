@@ -15,4 +15,5 @@ public class Player {
 	private int score;
 	private ArrayList<Hero> heroes;
 	private int actionPoint;
+	private ArrayList<Cell> vision;
 }
