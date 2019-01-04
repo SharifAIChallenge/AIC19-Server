@@ -3,7 +3,7 @@ package ir.sharif.aichallenge.server.hamid.model.ability;
 import lombok.*;
 
 @Data
-@Builder
+//@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter

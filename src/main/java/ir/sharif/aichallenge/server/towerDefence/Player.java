@@ -11,7 +11,6 @@ import ir.sharif.aichallenge.server.towerDefence.Factory.UnitFactory;
 import ir.sharif.aichallenge.server.towerDefence.GameObject.ArcherTower;
 import ir.sharif.aichallenge.server.towerDefence.GameObject.Tower;
 import ir.sharif.aichallenge.server.towerDefence.GameObject.Unit;
-import ir.sharif.aichallenge.towerDefence.Map.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
