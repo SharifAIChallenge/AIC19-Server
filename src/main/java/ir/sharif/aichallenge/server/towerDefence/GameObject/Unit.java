@@ -2,8 +2,6 @@ package ir.sharif.aichallenge.server.towerDefence.GameObject;
 
 import ir.sharif.aichallenge.server.towerDefence.Factory.TowerFactory;
 import ir.sharif.aichallenge.server.towerDefence.Map.*;
-import ir.sharif.aichallenge.towerDefence.Map.*;
-
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
