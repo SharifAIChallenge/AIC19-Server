@@ -7,5 +7,5 @@ import java.util.ArrayList;
 public class Path {
 	private Cell begin;
 	private Cell end;
-	private ArrayList<Direction> path;
+	private Direction direction;
 }
