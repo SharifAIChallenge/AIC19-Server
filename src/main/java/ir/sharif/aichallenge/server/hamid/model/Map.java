@@ -2,7 +2,7 @@ package ir.sharif.aichallenge.server.hamid.model;
 
 import lombok.*;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -15,7 +15,7 @@ public class Map {
 	private Cell[][] cells;
 	private int numberOfRows;
 	private int numberOfColumns;
-	private ArrayList<Cell> player1RespownZone;
-	private ArrayList<Cell> player2RespownZone;
-	private ArrayList<Cell> ObjectiveZone;
+	private List<Cell> player1RespownZone;
+	private List<Cell> player2RespownZone;
+	private List<Cell> ObjectiveZone;
 }

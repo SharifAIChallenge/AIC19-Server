@@ -5,7 +5,7 @@ import ir.sharif.aichallenge.server.hamid.model.ability.DodgeAbility;
 import ir.sharif.aichallenge.server.hamid.model.ability.PowerAbiliy;
 import lombok.*;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -15,10 +15,10 @@ import java.util.ArrayList;
 @Getter
 
 public class Hero {
-	private ArrayList<Ability> abilities;
-	private ArrayList<DodgeAbility> dogeAbilities;
-	private ArrayList<PowerAbiliy> powerAbiliys;
+	private List<Ability> abilities;
+	private List<DodgeAbility> dogeAbilities;
+	private List<PowerAbiliy> powerAbiliys;
 	private int hp;
 	private Cell cell;
-	private ArrayList<Path> recentPaths;
+	private List<Path> recentPaths;
 }

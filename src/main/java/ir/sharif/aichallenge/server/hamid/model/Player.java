@@ -2,7 +2,7 @@ package ir.sharif.aichallenge.server.hamid.model;
 
 import lombok.*;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class Player {
 	private int score;
-	private ArrayList<Hero> heroes;
+	private List<Hero> heroes;
 	private int actionPoint;
-	private ArrayList<Cell> vision;
+	private List<Cell> vision;
 }
