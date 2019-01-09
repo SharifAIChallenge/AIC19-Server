@@ -4,36 +4,45 @@ import ir.sharif.aichallenge.server.common.model.Event;
 import ir.sharif.aichallenge.server.common.network.data.Message;
 import ir.sharif.aichallenge.server.engine.core.GameLogic;
 
-public class GameMessageHandler implements GameLogic {
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class GameHandler implements GameLogic {
+
+    public static final int CLIENT_NUM = 2;
+    public static final int CLIENT_RESPONSE_TIME = 0;
+    public static final int TURN_TIMEOUT = 0;
+
+    private AtomicInteger currentTrun;
+
     @Override
     public int getClientsNum() {
-        return 0;
+        return CLIENT_NUM;
     }
 
     @Override
     public long getClientResponseTimeout() {
-        return 0;
+        return CLIENT_RESPONSE_TIME;
     }
 
     @Override
     public long getTurnTimeout() {
-        return 0;
+        return TURN_TIMEOUT;
     }
 
     @Override
     public void init() {
-
+        //todo read from map
     }
 
     @Override
     public Message getUIInitialMessage() {
         return null;
-    }
+    }//for ui
 
     @Override
     public Message[] getClientInitialMessages() {
         return new Message[0];
-    }
+    }//for clients
 
     @Override
     public void simulateEvents(Event[] environmentEvent, Event[][] clientsEvent) {
