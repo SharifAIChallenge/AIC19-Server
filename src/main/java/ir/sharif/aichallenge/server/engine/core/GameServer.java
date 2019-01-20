@@ -212,7 +212,7 @@ public class GameServer {
         private Event[][] clientEvents;
 
         /**
-         * The run method of the {@link Runnable Runnable} interface which will create a
+         * The run method of the {@link Runnable Run    nable} interface which will create a
          * {@link java.util.concurrent.Callable Callable} instance and call it in a while until the finish flag if the
          * game had been raised or the shutdown request sent to the class (through
          * {@link Loop#shutdown() shutdown()} method)
