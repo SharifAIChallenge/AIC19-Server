@@ -10,5 +10,8 @@ import lombok.*;
 @Getter
 
 public class DodgeAbility extends Ability {
-
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

@@ -66,6 +66,7 @@ public class GameHandler implements GameLogic {
 
     @Override
     public Message[] getClientMessages() {
+
         return new Message[0];
     }
 
