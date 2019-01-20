@@ -17,4 +17,9 @@ public class Ability {
 	private int apCost;
 	private int cooldown;
 	private int remainingCooldown;
+
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
 }

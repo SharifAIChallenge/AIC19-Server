@@ -16,4 +16,9 @@ public class Player {
 	private List<Hero> heroes;
 	private int actionPoint;
 	private List<Cell> vision;
+
+
+	public void addHero(Hero hero) {
+		heroes.add(hero);
+	}
 }

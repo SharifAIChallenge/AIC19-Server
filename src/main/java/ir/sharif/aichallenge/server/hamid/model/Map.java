@@ -1,7 +1,6 @@
 package ir.sharif.aichallenge.server.hamid.model;
 
 import lombok.*;
-
 import java.util.List;
 
 @Data
@@ -18,4 +17,5 @@ public class Map {
 	private List<Cell> player1RespownZone;
 	private List<Cell> player2RespownZone;
 	private List<Cell> ObjectiveZone;
+
 }
