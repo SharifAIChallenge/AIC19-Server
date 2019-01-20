@@ -49,11 +49,13 @@ public class GameEngine {
 
         //move
         if (state.equals(GameState.MOVE)) {
-
+            //todo sort
+            //todo move and vision
         }
 
         //cast
         if (state.equals(GameState.CAST)) {
+            //todo cast
         }
 
 
