@@ -15,5 +15,5 @@ import java.util.List;
 @NoArgsConstructor
 public class Move {
     private List<Direction> moves;
-    private Integer heroId;
+    private Hero hero;
 }

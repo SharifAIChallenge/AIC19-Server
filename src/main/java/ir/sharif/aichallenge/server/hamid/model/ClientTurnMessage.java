@@ -1,5 +1,6 @@
 package ir.sharif.aichallenge.server.hamid.model;
 
+import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
 import lombok.*;
 
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
 @Getter
 
 public class ClientTurnMessage {
-    private String type;
+    private GameState type;
     private List<Integer> herosId;
     private List<Move> moves;
     private Integer heroId;
