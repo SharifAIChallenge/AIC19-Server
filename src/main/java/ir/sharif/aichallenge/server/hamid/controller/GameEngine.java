@@ -53,10 +53,10 @@ public class GameEngine {
             //todo sort
             List<Move> moves1 = message1.getMoves();
             List<Move> moves2 = message2.getMoves();
-            for (Move move: moves1) {
+            for (Move move : moves1) {
                 prepareMove(move);
             }
-            for (Move move: moves2) {
+            for (Move move : moves2) {
                 prepareMove(move);
             }
             moves1.sort(Comparator.comparingInt(o -> o.getMoves().size()));
@@ -77,16 +77,17 @@ public class GameEngine {
     private void prepareMove(Move move) {
         Cell cell = move.getHero().getCell(); // todo not change cell
         List<Direction> newMoves = new ArrayList<>();
-        for (Direction direction: move.getMoves()) {
-            if (isValid(cell, direction)) {
-                cell = nextCell(cell, direction);
+        for (Direction direction : move.getMoves()) {
+            Cell nextCell = nextCellIfNotWall(cell, direction);
+            if (nextCell != null) {
+                cell = nextCell;
                 newMoves.add(direction);
             }
         }
         move.setMoves(newMoves);
     }
 
-    private boolean isValid(Cell cell, Direction direction) {
+    private Cell nextCellIfNotWall(Cell cell, Direction direction) {
         int column = cell.getColumn();
         int row = cell.getRow();
         switch (direction) {
@@ -103,32 +104,15 @@ public class GameEngine {
                 column++;
                 break;
         }
-        return (row >= 0 && row < map.getNumberOfRows() && column >= 0
-                && column < map.getNumberOfColumns() && !map.getCells()[row][column].isWall()); // todo 0 based ok?
-    }
-
-    private Cell nextCell(Cell cell, Direction direction) {
-        int column = cell.getColumn();
-        int row = cell.getRow();
-        switch (direction) {
-            case UP:
-                row--;
-                break;
-            case DOWN:
-                row++;
-                break;
-            case LEFT:
-                column--;
-                break;
-            case RIGHT:
-                column++;
-                break;
+        if (row >= 0 && row < map.getNumberOfRows() && column >= 0
+                && column < map.getNumberOfColumns() && !map.getCells()[row][column].isWall()) { // todo 0 based ok?
+            return map.getCells()[row][column];
         }
-        return map.getCells()[row][column];
+        return null;
     }
 
-    private Cell getEmptyCell(int row , int collumn) {
-        return new Cell(false , false , null , row , collumn);
+    private Cell getEmptyCell(int row, int column) {
+        return new Cell(false, false, null, row, column);
     }
 
     public void postPrepare(List<Move> moves) {
@@ -144,7 +128,7 @@ public class GameEngine {
         }
     }
 
-    //this function used in postPrepare
+    //this method used in postPrepare
     private void move(List<Cell> reservedCell, Move move, Hero hero, List<Direction> newPath) {
         for (Direction moveMove : move.getMoves()) {
             Cell oldCell = hero.getCell();
@@ -153,27 +137,27 @@ public class GameEngine {
             int newColumn;
             switch (moveMove) {
                 case UP:
-                    newRow = oldCell.getRow() -1;
+                    newRow = oldCell.getRow() - 1;
                     newColumn = oldCell.getColumn();
-                    newCell = getEmptyCell(newRow , newColumn);
+                    newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
                         hero.setCell(newCell);
                         newPath.add(Direction.UP);
                     }
                     break;
                 case DOWN:
-                    newRow = oldCell.getRow() +1;
+                    newRow = oldCell.getRow() + 1;
                     newColumn = oldCell.getColumn();
-                    newCell = getEmptyCell(newRow , newColumn);
+                    newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
                         hero.setCell(newCell);
                         newPath.add(Direction.DOWN);
                     }
                     break;
                 case LEFT:
-                    newRow = oldCell.getRow() ;
+                    newRow = oldCell.getRow();
                     newColumn = oldCell.getColumn() + 1;
-                    newCell = getEmptyCell(newRow , newColumn);
+                    newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
                         hero.setCell(newCell);
                         newPath.add(Direction.LEFT);
@@ -182,7 +166,7 @@ public class GameEngine {
                 case RIGHT:
                     newRow = oldCell.getRow();
                     newColumn = oldCell.getColumn() - 1;
-                    newCell = getEmptyCell(newRow , newColumn);
+                    newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
                         hero.setCell(newCell);
                         newPath.add(Direction.RIGHT);
