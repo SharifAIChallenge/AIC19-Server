@@ -50,8 +50,8 @@ public class GameEngine {
 
         //move
         if (state.equals(GameState.MOVE)) {
-            //todo sort
-            List<Move> moves1 = message1.getMoves();
+            //sort
+            List<Move> moves1 = message1.getMoves(); // todo merge same hero moves in one move in getMoves
             List<Move> moves2 = message2.getMoves();
             for (Move move : moves1) {
                 prepareMove(move);

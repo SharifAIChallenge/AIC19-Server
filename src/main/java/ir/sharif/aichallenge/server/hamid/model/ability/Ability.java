@@ -18,6 +18,11 @@ public class Ability {
 	private int cooldown;
 	private int remainingCooldown;
 
+	// power ability
+	private int areaOfEffect;
+	private int power;
+	private boolean isLobbing;
+
 	@Override
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
