@@ -3,6 +3,7 @@ package ir.sharif.aichallenge.server.hamid.model;
 import lombok.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -15,7 +16,7 @@ public class Player {
 	private int score;
 	private List<Hero> heroes;
 	private int actionPoint;
-	private List<Cell> vision;
+	private Set<Cell> vision;	// hashcode and equals not matter
 
 
 	public void addHero(Hero hero) {
