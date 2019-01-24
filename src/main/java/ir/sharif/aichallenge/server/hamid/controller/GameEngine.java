@@ -62,6 +62,7 @@ public class GameEngine {
             moves1.sort(Comparator.comparingInt(o -> o.getMoves().size()));
             moves2.sort(Comparator.comparingInt(o -> o.getMoves().size()));
             //todo postPrepare
+            //todo set heroes recentPath
             //todo move and vision
 
         }
@@ -107,8 +108,8 @@ public class GameEngine {
                 break;
         }
         if (row >= 0 && row < map.getNumberOfRows() && column >= 0
-                && column < map.getNumberOfColumns() && !map.getCells()[row][column].isWall()) { // todo 0 based ok?
-            return map.getCells()[row][column];
+                && column < map.getNumberOfColumns() && !map.getCell(row, column).isWall()) { // todo 0 based ok?
+            return map.getCell(row, column);
         }
         return null;
     }
