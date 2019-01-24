@@ -61,7 +61,9 @@ public class GameEngine {
             }
             moves1.sort(Comparator.comparingInt(o -> o.getMoves().size()));
             moves2.sort(Comparator.comparingInt(o -> o.getMoves().size()));
+            //todo postPrepare
             //todo move and vision
+
         }
 
         //cast
