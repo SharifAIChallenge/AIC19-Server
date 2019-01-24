@@ -13,10 +13,8 @@ import java.util.List;
 
 public class ClientTurnMessage {
     private GameState type;
-    private List<Integer> herosId;
+    private List<Integer> heroesId;
     private List<Move> moves;
     private Integer heroId;
-    private String abilityName;
-    private int targetRow;
-    private int targetCollumn;
+    private List<Cast> casts;
 }

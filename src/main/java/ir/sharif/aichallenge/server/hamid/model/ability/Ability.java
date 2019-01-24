@@ -15,8 +15,8 @@ public class Ability {
 	private AbilityType type;
 	private int range;
 	private int apCost;
-	private int cooldown;
-	private int remainingCooldown;
+	private int coolDown;
+	private int remainingCoolDown;
 
 	// power ability
 	private int areaOfEffect;
