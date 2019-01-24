@@ -10,11 +10,11 @@ import java.util.Map;
 public class GameEngine {
 
     public static final String PICK = "pick";
-    private Player firstPlayer;
-    private Player secondPlayer;
+    private Player[] players = new Player[2];
     private GameState state;
     private Map<Integer, Hero> heroes;
     private ir.sharif.aichallenge.server.hamid.model.Map map;
+    private ClientTools clientTools;
 
     public static void main(String[] args) {
         GameEngine gameEngine = new GameEngine();
@@ -29,8 +29,8 @@ public class GameEngine {
 
     public void doPickTurn(int firstHero, int secondHero) {
         try {
-            firstPlayer.addHero((Hero) heroes.get(firstHero).clone());
-            secondPlayer.addHero((Hero) heroes.get(secondHero).clone());
+            players[0].addHero((Hero) heroes.get(firstHero).clone());
+            players[1].addHero((Hero) heroes.get(secondHero).clone());
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
@@ -51,7 +51,7 @@ public class GameEngine {
         //move
         if (state.equals(GameState.MOVE)) {
             //sort
-            List<Move> moves1 = message1.getMoves(); // todo merge same hero moves in one move in getMoves
+            List<Move> moves1 = message1.getMoves(); //todo merge same hero moves in one move in getMoves //todo filter dead hero moves
             List<Move> moves2 = message2.getMoves();
             for (Move move : moves1) {
                 prepareMove(move);
@@ -62,9 +62,59 @@ public class GameEngine {
             moves1.sort(Comparator.comparingInt(o -> o.getMoves().size()));
             moves2.sort(Comparator.comparingInt(o -> o.getMoves().size()));
             //todo postPrepare
-            //todo set heroes recentPath
-            //todo move and vision
 
+            //set heroes recentPath
+            for (Move move : moves1) {
+                Hero hero = move.getHero();
+                List<Cell> recentPath = new ArrayList<>();
+                Cell cell = hero.getCell();
+                recentPath.add(cell);
+                for (Direction direction : move.getMoves()) {
+                    cell = nextCellIfNotWall(cell, direction); //it's valid
+                    recentPath.add(cell);
+                }
+                hero.setRecentPath(recentPath);
+            }
+
+            //move and vision
+            int maxIter = 0;
+            for (Player player : players) {
+                for (Hero hero : player.getHeroes()) {
+                    hero.setRecentPathForOpponent(new ArrayList<>());
+                    maxIter = Math.max(maxIter, hero.getRecentPath().size());
+                }
+            }
+            for (int i = 0; i < maxIter; i++) {
+                for (Player player : players) {
+                    for (Hero hero : player.getHeroes()) {
+                        if (i < hero.getRecentPath().size()) {
+                            hero.setCell(hero.getRecentPath().get(i));
+                        }
+                    }
+                }
+                for (Hero firstPlayerHero : players[0].getHeroes()) {
+                    for (Hero secondPlayerHero : players[1].getHeroes()) {
+                        if (clientTools.isInVision(firstPlayerHero.getCell(), secondPlayerHero.getCell())) {
+                            firstPlayerHero.addToRecentPathForOpponent(firstPlayerHero.getCell());
+                            secondPlayerHero.addToRecentPathForOpponent(secondPlayerHero.getCell());
+                        }
+                    }
+                }
+            }
+            // unique recentPathForOpponent
+            for (Player player : players) {
+                for (Hero hero : player.getHeroes()) {
+                    List<Cell> path = hero.getRecentPathForOpponent();
+                    List<Cell> ans = new ArrayList<>();
+                    ans.add(path.get(0));
+                    for (int i = 1; i < path.size(); i++) {
+                        if (path.get(i) != path.get(i - 1))
+                            ans.add(path.get(i));
+                    }
+                    hero.setRecentPathForOpponent(ans);
+                }
+            }
+            // end of move and vision
         }
 
         //cast
