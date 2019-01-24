@@ -7,8 +7,16 @@ import ir.sharif.aichallenge.server.hamid.utils.VisionTools;
 
 import java.util.*;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameEngine {
+    public static final int PICK_OFFSET = 4;
+    public static final int NUM_OF_MOVE_TURN = 4;
+    public static final int NUM_OF_CAST_TURN = 4;
+
+    private AtomicInteger currentTrun;
+
+
     private Player[] players = new Player[2];
     private GameState state;
     private Map<Integer, Hero> heroes;
@@ -60,8 +68,9 @@ public class GameEngine {
             }
             moves1.sort(Comparator.comparingInt(o -> o.getMoves().size()));
             moves2.sort(Comparator.comparingInt(o -> o.getMoves().size()));
-            //todo postPrepare
-
+            //post Prepare
+            postPrepare(moves1);
+            postPrepare(moves2);
             //set heroes recentPath
             for (Move move : moves1) {
                 Hero hero = move.getHero();
@@ -136,16 +145,28 @@ public class GameEngine {
         //cast
         if (state.equals(GameState.CAST)) {
             //todo cast
-
+            List<Cast> casts1 = message1.getCasts();
+            List<Cast> casts2 = message2.getCasts();
         }
 
 
-        //todo check game state
+        if (currentTrun.get() >= PICK_OFFSET) {
+            int turn = currentTrun.get() - PICK_OFFSET;
+            if (turn % (NUM_OF_CAST_TURN + NUM_OF_MOVE_TURN) < NUM_OF_MOVE_TURN) {
+                state = GameState.MOVE;
+            } else {
+                state = GameState.CAST;
+            }
+        } else {
+            state = GameState.PICK;
+        }
 
+        //todo assign scores
     }
 
+    // check final location of heroes
     private void prepareMove(Move move) {
-        Cell cell = move.getHero().getCell(); // todo not change cell
+        Cell cell = move.getHero().getCell(); //not change cell
         List<Direction> newMoves = new ArrayList<>();
         for (Direction direction : move.getMoves()) {
             Cell nextCell = nextCellIfNotWall(cell, direction);
