@@ -3,18 +3,17 @@ package ir.sharif.aichallenge.server.hamid.controller;
 import ir.sharif.aichallenge.server.hamid.model.*;
 import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
+import ir.sharif.aichallenge.server.hamid.utils.VisionTools;
 
 import java.util.*;
 import java.util.Map;
 
 public class GameEngine {
-
-    public static final String PICK = "pick";
     private Player[] players = new Player[2];
     private GameState state;
     private Map<Integer, Hero> heroes;
     private ir.sharif.aichallenge.server.hamid.model.Map map;
-    private ClientTools clientTools;
+    private VisionTools visionTools;
 
     public static void main(String[] args) {
         GameEngine gameEngine = new GameEngine();
@@ -94,7 +93,7 @@ public class GameEngine {
                 }
                 for (Hero firstPlayerHero : players[0].getHeroes()) {
                     for (Hero secondPlayerHero : players[1].getHeroes()) {
-                        if (clientTools.isInVision(firstPlayerHero.getCell(), secondPlayerHero.getCell())) {
+                        if (visionTools.isInVision(firstPlayerHero.getCell(), secondPlayerHero.getCell())) {
                             firstPlayerHero.addToRecentPathForOpponent(firstPlayerHero.getCell());
                             secondPlayerHero.addToRecentPathForOpponent(secondPlayerHero.getCell());
                         }
@@ -123,7 +122,7 @@ public class GameEngine {
                     for (int j = 0; j < map.getNumberOfColumns(); j++) {
                         Cell cell = map.getCell(i, j);
                         for (Hero hero : player.getHeroes()) {  // todo check alive
-                            if (clientTools.isInVision(cell, hero.getCell())) {
+                            if (visionTools.isInVision(cell, hero.getCell())) {
                                 vision.add(cell);
                             }
                         }
@@ -137,6 +136,7 @@ public class GameEngine {
         //cast
         if (state.equals(GameState.CAST)) {
             //todo cast
+
         }
 
 
@@ -175,7 +175,7 @@ public class GameEngine {
                 break;
         }
         if (row >= 0 && row < map.getNumberOfRows() && column >= 0
-                && column < map.getNumberOfColumns() && !map.getCell(row, column).isWall()) { // todo 0 based ok?
+                && column < map.getNumberOfColumns() && !map.getCell(row, column).isWall()) {
             return map.getCell(row, column);
         }
         return null;
