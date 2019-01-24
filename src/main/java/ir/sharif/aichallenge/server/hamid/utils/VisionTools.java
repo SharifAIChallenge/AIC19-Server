@@ -1,4 +1,4 @@
-package ir.sharif.aichallenge.server.hamid.controller;
+package ir.sharif.aichallenge.server.hamid.utils;
 
 import ir.sharif.aichallenge.server.hamid.model.Cell;
 import ir.sharif.aichallenge.server.hamid.model.Map;
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 @AllArgsConstructor
-public class ClientTools {  //todo refactor --> rename class
+public class VisionTools {
     private Map map;
 
     public boolean isInVision(Cell startCell, Cell endCell) {
@@ -88,7 +88,7 @@ public class ClientTools {  //todo refactor --> rename class
         return manhattanDistance(nextCell, targetCell) <= manhattanDistance(currentCell, targetCell);
     }
 
-    public int manhattanDistance(Cell startCell, Cell endCell) {
+    private int manhattanDistance(Cell startCell, Cell endCell) {
         return Math.abs(startCell.getRow() - endCell.getRow()) + Math.abs(startCell.getColumn() - endCell.getColumn());
     }
 
