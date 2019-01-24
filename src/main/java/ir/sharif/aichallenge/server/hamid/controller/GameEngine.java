@@ -88,7 +88,7 @@ public class GameEngine {
                 for (Player player : players) {
                     for (Hero hero : player.getHeroes()) {
                         if (i < hero.getRecentPath().size()) {
-                            hero.setCell(hero.getRecentPath().get(i));
+                            hero.setCell(hero.getRecentPath().get(i)); // at the end of iteration heroes are at their destination
                         }
                     }
                 }
@@ -115,6 +115,23 @@ public class GameEngine {
                 }
             }
             // end of move and vision
+
+            //vision for players
+            for (Player player : players) {
+                Set<Cell> vision = new HashSet<>();
+                for (int i = 0; i < map.getNumberOfRows(); i++) {
+                    for (int j = 0; j < map.getNumberOfColumns(); j++) {
+                        Cell cell = map.getCell(i, j);
+                        for (Hero hero : player.getHeroes()) {  // todo check alive
+                            if (clientTools.isInVision(cell, hero.getCell())) {
+                                vision.add(cell);
+                            }
+                        }
+                    }
+                }
+                player.setVision(vision);
+            }
+            //end of vision for players
         }
 
         //cast
