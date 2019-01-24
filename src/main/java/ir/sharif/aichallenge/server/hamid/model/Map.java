@@ -18,4 +18,7 @@ public class Map {
 	private List<Cell> player2RespownZone;
 	private List<Cell> ObjectiveZone;
 
+	public Cell getCell(int row, int column) {
+		return cells[row][column];
+	}
 }
