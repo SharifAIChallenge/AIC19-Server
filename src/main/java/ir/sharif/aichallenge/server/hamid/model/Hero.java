@@ -20,6 +20,10 @@ public class Hero {
     private List<Cell> recentPath;
     private List<Cell> recentPathForOpponent;
 
+    public void addToRecentPathForOpponent(Cell cell) {
+        recentPathForOpponent.add(cell);
+    }
+
     @Override
     public Object clone() throws CloneNotSupportedException {
         List<Ability> abilities = new ArrayList<>();
