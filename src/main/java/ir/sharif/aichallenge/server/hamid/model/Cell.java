@@ -2,6 +2,7 @@ package ir.sharif.aichallenge.server.hamid.model;
 
 import lombok.*;
 
+import java.util.List;
 import java.util.Objects;
 
 @Data
@@ -14,7 +15,7 @@ import java.util.Objects;
 public class Cell {
 	private boolean isWall;
 	private boolean isObjectiveZone;
-	private Hero[] heroes;
+	private List<Hero> heroes;
 	private int row;
 	private int column;
 
