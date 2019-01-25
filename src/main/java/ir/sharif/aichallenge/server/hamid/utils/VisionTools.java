@@ -20,7 +20,7 @@ public class VisionTools {
         return lastCell == endCell;
     }
 
-    private Cell[] getRayCells(Cell startCell, Cell targetCell) {
+    Cell[] getRayCells(Cell startCell, Cell targetCell) {
         ArrayList<Cell> path = new ArrayList<>();
         dfs(startCell, startCell, targetCell, new HashMap<>(), path);
         return path.toArray(new Cell[0]);
