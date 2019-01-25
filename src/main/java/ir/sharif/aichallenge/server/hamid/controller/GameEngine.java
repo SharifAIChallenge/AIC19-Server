@@ -1,9 +1,11 @@
 package ir.sharif.aichallenge.server.hamid.controller;
 
 import ir.sharif.aichallenge.server.hamid.model.*;
+import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
 import ir.sharif.aichallenge.server.hamid.model.enums.AbilityType;
 import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
+import ir.sharif.aichallenge.server.hamid.utils.AbilityTools;
 import ir.sharif.aichallenge.server.hamid.utils.VisionTools;
 
 import java.util.*;
@@ -23,6 +25,7 @@ public class GameEngine {
     private Map<Integer, Hero> heroes;
     private ir.sharif.aichallenge.server.hamid.model.Map map;
     private VisionTools visionTools;
+    private AbilityTools abilityTools;
 
     public static void main(String[] args) {
         GameEngine gameEngine = new GameEngine();
@@ -143,58 +146,32 @@ public class GameEngine {
             //end of vision for players
         }
 
+
+        Map<Hero, Ability> fortifedHeroes = new HashMap<>();
+
         //cast
         if (state.equals(GameState.CAST)) {
             //todo cast
             List<Cast> casts1 = message1.getCasts();
             List<Cast> casts2 = message2.getCasts();
 
-            for (Cast cast : casts1) {
-                if (cast.getAbility().getType() == AbilityType.FORTIFY) {
-
-                }
-            }
-            for (Cast cast : casts2) {
-                if (cast.getAbility().getType() == AbilityType.FORTIFY) {
-
-                }
-            }
-
-            for (Cast cast : casts1) {
-                if (cast.getAbility().getType() == AbilityType.HEAL) {
-                    if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow() , cast.getTargetColumn()) , cast.getHero().getCell()) <= cast.getAbility().getAreaOfEffect()) {
-
+            List<Cast> casts = new ArrayList<>();
+            casts.addAll(message1.getCasts());
+            casts.addAll(message2.getCasts());
+            Collections.sort(casts);
+            abilityTools.setMap(map);
+            abilityTools.setVisionTools(visionTools);
+            for (Cast cast : casts) {
+                if (cast.getAbility().getType() == AbilityType.ATTACK) {
+                    if (casts1.contains(cast)) {
+                        abilityTools.setMyHeroes(players[0].getHeroes());
+                        abilityTools.setOppHeroes(players[1].getHeroes());
+                        cast(cast , 1 , fortifedHeroes);
+                    }else {
+                        abilityTools.setMyHeroes(players[1].getHeroes());
+                        abilityTools.setOppHeroes(players[0].getHeroes());
+                        cast(cast , 2 , fortifedHeroes);
                     }
-                }
-            }
-
-            for (Cast cast : casts2) {
-                if (cast.getAbility().getType() == AbilityType.HEAL) {
-
-                }
-            }
-
-            for (Cast cast : casts1) {
-                if (cast.getAbility().getType() == AbilityType.DODGE) {
-
-                }
-            }
-
-            for (Cast cast : casts2) {
-                if (cast.getAbility().getType() == AbilityType.DODGE) {
-
-                }
-            }
-
-            for (Cast cast : casts1) {
-                if (cast.getAbility().getType() == AbilityType.ATTACK) {
-
-                }
-            }
-
-            for (Cast cast : casts2) {
-                if (cast.getAbility().getType() == AbilityType.ATTACK) {
-
                 }
             }
 
@@ -213,6 +190,65 @@ public class GameEngine {
         }
 
         //todo assign scores
+    }
+
+    private void cast(Cast cast, int player, Map<Hero, Ability> fortifiedHeroes) {
+        AbilityType abilityType = cast.getAbility().getType();
+        Ability ability = cast.getAbility();
+        if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow(), cast.getTargetColumn()), cast.getHero().getCell()) <= ability.getRange()) {
+            List<Hero> targetHeroes = getHeroesInAreaOfEffect(cast);
+            abilityTools.getAbilityTargets(ability , cast.getHero().getCell() , map.getCell(cast.getTargetRow() , cast.getTargetColumn()));
+            for (Hero hero : targetHeroes) {
+                switch (abilityType) {
+                    case DODGE:
+                            break;
+                    case HEAL:
+                        if (players[player - 1].getHeroes().contains(hero)) {
+                            int hp = Math.min(hero.getHp() + ability.getPower(), hero.getMaxHp());
+                            hero.setHp(hp);
+                        }
+                        break;
+                    case ATTACK:
+                        if (player == 1)
+                            player = 2;
+                        else
+                            player = 1;
+                        if (players[player - 1].getHeroes().contains(hero)) {
+                            //todo attack
+                        }
+                        break;
+                    case FORTIFY:
+                        if (players[player - 1].getHeroes().contains(hero)) {
+                            fortifiedHeroes.put(hero , ability);
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
+    private List<Hero> getHeroesInAreaOfEffect(Cast cast) {
+        Ability ability = cast.getAbility();
+        List<Hero> heroes = new ArrayList<>();
+        for (int i = -1 * ability.getRange(); i <= ability.getRange(); i++) {
+            for (int j = -1 * ability.getRange(); i <= ability.getRange(); j++) {
+                if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow(), cast.getTargetColumn()), map.getCell(cast.getTargetRow() + i, cast.getTargetColumn() + j)) <= ability.getRange()) {
+                    heroes.addAll(map.getCell(cast.getTargetRow() + i, cast.getTargetColumn() + j).getHeroes());
+                }
+            }
+        }
+        return heroes;
+    }
+
+
+    private void fortify(Cast cast, int player, List<Hero> fortifiedHeroes) {
+        if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow(), cast.getTargetColumn()), cast.getHero().getCell()) <= cast.getAbility().getRange()) {
+            for (Hero hero : map.getCell(cast.getTargetRow(), cast.getTargetColumn()).getHeroes()) {
+                if (players[player - 1].getHeroes().contains(hero)) {
+                    fortifiedHeroes.add(hero);
+                }
+            }
+        }
     }
 
     // check final location of heroes
