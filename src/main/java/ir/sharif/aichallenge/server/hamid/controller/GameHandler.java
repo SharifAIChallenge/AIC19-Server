@@ -6,9 +6,10 @@ import ir.sharif.aichallenge.server.common.network.data.Message;
 import ir.sharif.aichallenge.server.engine.core.GameLogic;
 import ir.sharif.aichallenge.server.hamid.model.Player;
 import ir.sharif.aichallenge.server.hamid.model.message.TurnMessage;
+import lombok.extern.log4j.Log4j;
 
 import java.util.concurrent.atomic.AtomicInteger;
-
+@Log4j
 public class GameHandler implements GameLogic {
 
     public static final int CLIENT_NUM = 2;
