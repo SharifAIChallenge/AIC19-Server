@@ -15,6 +15,7 @@ import java.util.List;
 
 public class Hero {
     private List<Ability> abilities;
+    private int maxHp;
     private int hp;     // todo default hp --> HeroConstants Class
     private Cell cell;
     private List<Cell> recentPath;
@@ -31,6 +32,6 @@ public class Hero {
             abilities.add((Ability) ability.clone());
         }
 
-        return new Hero(abilities, hp, cell, null, null);
+        return new Hero(abilities,maxHp, hp, cell, null, null);
     }
 }

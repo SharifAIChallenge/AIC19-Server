@@ -1,6 +1,7 @@
 package ir.sharif.aichallenge.server.hamid.controller;
 
 import ir.sharif.aichallenge.server.hamid.model.*;
+import ir.sharif.aichallenge.server.hamid.model.enums.AbilityType;
 import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
 import ir.sharif.aichallenge.server.hamid.utils.VisionTools;
@@ -147,6 +148,56 @@ public class GameEngine {
             //todo cast
             List<Cast> casts1 = message1.getCasts();
             List<Cast> casts2 = message2.getCasts();
+
+            for (Cast cast : casts1) {
+                if (cast.getAbility().getType() == AbilityType.FORTIFY) {
+
+                }
+            }
+            for (Cast cast : casts2) {
+                if (cast.getAbility().getType() == AbilityType.FORTIFY) {
+
+                }
+            }
+
+            for (Cast cast : casts1) {
+                if (cast.getAbility().getType() == AbilityType.HEAL) {
+                    if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow() , cast.getTargetColumn()) , cast.getHero().getCell()) <= cast.getAbility().getAreaOfEffect()) {
+
+                    }
+                }
+            }
+
+            for (Cast cast : casts2) {
+                if (cast.getAbility().getType() == AbilityType.HEAL) {
+
+                }
+            }
+
+            for (Cast cast : casts1) {
+                if (cast.getAbility().getType() == AbilityType.DODGE) {
+
+                }
+            }
+
+            for (Cast cast : casts2) {
+                if (cast.getAbility().getType() == AbilityType.DODGE) {
+
+                }
+            }
+
+            for (Cast cast : casts1) {
+                if (cast.getAbility().getType() == AbilityType.ATTACK) {
+
+                }
+            }
+
+            for (Cast cast : casts2) {
+                if (cast.getAbility().getType() == AbilityType.ATTACK) {
+
+                }
+            }
+
         }
 
 

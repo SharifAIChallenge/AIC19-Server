@@ -88,7 +88,7 @@ public class VisionTools {
         return manhattanDistance(nextCell, targetCell) <= manhattanDistance(currentCell, targetCell);
     }
 
-    private int manhattanDistance(Cell startCell, Cell endCell) {
+    public int manhattanDistance(Cell startCell, Cell endCell) {
         return Math.abs(startCell.getRow() - endCell.getRow()) + Math.abs(startCell.getColumn() - endCell.getColumn());
     }
 
