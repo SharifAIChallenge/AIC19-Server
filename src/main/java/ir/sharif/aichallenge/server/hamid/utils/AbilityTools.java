@@ -26,44 +26,35 @@ public class AbilityTools {
         this.oppHeroes = oppHeroes;
     }
 
-    public Hero[] getAbilityTargets(Ability ability, Cell startCell, Cell targetCell)
-    {
+    public Hero[] getAbilityTargets(Ability ability, Cell startCell, Cell targetCell) {
         Cell[] impactCells = getImpactCells(ability, startCell, targetCell);
         Set<Cell> affectedCells = new HashSet<>();
-        for (Cell cell : impactCells)
-        {
+        for (Cell cell : impactCells) {
             affectedCells.addAll(getCellsInAOE(cell, ability.getAreaOfEffect()));
         }
-        if (ability.getType() == AbilityType.HEAL)
-        {
+        if (ability.getType() == AbilityType.HEAL) {
             return getMyHeroesInCells(affectedCells.toArray(new Cell[0]));
-        } else
-        {
+        } else {
             return getOppHeroesInCells(affectedCells.toArray(new Cell[0]));
         }
     }
 
-    public Cell[] getImpactCells(Ability ability, Cell startCell, Cell targetCell)
-    {
-        if (ability.isLobbing())
-        {
+    public Cell[] getImpactCells(Ability ability, Cell startCell, Cell targetCell) {
+        if (ability.isLobbing()) {
             return new Cell[]{targetCell};
         }
-        if (startCell.isWall() || startCell == targetCell)
-        {
+        if (startCell.isWall() || startCell == targetCell) {
             return new Cell[]{startCell};
         }
         ArrayList<Cell> impactCells = new ArrayList<>();
         Cell[] rayCells = visionTools.getRayCells(startCell, targetCell);
         Cell lastCell = null;
-        for (Cell cell : rayCells)
-        {
+        for (Cell cell : rayCells) {
             if (visionTools.manhattanDistance(startCell, cell) > ability.getRange())
                 break;
             lastCell = cell;
             if ((getOppHero(cell) != null && !ability.getType().equals(AbilityType.HEAL))
-                    || ((getMyHero(cell) != null && ability.getType().equals(AbilityType.HEAL))))
-            {
+                    || ((getMyHero(cell) != null && ability.getType().equals(AbilityType.HEAL)))) {
                 impactCells.add(cell);
                 if (!ability.isPiercing()) break;
             }
@@ -73,39 +64,31 @@ public class AbilityTools {
         return impactCells.toArray(new Cell[0]);
     }
 
-    public Hero getOppHero(Cell cell)
-    {
-        for (Hero hero : oppHeroes)
-        {
+    public Hero getOppHero(Cell cell) {
+        for (Hero hero : oppHeroes) {
             if (hero.getCell() == cell)
                 return hero;
         }
         return null;
     }
 
-    public Hero getOppHero(int cellRow, int cellColumn)
-    {
+    public Hero getOppHero(int cellRow, int cellColumn) {
         if (!map.isInMap(cellRow, cellColumn)) return null;
         return getOppHero(map.getCell(cellRow, cellColumn));
     }
 
-    public Hero getMyHero(Cell cell)
-    {
-        for (Hero hero : myHeroes)
-        {
+    public Hero getMyHero(Cell cell) {
+        for (Hero hero : myHeroes) {
             if (hero.getCell() == cell)
                 return hero;
         }
         return null;
     }
 
-    private ArrayList<Cell> getCellsInAOE(Cell impactCell, int AOE)
-    {
+    private ArrayList<Cell> getCellsInAOE(Cell impactCell, int AOE) {
         ArrayList<Cell> cells = new ArrayList<>();
-        for (int row = impactCell.getRow() - AOE; row <= impactCell.getRow() + AOE; row++)
-        {
-            for (int col = impactCell.getColumn() - AOE; col <= impactCell.getColumn() + AOE; col++)
-            {
+        for (int row = impactCell.getRow() - AOE; row <= impactCell.getRow() + AOE; row++) {
+            for (int col = impactCell.getColumn() - AOE; col <= impactCell.getColumn() + AOE; col++) {
                 if (!map.isInMap(row, col)) continue;
                 Cell cell = map.getCell(row, col);
                 if (visionTools.manhattanDistance(impactCell, cell) <= AOE)
@@ -115,28 +98,22 @@ public class AbilityTools {
         return cells;
     }
 
-    private Hero[] getOppHeroesInCells(Cell[] cells)
-    {
+    private Hero[] getOppHeroesInCells(Cell[] cells) {
         ArrayList<Hero> heroes = new ArrayList<>();
-        for (Cell cell : cells)
-        {
+        for (Cell cell : cells) {
             Hero hero = getOppHero(cell);
-            if (hero != null)
-            {
+            if (hero != null) {
                 heroes.add(hero);
             }
         }
         return heroes.toArray(new Hero[0]);
     }
 
-    private Hero[] getMyHeroesInCells(Cell[] cells)
-    {
+    private Hero[] getMyHeroesInCells(Cell[] cells) {
         ArrayList<Hero> heroes = new ArrayList<>();
-        for (Cell cell : cells)
-        {
+        for (Cell cell : cells) {
             Hero hero = getMyHero(cell);
-            if (hero != null)
-            {
+            if (hero != null) {
                 heroes.add(hero);
             }
         }
