@@ -27,6 +27,13 @@ public class Hero {
         recentPathForOpponent.add(cell);
     }
 
+    public void moveTo(Cell targetCell) {
+        List<Hero> heroes = this.cell.getHeroes();
+        heroes.remove(this);
+        this.cell = targetCell;
+        cell.getHeroes().add(this);
+    }
+
     @Override
     public Object clone() throws CloneNotSupportedException {
         List<Ability> abilities = new ArrayList<>();
