@@ -22,6 +22,7 @@ public class Ability {
 	private int areaOfEffect;
 	private int power;
 	private boolean isLobbing;
+	private boolean isPiercing;
 
 	@Override
 	public Object clone() throws CloneNotSupportedException {

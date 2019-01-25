@@ -21,4 +21,9 @@ public class Map {
 	public Cell getCell(int row, int column) {
 		return cells[row][column];
 	}
+
+	public boolean isInMap(int row, int column)
+	{
+		return (row >= 0 && row < numberOfRows && column >= 0 && column < numberOfColumns);
+	}
 }
