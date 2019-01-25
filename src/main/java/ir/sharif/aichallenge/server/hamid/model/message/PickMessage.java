@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @Getter
 
-public class PicMessage {
+public class PickMessage {
     private List<Hero> myHeroes;
     private List<Hero> oppHeroes;
 }

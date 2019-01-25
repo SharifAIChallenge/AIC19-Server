@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @Getter
 
-public class TurnMessage {
+public class TurnMessage extends Message{
     private int myScore;
     private int oppScore;
     private String currentPhase;
@@ -24,5 +24,4 @@ public class TurnMessage {
     private List<Hero> oppHeroes;
     private List<Wall> brokenWalls;
     private List<Wall> createdWalls;
-
 }

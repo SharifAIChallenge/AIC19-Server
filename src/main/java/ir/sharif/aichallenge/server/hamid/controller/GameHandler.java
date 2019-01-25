@@ -72,14 +72,22 @@ public class GameHandler implements GameLogic {
 
     @Override
     public Message[] getClientMessages() {
+        Player[] players = gameEngine.getPlayers();
         Message[] messages = new Message[2];
-        Player player = gameEngine.getPlayers()[1];
-        TurnMessage turnMessage = new TurnMessage();
         //todo prepare map for clients
-        //todo search for walls
-
-        Player player2 = gameEngine.getPlayers()[2];
-
+        for (int i = 0; i < CLIENT_NUM; i++) {
+            TurnMessage turnMessage = new TurnMessage();
+            Player player = players[i];
+            turnMessage.setMyScore(player.getScore());
+            turnMessage.setOppScore(players[1 - i].getScore()); // client_num must be 2
+            turnMessage.setCurrentPhase(gameEngine.getState().name());
+            turnMessage.setCurrentTurn(gameEngine.getCurrentTrun().get());
+            //todo map
+            turnMessage.setMyHeroes(player.getHeroes());
+            turnMessage.setOppHeroes(players[1 - i].getHeroes()); // client_num must be 2
+            //todo broken walls and created walls
+            //todo make json array and message[i]
+        }
         return messages;
     }
 

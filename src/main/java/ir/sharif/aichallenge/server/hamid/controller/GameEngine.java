@@ -39,10 +39,10 @@ public class GameEngine {
     }
 
     public void initialize() {
-        // todo initialize heros
+        // todo initialize heroes
     }
 
-    public void doPickTurn(int firstHero, int secondHero) {
+    private void doPickTurn(int firstHero, int secondHero) {
         try {
             players[0].addHero((Hero) heroes.get(firstHero).clone());
             players[1].addHero((Hero) heroes.get(secondHero).clone());
@@ -57,7 +57,7 @@ public class GameEngine {
             if (message1.getType().equals(GameState.PICK) && message2.getType().equals(GameState.PICK))
                 doPickTurn(message1.getHeroId(), message2.getHeroId());
             else if (message1.getType().equals(GameState.PICK)) {
-                doPickTurn(message1.getHeroId(), Math.abs(new Random().nextInt()) % heroes.size());//todo random or null
+                doPickTurn(message1.getHeroId(), Math.abs(new Random().nextInt()) % heroes.size());
             } else {
                 doPickTurn(Math.abs(new Random().nextInt()) % heroes.size(), message2.getHeroId());
             }
@@ -151,7 +151,7 @@ public class GameEngine {
         }
 
 
-        Map<Hero, Ability> fortifedHeroes = new HashMap<>();
+        Map<Hero, Ability> fortifiedHeroes = new HashMap<>();
 
         //cast
         if (state.equals(GameState.CAST)) {
@@ -170,11 +170,11 @@ public class GameEngine {
                     if (casts1.contains(cast)) {
                         abilityTools.setMyHeroes(players[0].getHeroes());
                         abilityTools.setOppHeroes(players[1].getHeroes());
-                        cast(cast, 1, fortifedHeroes);
+                        cast(cast, 1, fortifiedHeroes);
                     } else {
                         abilityTools.setMyHeroes(players[1].getHeroes());
                         abilityTools.setOppHeroes(players[0].getHeroes());
-                        cast(cast, 2, fortifedHeroes);
+                        cast(cast, 2, fortifiedHeroes);
                     }
                 }
             }
@@ -201,13 +201,13 @@ public class GameEngine {
         for (Player player : players) {
             for (Hero hero : player.getHeroes()) {
                 if (hero.getCell() == null) {
-                    hero.setResponeTime(hero.getResponeTime() - 1);
-                    if (hero.getResponeTime() <= 0) {
+                    hero.setRespawnTime(hero.getRespawnTime() - 1);
+                    if (hero.getRespawnTime() <= 0) {
                         if (players[0].equals(player)) {
-                            Cell cell = map.getPlayer1RespownZone().get(Math.abs(new Random().nextInt() % map.getPlayer1RespownZone().size()));
+                            Cell cell = map.getPlayer1RespawnZone().get(Math.abs(new Random().nextInt() % map.getPlayer1RespawnZone().size()));
                             hero.setCell(cell);
                         } else {
-                            Cell cell = map.getPlayer2RespownZone().get(Math.abs(new Random().nextInt() % map.getPlayer2RespownZone().size()));
+                            Cell cell = map.getPlayer2RespawnZone().get(Math.abs(new Random().nextInt() % map.getPlayer2RespawnZone().size()));
                             hero.setCell(cell);
                         }
                     }
@@ -341,7 +341,7 @@ public class GameEngine {
         return new Cell(false, false, null, row, column);
     }
 
-    public void postPrepare(List<Move> moves) {
+    private void postPrepare(List<Move> moves) {
         List<Cell> reservedCell = new ArrayList<>();
         for (Move move : moves) {
             Hero hero = move.getHero();
