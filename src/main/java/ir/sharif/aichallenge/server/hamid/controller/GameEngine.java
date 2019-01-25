@@ -100,7 +100,7 @@ public class GameEngine {
                 for (Player player : players) {
                     for (Hero hero : player.getHeroes()) {
                         if (i < hero.getRecentPath().size()) {
-                            hero.setCell(hero.getRecentPath().get(i)); // at the end of iteration heroes are at their destination
+                            hero.moveTo(hero.getRecentPath().get(i)); // at the end of iteration heroes are at their destination
                         }
                     }
                 }
