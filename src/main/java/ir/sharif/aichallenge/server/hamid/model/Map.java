@@ -14,8 +14,8 @@ public class Map {
 	private Cell[][] cells;
 	private int numberOfRows;
 	private int numberOfColumns;
-	private List<Cell> player1RespownZone;
-	private List<Cell> player2RespownZone;
+	private List<Cell> player1RespawnZone;
+	private List<Cell> player2RespawnZone;
 	private List<Cell> ObjectiveZone;
 
 	public Cell getCell(int row, int column) {

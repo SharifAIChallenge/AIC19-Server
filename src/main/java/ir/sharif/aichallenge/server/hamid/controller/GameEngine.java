@@ -177,7 +177,7 @@ public class GameEngine {
 
         }
 
-        //todo check resone Heroes
+        //todo check respawn Heroes
 
         if (currentTrun.get() >= PICK_OFFSET) {
             int turn = currentTrun.get() - PICK_OFFSET;
@@ -213,14 +213,14 @@ public class GameEngine {
                             player = 1;
                         if (players[player - 1].getHeroes().contains(hero)) {
                             if (player == 2) {
-                                if (map.getPlayer1RespownZone().contains(hero))
+                                if (map.getPlayer1RespawnZone().contains(hero))
                                     break;
-                                if (map.getPlayer2RespownZone().contains(cast.getHero()))
+                                if (map.getPlayer2RespawnZone().contains(cast.getHero()))
                                     break;
                             }else {
-                                if (map.getPlayer1RespownZone().contains(cast.getHero()))
+                                if (map.getPlayer1RespawnZone().contains(cast.getHero()))
                                     break;
-                                if (map.getPlayer2RespownZone().contains(hero))
+                                if (map.getPlayer2RespawnZone().contains(hero))
                                     break;
                             }
                             if (fortifiedHeroes.containsKey(hero)) {
@@ -232,7 +232,7 @@ public class GameEngine {
                             if (hero.getHp() <= 0) {
                                 hero.setHp(0);
                                 hero.setCell(null);
-                                hero.setResponeTime(hero.MAX_RESPONE_TIME);
+                                hero.setRespawnTime(hero.MAX_RESPAWN_TIME);
                             }
                         }
                         break;
