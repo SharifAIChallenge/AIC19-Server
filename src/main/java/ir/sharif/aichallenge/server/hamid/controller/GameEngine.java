@@ -7,11 +7,15 @@ import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
 import ir.sharif.aichallenge.server.hamid.utils.AbilityTools;
 import ir.sharif.aichallenge.server.hamid.utils.VisionTools;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Getter
+@Setter
 public class GameEngine {
     public static final int PICK_OFFSET = 4;
     public static final int NUM_OF_MOVE_TURN = 4;
@@ -166,18 +170,18 @@ public class GameEngine {
                     if (casts1.contains(cast)) {
                         abilityTools.setMyHeroes(players[0].getHeroes());
                         abilityTools.setOppHeroes(players[1].getHeroes());
-                        cast(cast , 1 , fortifedHeroes);
-                    }else {
+                        cast(cast, 1, fortifedHeroes);
+                    } else {
                         abilityTools.setMyHeroes(players[1].getHeroes());
                         abilityTools.setOppHeroes(players[0].getHeroes());
-                        cast(cast , 2 , fortifedHeroes);
+                        cast(cast, 2, fortifedHeroes);
                     }
                 }
             }
 
         }
 
-        //todo check resone Heroes
+        checkKilledHeroes();
 
         if (currentTrun.get() >= PICK_OFFSET) {
             int turn = currentTrun.get() - PICK_OFFSET;
@@ -193,13 +197,34 @@ public class GameEngine {
         //todo assign scores
     }
 
+    private void checkKilledHeroes() {
+        for (Player player : players) {
+            for (Hero hero : player.getHeroes()) {
+                if (hero.getCell() == null) {
+                    hero.setResponeTime(hero.getResponeTime() - 1);
+                    if (hero.getResponeTime() <= 0) {
+                        if (players[0].equals(player)) {
+                            Cell cell = map.getPlayer1RespownZone().get(Math.abs(new Random().nextInt() % map.getPlayer1RespownZone().size()));
+                            hero.setCell(cell);
+                        } else {
+                            Cell cell = map.getPlayer2RespownZone().get(Math.abs(new Random().nextInt() % map.getPlayer2RespownZone().size()));
+                            hero.setCell(cell);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private void cast(Cast cast, int player, Map<Hero, Ability> fortifiedHeroes) {
         AbilityType abilityType = cast.getAbility().getType();
         Ability ability = cast.getAbility();
         if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow(), cast.getTargetColumn()), cast.getHero().getCell()) <= ability.getRange()) {
-            List<Hero> targetHeroes = Arrays.asList(abilityTools.getAbilityTargets(ability , cast.getHero().getCell() , map.getCell(cast.getTargetRow() , cast.getTargetColumn())));
+            List<Hero> targetHeroes = Arrays.asList(abilityTools.getAbilityTargets(ability, cast.getHero().getCell(), map.getCell(cast.getTargetRow(), cast.getTargetColumn())));
             for (Hero hero : targetHeroes) {
                 switch (abilityType) {
+                    case DODGE:
+                        break;
                     case HEAL:
                         if (players[player - 1].getHeroes().contains(hero)) {
                             int hp = Math.min(hero.getHp() + ability.getPower(), hero.getMaxHp());
@@ -217,7 +242,7 @@ public class GameEngine {
                                     break;
                                 if (map.getPlayer2RespownZone().contains(cast.getHero()))
                                     break;
-                            }else {
+                            } else {
                                 if (map.getPlayer1RespownZone().contains(cast.getHero()))
                                     break;
                                 if (map.getPlayer2RespownZone().contains(hero))
@@ -238,7 +263,7 @@ public class GameEngine {
                         break;
                     case FORTIFY:
                         if (players[player - 1].getHeroes().contains(hero)) {
-                            fortifiedHeroes.put(hero , ability);
+                            fortifiedHeroes.put(hero, ability);
                         }
                         break;
                 }
