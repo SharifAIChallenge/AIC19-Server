@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class Cast {
-    private Integer heroId;
+    private Hero hero;
     private Ability ability;
     private int targetRow;
     private int targetColumn;
