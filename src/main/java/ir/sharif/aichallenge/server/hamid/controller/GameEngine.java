@@ -156,8 +156,8 @@ public class GameEngine {
             List<Cast> casts2 = message2.getCasts();
 
             List<Cast> casts = new ArrayList<>();
-            casts.addAll(message1.getCasts());
-            casts.addAll(message2.getCasts());
+            casts.addAll(casts1);
+            casts.addAll(casts2);
             Collections.sort(casts);
             abilityTools.setMap(map);
             abilityTools.setVisionTools(visionTools);
@@ -200,8 +200,6 @@ public class GameEngine {
             List<Hero> targetHeroes = Arrays.asList(abilityTools.getAbilityTargets(ability , cast.getHero().getCell() , map.getCell(cast.getTargetRow() , cast.getTargetColumn())));
             for (Hero hero : targetHeroes) {
                 switch (abilityType) {
-                    case DODGE:
-                            break;
                     case HEAL:
                         if (players[player - 1].getHeroes().contains(hero)) {
                             int hp = Math.min(hero.getHp() + ability.getPower(), hero.getMaxHp());
@@ -244,6 +242,10 @@ public class GameEngine {
                         }
                         break;
                 }
+            }
+            if (abilityType.equals(AbilityType.DODGE)) {    //todo check validation
+                Hero hero = cast.getHero();
+                hero.moveTo(map.getCell(cast.getTargetRow(), cast.getTargetColumn()));
             }
         }
     }
