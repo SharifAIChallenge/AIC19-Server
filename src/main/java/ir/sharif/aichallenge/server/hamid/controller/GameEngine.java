@@ -177,6 +177,7 @@ public class GameEngine {
 
         }
 
+        //todo check resone Heroes
 
         if (currentTrun.get() >= PICK_OFFSET) {
             int turn = currentTrun.get() - PICK_OFFSET;
@@ -196,8 +197,7 @@ public class GameEngine {
         AbilityType abilityType = cast.getAbility().getType();
         Ability ability = cast.getAbility();
         if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow(), cast.getTargetColumn()), cast.getHero().getCell()) <= ability.getRange()) {
-            List<Hero> targetHeroes = getHeroesInAreaOfEffect(cast);
-            abilityTools.getAbilityTargets(ability , cast.getHero().getCell() , map.getCell(cast.getTargetRow() , cast.getTargetColumn()));
+            List<Hero> targetHeroes = Arrays.asList(abilityTools.getAbilityTargets(ability , cast.getHero().getCell() , map.getCell(cast.getTargetRow() , cast.getTargetColumn())));
             for (Hero hero : targetHeroes) {
                 switch (abilityType) {
                     case DODGE:
@@ -214,7 +214,28 @@ public class GameEngine {
                         else
                             player = 1;
                         if (players[player - 1].getHeroes().contains(hero)) {
-                            //todo attack
+                            if (player == 2) {
+                                if (map.getPlayer1RespownZone().contains(hero))
+                                    break;
+                                if (map.getPlayer2RespownZone().contains(cast.getHero()))
+                                    break;
+                            }else {
+                                if (map.getPlayer1RespownZone().contains(cast.getHero()))
+                                    break;
+                                if (map.getPlayer2RespownZone().contains(hero))
+                                    break;
+                            }
+                            if (fortifiedHeroes.containsKey(hero)) {
+                                if (ability.getPower() > fortifiedHeroes.get(hero).getPower()) {
+                                    hero.setHp(hero.getHp() + fortifiedHeroes.get(hero).getPower() - ability.getPower());
+                                }
+                            } else
+                                hero.setHp(hero.getHp() - ability.getPower());
+                            if (hero.getHp() <= 0) {
+                                hero.setHp(0);
+                                hero.setCell(null);
+                                hero.setResponeTime(hero.MAX_RESPONE_TIME);
+                            }
                         }
                         break;
                     case FORTIFY:

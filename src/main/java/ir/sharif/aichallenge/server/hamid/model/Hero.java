@@ -20,6 +20,8 @@ public class Hero {
     private Cell cell;
     private List<Cell> recentPath;
     private List<Cell> recentPathForOpponent;
+    private int responeTime;
+    public static int MAX_RESPONE_TIME = 10;
 
     public void addToRecentPathForOpponent(Cell cell) {
         recentPathForOpponent.add(cell);
@@ -32,6 +34,6 @@ public class Hero {
             abilities.add((Ability) ability.clone());
         }
 
-        return new Hero(abilities,maxHp, hp, cell, null, null);
+        return new Hero(abilities,maxHp, hp, cell, null, null , this.responeTime);
     }
 }
