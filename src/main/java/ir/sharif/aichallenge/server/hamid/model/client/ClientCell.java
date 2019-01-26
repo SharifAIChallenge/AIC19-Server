@@ -9,6 +9,11 @@ import lombok.*;
 @Builder
 
 public class ClientCell {
-    private int rowNum;
-    private int columnNum;
+    private boolean isWall;
+    private boolean isInMyRespawnZone;
+    private boolean isInOppRespawnZone;
+    private boolean isInObjectZone;
+    private boolean isInVision;
+    private int row;
+    private int column;
 }
