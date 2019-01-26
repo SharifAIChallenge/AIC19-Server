@@ -155,7 +155,7 @@ public class GameEngine {
 
         //cast
         if (state.equals(GameState.CAST)) {
-            //todo cast
+            //cast
             List<Cast> casts1 = message1.getCasts();
             List<Cast> casts2 = message2.getCasts();
 

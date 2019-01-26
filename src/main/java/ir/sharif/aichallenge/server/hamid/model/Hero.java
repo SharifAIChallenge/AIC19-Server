@@ -22,6 +22,8 @@ public class Hero {
     private List<Cell> recentPathForOpponent;
     private int respawnTime;
     public static int MAX_RESPAWN_TIME = 10;
+    private int id;         // todo make final
+    private String name;    // todo make final
 
     public void addToRecentPathForOpponent(Cell cell) {
         recentPathForOpponent.add(cell);
@@ -41,6 +43,6 @@ public class Hero {
             abilities.add((Ability) ability.clone());
         }
 
-        return new Hero(abilities,maxHp, hp, cell, null, null , this.respawnTime);
+        return new Hero(abilities,maxHp, hp, cell, null, null , this.respawnTime, this.id, this.name);
     }
 }

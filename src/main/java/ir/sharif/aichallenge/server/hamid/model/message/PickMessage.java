@@ -15,4 +15,5 @@ import java.util.List;
 public class PickMessage {
     private List<Hero> myHeroes;
     private List<Hero> oppHeroes;
+    private int currentTurn;
 }
