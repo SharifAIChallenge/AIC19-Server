@@ -1,19 +1,25 @@
 package ir.sharif.aichallenge.server.hamid.controller;
 
-import com.google.gson.JsonArray;
 import ir.sharif.aichallenge.server.common.model.Event;
+import ir.sharif.aichallenge.server.common.network.Json;
 import ir.sharif.aichallenge.server.common.network.data.Message;
 import ir.sharif.aichallenge.server.engine.core.GameLogic;
 import ir.sharif.aichallenge.server.hamid.model.Cell;
 import ir.sharif.aichallenge.server.hamid.model.Hero;
 import ir.sharif.aichallenge.server.hamid.model.Map;
 import ir.sharif.aichallenge.server.hamid.model.Player;
+import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
 import ir.sharif.aichallenge.server.hamid.model.client.ClientCell;
 import ir.sharif.aichallenge.server.hamid.model.client.ClientMap;
+import ir.sharif.aichallenge.server.hamid.model.client.EmptyCell;
+import ir.sharif.aichallenge.server.hamid.model.client.hero.ClientHero;
+import ir.sharif.aichallenge.server.hamid.model.client.hero.Cooldown;
+import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
 import ir.sharif.aichallenge.server.hamid.model.message.TurnMessage;
 import ir.sharif.aichallenge.server.hamid.utils.VisionTools;
 import lombok.extern.log4j.Log4j;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 @Log4j
@@ -81,7 +87,25 @@ public class GameHandler implements GameLogic {
     public Message[] getClientMessages() {
         Player[] players = gameEngine.getPlayers();
         Message[] messages = new Message[2];
+        GameState state = gameEngine.getState();
 
+        switch (state) {
+            case PICK:
+                setMessagesForPick(players, messages);
+                break;
+            case MOVE:
+            case CAST:
+                setMessagesForTurn(players, messages);
+                break;
+        }
+        return messages;
+    }
+
+    private void setMessagesForPick(Player[] players, Message[] messages) {
+        //todo
+    }
+
+    private void setMessagesForTurn(Player[] players, Message[] messages) {
         for (int i = 0; i < CLIENT_NUM; i++) {
             TurnMessage turnMessage = new TurnMessage();
             Player player = players[i];
@@ -90,12 +114,81 @@ public class GameHandler implements GameLogic {
             turnMessage.setCurrentPhase(gameEngine.getState().name());
             turnMessage.setCurrentTurn(gameEngine.getCurrentTrun().get());
             turnMessage.setMap(getClientMap(i));
-            turnMessage.setMyHeroes(player.getHeroes());
-            turnMessage.setOppHeroes(players[1 - i].getHeroes()); // client_num must be 2
-            //todo broken walls and created walls
-            //todo make json array and message[i]
+            turnMessage.setMyHeroes(getClientHeroes(i));
+            turnMessage.setOppHeroes(getClientOppHeroes(i));
+            //make json array and message[i]
+            TurnMessage[] turnMessages = new TurnMessage[1];
+            turnMessages[0] = turnMessage;
+            messages[i] = new Message(Message.NAME_TURN, Json.GSON.toJsonTree(turnMessages).getAsJsonArray());
         }
-        return messages;
+    }
+
+    private List<ClientHero> getClientHeroes(int i) {
+        Player[] players = gameEngine.getPlayers();
+        List<ClientHero> clientHeroes = new ArrayList<>();
+        for (Hero hero : players[i].getHeroes()) {
+            ClientHero clientHero = new ClientHero();
+            clientHero.setId(hero.getId());
+            clientHero.setType(hero.getName());
+            clientHero.setCurrentHP(hero.getHp());
+            //cooldowns
+            List<Cooldown> cooldowns = new ArrayList<>();
+            for (Ability ability : hero.getAbilities()) {
+                Cooldown cooldown = new Cooldown(ability.getName(), ability.getRemainingCoolDown());
+                cooldowns.add(cooldown);
+            }
+            Cooldown[] cool = new Cooldown[cooldowns.size()];
+            cool = cooldowns.toArray(cool);
+            clientHero.setCooldowns(cool);  //end of cooldowns
+            clientHero.setCurrentCell(new EmptyCell(hero.getCell().getRow(), hero.getCell().getColumn()));
+            //recent path
+            List<EmptyCell> recentPathList = new ArrayList<>();
+            for (Cell cell : hero.getRecentPath()) {
+                EmptyCell emptyCell = new EmptyCell(cell.getRow(), cell.getColumn());
+                recentPathList.add(emptyCell);
+            }
+            EmptyCell[] recentPath = new EmptyCell[recentPathList.size()];
+            recentPath = recentPathList.toArray(recentPath);
+            clientHero.setRecentPath(recentPath);
+            clientHero.setRespawnTime(hero.getRespawnTime());
+            clientHeroes.add(clientHero);
+        }
+        return clientHeroes;
+    }
+
+    private List<ClientHero> getClientOppHeroes(int i) {
+        Player[] players = gameEngine.getPlayers();
+        Player opponent = players[1-i];
+        List<ClientHero> clientHeroes = new ArrayList<>();
+        for (Hero hero : opponent.getHeroes()) {
+            ClientHero clientHero = new ClientHero();
+            clientHero.setId(hero.getId());
+            clientHero.setType(hero.getName());
+            clientHero.setCurrentHP(hero.getHp());
+            //cooldowns
+            List<Cooldown> cooldowns = new ArrayList<>();
+            for (Ability ability : hero.getAbilities()) {
+                Cooldown cooldown = new Cooldown(ability.getName(), ability.getRemainingCoolDown());
+                cooldowns.add(cooldown);
+            }
+            Cooldown[] cool = new Cooldown[cooldowns.size()];
+            cool = cooldowns.toArray(cool);
+            clientHero.setCooldowns(cool);  //end of cooldowns
+            clientHero.setCurrentCell(players[i].getVision().contains(hero.getCell()) ?
+                    new EmptyCell(hero.getCell().getRow(), hero.getCell().getColumn()) : null); //todo null ok?
+            //recent path
+            List<EmptyCell> recentPathList = new ArrayList<>();
+            for (Cell cell : hero.getRecentPathForOpponent()) {
+                EmptyCell emptyCell = new EmptyCell(cell.getRow(), cell.getColumn());
+                recentPathList.add(emptyCell);
+            }
+            EmptyCell[] recentPath = new EmptyCell[recentPathList.size()];
+            recentPath = recentPathList.toArray(recentPath);
+            clientHero.setRecentPath(recentPath);
+            clientHero.setRespawnTime(hero.getRespawnTime());
+            clientHeroes.add(clientHero);
+        }
+        return clientHeroes;
     }
 
     private ClientMap getClientMap(int playerNum) {

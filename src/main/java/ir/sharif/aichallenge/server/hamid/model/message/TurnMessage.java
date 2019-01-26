@@ -3,6 +3,7 @@ package ir.sharif.aichallenge.server.hamid.model.message;
 import ir.sharif.aichallenge.server.hamid.model.Hero;
 import ir.sharif.aichallenge.server.hamid.model.client.ClientMap;
 import ir.sharif.aichallenge.server.hamid.model.client.Wall;
+import ir.sharif.aichallenge.server.hamid.model.client.hero.ClientHero;
 import lombok.*;
 
 import java.util.List;
@@ -20,8 +21,6 @@ public class TurnMessage extends Message{
     private String currentPhase;
     private int currentTurn;
     private ClientMap map;
-    private List<Hero> myHeroes;
-    private List<Hero> oppHeroes;
-    private List<Wall> brokenWalls;
-    private List<Wall> createdWalls;
+    private List<ClientHero> myHeroes;      //todo should be array?
+    private List<ClientHero> oppHeroes;     //todo should be array?
 }
