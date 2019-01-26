@@ -1,6 +1,7 @@
 package ir.sharif.aichallenge.server.hamid.model.message;
 
 import ir.sharif.aichallenge.server.hamid.model.Hero;
+import ir.sharif.aichallenge.server.hamid.model.client.hero.EmptyHero;
 import lombok.*;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
 @Getter
 
 public class PickMessage {
-    private List<Hero> myHeroes;
-    private List<Hero> oppHeroes;
+    private List<EmptyHero> myHeroes;
+    private List<EmptyHero> oppHeroes;
     private int currentTurn;
 }

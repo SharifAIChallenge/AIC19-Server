@@ -8,6 +8,7 @@ import ir.sharif.aichallenge.server.common.network.Json;
  */
 public class Message {
 
+    public static final String NAME_PICK = "pick";
     public static final String NAME_TURN = "turn";
     public static final String NAME_INIT = "init";
     public static final String NAME_STATUS = "status";

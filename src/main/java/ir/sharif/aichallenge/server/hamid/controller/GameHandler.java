@@ -14,7 +14,9 @@ import ir.sharif.aichallenge.server.hamid.model.client.ClientMap;
 import ir.sharif.aichallenge.server.hamid.model.client.EmptyCell;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.ClientHero;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.Cooldown;
+import ir.sharif.aichallenge.server.hamid.model.client.hero.EmptyHero;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
+import ir.sharif.aichallenge.server.hamid.model.message.PickMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.TurnMessage;
 import ir.sharif.aichallenge.server.hamid.utils.VisionTools;
 import lombok.extern.log4j.Log4j;
@@ -102,7 +104,26 @@ public class GameHandler implements GameLogic {
     }
 
     private void setMessagesForPick(Player[] players, Message[] messages) {
-        //todo
+        for (int i = 0; i < CLIENT_NUM; i++) {
+            PickMessage pickMessage = new PickMessage();
+            List<EmptyHero> myHeroes = new ArrayList<>();
+            for (Hero hero : players[i].getHeroes()) {
+                EmptyHero emptyHero = new EmptyHero(hero.getId(), hero.getName());
+                myHeroes.add(emptyHero);
+            }
+            pickMessage.setMyHeroes(myHeroes);
+            List<EmptyHero> oppHeroes = new ArrayList<>();
+            for (Hero hero : players[1 - i].getHeroes()) {
+                EmptyHero emptyHero = new EmptyHero(hero.getId(), hero.getName());
+                oppHeroes.add(emptyHero);
+            }
+            pickMessage.setMyHeroes(oppHeroes);
+            pickMessage.setCurrentTurn(gameEngine.getCurrentTrun().get());  //todo correct?
+            //make json array and message[i]
+            PickMessage[] pickMessages = new PickMessage[1];
+            pickMessages[0] = pickMessage;
+            messages[i] = new Message(Message.NAME_PICK, Json.GSON.toJsonTree(pickMessages).getAsJsonArray());
+        }
     }
 
     private void setMessagesForTurn(Player[] players, Message[] messages) {
