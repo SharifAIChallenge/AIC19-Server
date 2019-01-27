@@ -21,7 +21,7 @@ public class GameEngine {
     public static final int NUM_OF_MOVE_TURN = 4;
     public static final int NUM_OF_CAST_TURN = 4;
 
-    private AtomicInteger currentTrun;
+    private AtomicInteger currentTurn;
 
 
     private Player[] players = new Player[2];
@@ -183,8 +183,8 @@ public class GameEngine {
 
         checkKilledHeroes();
 
-        if (currentTrun.get() >= PICK_OFFSET) {
-            int turn = currentTrun.get() - PICK_OFFSET;
+        if (currentTurn.get() >= PICK_OFFSET) {
+            int turn = currentTurn.get() - PICK_OFFSET;
             if (turn % (NUM_OF_CAST_TURN + NUM_OF_MOVE_TURN) < NUM_OF_MOVE_TURN) {
                 state = GameState.MOVE;
             } else {
@@ -205,10 +205,10 @@ public class GameEngine {
                     if (hero.getRespawnTime() <= 0) {
                         if (players[0].equals(player)) {
                             Cell cell = map.getPlayer1RespawnZone().get(Math.abs(new Random().nextInt() % map.getPlayer1RespawnZone().size()));
-                            hero.setCell(cell);
+                            hero.moveTo(cell);
                         } else {
                             Cell cell = map.getPlayer2RespawnZone().get(Math.abs(new Random().nextInt() % map.getPlayer2RespawnZone().size()));
-                            hero.setCell(cell);
+                            hero.moveTo(cell);
                         }
                     }
                 }
@@ -256,7 +256,7 @@ public class GameEngine {
                                 hero.setHp(hero.getHp() - ability.getPower());
                             if (hero.getHp() <= 0) {
                                 hero.setHp(0);
-                                hero.setCell(null);
+                                hero.moveTo(null);
                                 hero.setRespawnTime(hero.MAX_RESPAWN_TIME);
                             }
                         }
@@ -350,7 +350,7 @@ public class GameEngine {
             move(reservedCell, move, hero, newPath);
             move.setMoves(newPath);
             reservedCell.add(hero.getCell());
-            hero.setCell(startCell);
+            hero.moveTo(startCell);
         }
     }
 
@@ -367,7 +367,7 @@ public class GameEngine {
                     newColumn = oldCell.getColumn();
                     newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
-                        hero.setCell(newCell);
+                        hero.moveTo(newCell);
                         newPath.add(Direction.UP);
                     }
                     break;
@@ -376,7 +376,7 @@ public class GameEngine {
                     newColumn = oldCell.getColumn();
                     newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
-                        hero.setCell(newCell);
+                        hero.moveTo(newCell);
                         newPath.add(Direction.DOWN);
                     }
                     break;
@@ -385,7 +385,7 @@ public class GameEngine {
                     newColumn = oldCell.getColumn() + 1;
                     newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
-                        hero.setCell(newCell);
+                        hero.moveTo(newCell);
                         newPath.add(Direction.LEFT);
                     }
                     break;
@@ -394,7 +394,7 @@ public class GameEngine {
                     newColumn = oldCell.getColumn() - 1;
                     newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
-                        hero.setCell(newCell);
+                        hero.moveTo(newCell);
                         newPath.add(Direction.RIGHT);
                     }
                     break;

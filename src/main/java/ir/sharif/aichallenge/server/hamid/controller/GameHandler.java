@@ -118,7 +118,7 @@ public class GameHandler implements GameLogic {
                 oppHeroes.add(emptyHero);
             }
             pickMessage.setMyHeroes(oppHeroes);
-            pickMessage.setCurrentTurn(gameEngine.getCurrentTrun().get());  //todo correct?
+            pickMessage.setCurrentTurn(gameEngine.getCurrentTurn().get());  //todo correct?
             //make json array and message[i]
             PickMessage[] pickMessages = new PickMessage[1];
             pickMessages[0] = pickMessage;
@@ -133,7 +133,7 @@ public class GameHandler implements GameLogic {
             turnMessage.setMyScore(player.getScore());
             turnMessage.setOppScore(players[1 - i].getScore()); // client_num must be 2
             turnMessage.setCurrentPhase(gameEngine.getState().name());
-            turnMessage.setCurrentTurn(gameEngine.getCurrentTrun().get());
+            turnMessage.setCurrentTurn(gameEngine.getCurrentTurn().get());
             turnMessage.setMap(getClientMap(i));
             turnMessage.setMyHeroes(getClientHeroes(i));
             turnMessage.setOppHeroes(getClientOppHeroes(i));
