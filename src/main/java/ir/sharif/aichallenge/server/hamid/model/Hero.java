@@ -30,10 +30,13 @@ public class Hero {
     }
 
     public void moveTo(Cell targetCell) {
-        List<Hero> heroes = this.cell.getHeroes();
-        heroes.remove(this);
-        this.cell = targetCell;
-        cell.getHeroes().add(this);
+        if (cell != null) {
+            List<Hero> heroes = cell.getHeroes();
+            heroes.remove(this);
+        }
+        cell = targetCell;
+        if (cell != null)
+            cell.getHeroes().add(this);
     }
 
     @Override
