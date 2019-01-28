@@ -4,11 +4,9 @@ import ir.sharif.aichallenge.server.common.model.Event;
 import ir.sharif.aichallenge.server.common.network.Json;
 import ir.sharif.aichallenge.server.common.network.data.Message;
 import ir.sharif.aichallenge.server.engine.core.GameLogic;
-import ir.sharif.aichallenge.server.hamid.model.Cell;
-import ir.sharif.aichallenge.server.hamid.model.Hero;
-import ir.sharif.aichallenge.server.hamid.model.Map;
-import ir.sharif.aichallenge.server.hamid.model.Player;
+import ir.sharif.aichallenge.server.hamid.model.*;
 import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
+import ir.sharif.aichallenge.server.hamid.model.client.CastedAbility;
 import ir.sharif.aichallenge.server.hamid.model.client.ClientCell;
 import ir.sharif.aichallenge.server.hamid.model.client.ClientMap;
 import ir.sharif.aichallenge.server.hamid.model.client.EmptyCell;
@@ -18,6 +16,7 @@ import ir.sharif.aichallenge.server.hamid.model.client.hero.EmptyHero;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
 import ir.sharif.aichallenge.server.hamid.model.message.PickMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.TurnMessage;
+import ir.sharif.aichallenge.server.hamid.utils.Pair;
 import ir.sharif.aichallenge.server.hamid.utils.VisionTools;
 import lombok.extern.log4j.Log4j;
 
@@ -137,6 +136,7 @@ public class GameHandler implements GameLogic {
             turnMessage.setMap(getClientMap(i));
             turnMessage.setMyHeroes(getClientHeroes(i));
             turnMessage.setOppHeroes(getClientOppHeroes(i));
+            turnMessage.setCastAbilities(gameEngine.getCastingAbilities());
             //make json array and message[i]
             TurnMessage[] turnMessages = new TurnMessage[1];
             turnMessages[0] = turnMessage;
@@ -185,7 +185,12 @@ public class GameHandler implements GameLogic {
             ClientHero clientHero = new ClientHero();
             clientHero.setId(hero.getId());
             clientHero.setType(hero.getName());
-            clientHero.setCurrentHP(hero.getHp());
+            if (hero.getCell() == null)
+                clientHero.setCurrentHP(0);     //dead
+            else if (players[i].getVision().contains(hero.getCell()))
+                clientHero.setCurrentHP(-1);    //not in vision
+            else
+                clientHero.setCurrentHP(hero.getHp());  //in vision
             //cooldowns
             List<Cooldown> cooldowns = new ArrayList<>();
             for (Ability ability : hero.getAbilities()) {
@@ -196,7 +201,7 @@ public class GameHandler implements GameLogic {
             cool = cooldowns.toArray(cool);
             clientHero.setCooldowns(cool);  //end of cooldowns
             clientHero.setCurrentCell(players[i].getVision().contains(hero.getCell()) ?
-                    new EmptyCell(hero.getCell().getRow(), hero.getCell().getColumn()) : null); //todo null ok?
+                    new EmptyCell(hero.getCell().getRow(), hero.getCell().getColumn()) : null);
             //recent path
             List<EmptyCell> recentPathList = new ArrayList<>();
             for (Cell cell : hero.getRecentPathForOpponent()) {
