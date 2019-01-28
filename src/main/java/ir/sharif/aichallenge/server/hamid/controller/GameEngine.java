@@ -2,6 +2,7 @@ package ir.sharif.aichallenge.server.hamid.controller;
 
 import ir.sharif.aichallenge.server.hamid.model.*;
 import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
+import ir.sharif.aichallenge.server.hamid.model.client.CastedAbility;
 import ir.sharif.aichallenge.server.hamid.model.enums.AbilityType;
 import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
@@ -21,21 +22,17 @@ public class GameEngine {
     public static final int NUM_OF_MOVE_TURN = 4;
     public static final int NUM_OF_CAST_TURN = 4;
 
-    private AtomicInteger currentTurn;
-
-
+    private AtomicInteger currentTurn;      //todo set and update value
     private Player[] players = new Player[2];
     private GameState state;
     private Map<Integer, Hero> heroes;
     private ir.sharif.aichallenge.server.hamid.model.Map map;
     private VisionTools visionTools;
     private AbilityTools abilityTools;
+    private List<CastedAbility> castingAbilities; //list of cast and target hero //todo set value and check each hero use at most 1 ability and handle players ap
 
     public static void main(String[] args) {
         GameEngine gameEngine = new GameEngine();
-//        gameEngine.initialize();
-//        gameEngine.doPickTurn();
-//        gameEngine.doTurn();
     }
 
     public void initialize() {
