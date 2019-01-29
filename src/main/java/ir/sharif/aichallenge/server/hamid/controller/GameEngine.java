@@ -47,6 +47,9 @@ public class GameEngine {
 
     public static void main(String[] args) {
         GameEngine gameEngine = new GameEngine();
+//        gameEngine.initialize();
+//        gameEngine.doPickTurn();
+//        gameEngine.doTurn();
     }
 
     public void initialize(InitialMessage initialMessage) {
@@ -201,16 +204,14 @@ public class GameEngine {
             player2oppCastedAbilities = new ArrayList<>();
             castedAbilities = new ArrayList<>();
             for (Cast cast : casts) {
-                if (cast.getAbility().getType() == AbilityType.ATTACK) {
-                    if (casts1.contains(cast)) {
-                        abilityTools.setMyHeroes(players[0].getHeroes());
-                        abilityTools.setOppHeroes(players[1].getHeroes());
-                        cast(cast, 1, fortifiedHeroes);
-                    } else {
-                        abilityTools.setMyHeroes(players[1].getHeroes());
-                        abilityTools.setOppHeroes(players[0].getHeroes());
-                        cast(cast, 2, fortifiedHeroes);
-                    }
+                if (casts1.contains(cast)) {
+                    abilityTools.setMyHeroes(players[0].getHeroes());
+                    abilityTools.setOppHeroes(players[1].getHeroes());
+                    cast(cast, 1, fortifiedHeroes);
+                } else {
+                    abilityTools.setMyHeroes(players[1].getHeroes());
+                    abilityTools.setOppHeroes(players[0].getHeroes());
+                    cast(cast, 2, fortifiedHeroes);
                 }
             }
         }
@@ -275,7 +276,7 @@ public class GameEngine {
                                     break;
                                 if (map.getPlayer2RespawnZone().contains(cast.getHero()))
                                     break;
-                            }else {
+                            } else {
                                 if (map.getPlayer1RespawnZone().contains(cast.getHero()))
                                     break;
                                 if (map.getPlayer2RespawnZone().contains(hero))
@@ -386,30 +387,6 @@ public class GameEngine {
         }
     }
 
-    private List<Hero> getHeroesInAreaOfEffect(Cast cast) {
-        Ability ability = cast.getAbility();
-        List<Hero> heroes = new ArrayList<>();
-        for (int i = -1 * ability.getRange(); i <= ability.getRange(); i++) {
-            for (int j = -1 * ability.getRange(); i <= ability.getRange(); j++) {
-                if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow(), cast.getTargetColumn()), map.getCell(cast.getTargetRow() + i, cast.getTargetColumn() + j)) <= ability.getRange()) {
-                    heroes.addAll(map.getCell(cast.getTargetRow() + i, cast.getTargetColumn() + j).getHeroes());
-                }
-            }
-        }
-        return heroes;
-    }
-
-
-    private void fortify(Cast cast, int player, List<Hero> fortifiedHeroes) {
-        if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow(), cast.getTargetColumn()), cast.getHero().getCell()) <= cast.getAbility().getRange()) {
-            for (Hero hero : map.getCell(cast.getTargetRow(), cast.getTargetColumn()).getHeroes()) {
-                if (players[player - 1].getHeroes().contains(hero)) {
-                    fortifiedHeroes.add(hero);
-                }
-            }
-        }
-    }
-
     // check final location of heroes
     private void prepareMove(Move move) {
         Cell cell = move.getHero().getCell(); //not change cell
@@ -461,7 +438,7 @@ public class GameEngine {
             move(reservedCell, move, hero, newPath);
             move.setMoves(newPath);
             reservedCell.add(hero.getCell());
-            hero.moveTo(startCell);
+            hero.setCell(startCell);
         }
     }
 
@@ -478,7 +455,7 @@ public class GameEngine {
                     newColumn = oldCell.getColumn();
                     newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
-                        hero.moveTo(newCell);
+                        hero.setCell(newCell);
                         newPath.add(Direction.UP);
                     }
                     break;
@@ -487,7 +464,7 @@ public class GameEngine {
                     newColumn = oldCell.getColumn();
                     newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
-                        hero.moveTo(newCell);
+                        hero.setCell(newCell);
                         newPath.add(Direction.DOWN);
                     }
                     break;
@@ -496,7 +473,7 @@ public class GameEngine {
                     newColumn = oldCell.getColumn() + 1;
                     newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
-                        hero.moveTo(newCell);
+                        hero.setCell(newCell);
                         newPath.add(Direction.LEFT);
                     }
                     break;
@@ -505,7 +482,7 @@ public class GameEngine {
                     newColumn = oldCell.getColumn() - 1;
                     newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
-                        hero.moveTo(newCell);
+                        hero.setCell(newCell);
                         newPath.add(Direction.RIGHT);
                     }
                     break;
