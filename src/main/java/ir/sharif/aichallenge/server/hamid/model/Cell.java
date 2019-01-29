@@ -1,5 +1,6 @@
 package ir.sharif.aichallenge.server.hamid.model;
 
+import ir.sharif.aichallenge.server.hamid.model.client.ClientCell;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -20,7 +21,15 @@ public class Cell {
 	private int row;
 	private int column;
 
-	@Override
+	public Cell(ClientCell clientCell)
+	{
+		this.isWall = clientCell.isWall();
+		this.isObjectiveZone = clientCell.isInObjectiveZone();
+		this.row = clientCell.getRow();
+		this.column = clientCell.getColumn();
+	}
+
+    @Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
