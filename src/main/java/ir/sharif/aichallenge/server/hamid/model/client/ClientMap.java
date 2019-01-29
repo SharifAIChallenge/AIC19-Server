@@ -7,5 +7,7 @@ import lombok.*;
 @Getter
 @Setter
 public class ClientMap {
+    private int rowNum;
+    private int columnNum;
     private ClientCell[][] cells;
 }

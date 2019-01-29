@@ -7,6 +7,7 @@ import ir.sharif.aichallenge.server.hamid.model.client.EmptyCell;
 import ir.sharif.aichallenge.server.hamid.model.enums.AbilityType;
 import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
+import ir.sharif.aichallenge.server.hamid.model.message.InitialMessage;
 import ir.sharif.aichallenge.server.hamid.utils.AbilityTools;
 import ir.sharif.aichallenge.server.hamid.utils.VisionTools;
 import lombok.Getter;
@@ -42,8 +43,9 @@ public class GameEngine {
         GameEngine gameEngine = new GameEngine();
     }
 
-    public void initialize() {
-        // todo initialize heroes
+    public void initialize(InitialMessage initialMessage) {
+        Map<String, Integer> gameConstants = initialMessage.getGameConstants();
+
     }
 
     private void doPickTurn(int firstHero, int secondHero) {
