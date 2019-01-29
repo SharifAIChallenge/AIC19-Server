@@ -30,7 +30,7 @@ public class GameEngine {
     private int maxAP;
     private int maxTurns;
 
-    private AtomicInteger currentTurn;      //todo set and update value
+    private AtomicInteger currentTurn;
     private Player[] players = new Player[2];
     private GameState state;
     private Map<Integer, Hero> heroes;
@@ -48,7 +48,7 @@ public class GameEngine {
     public static void main(String[] args) {
         GameEngine gameEngine = new GameEngine();
 //        gameEngine.initialize();
-//        gameEngine.doPickTurn();
+//        gameEngine.pick();
 //        gameEngine.doTurn();
     }
 
@@ -86,19 +86,69 @@ public class GameEngine {
 
     public void doTurn(ClientTurnMessage message1, ClientTurnMessage message2) {
         //pick
-        if (state.equals(GameState.PICK)) {
-            if (message1.getType().equals(GameState.PICK) && message2.getType().equals(GameState.PICK))
-                doPickTurn(message1.getHeroId(), message2.getHeroId());
-            else if (message1.getType().equals(GameState.PICK)) {
-                doPickTurn(message1.getHeroId(), Math.abs(new Random().nextInt()) % heroes.size());
-            } else if (message2.getType().equals(GameState.PICK)) {
-                doPickTurn(Math.abs(new Random().nextInt()) % heroes.size(), message2.getHeroId());
-            } else {
-                doPickTurn(Math.abs(new Random().nextInt()) % heroes.size(), Math.abs(new Random().nextInt()) % heroes.size());
-            }
-        }
+        pick(message1, message2);
 
         //move
+        move(message1, message2);
+
+        //cast
+        cast(message1, message2);
+
+        checkKilledHeroes();
+
+        changeStateAndTurn();
+
+        //todo assign scores
+    }
+
+    private void changeStateAndTurn() {
+        if (currentTurn.get() >= PICK_OFFSET) {
+            if (state == GameState.CAST) {
+                currentTurn.incrementAndGet();
+                state = GameState.MOVE;
+            } else {
+                state = GameState.CAST;
+            }
+        } else {
+            state = GameState.PICK;
+        }
+    }
+
+    private void cast(ClientTurnMessage message1, ClientTurnMessage message2) {
+        Map<Hero, Ability> fortifiedHeroes = new HashMap<>();
+
+        //cast
+        if (state.equals(GameState.CAST)) {
+            //cast
+            List<Cast> casts1 = message1.getCasts();
+            List<Cast> casts2 = message2.getCasts();
+
+            List<Cast> casts = new ArrayList<>();
+            casts.addAll(casts1);
+            casts.addAll(casts2);
+            Collections.sort(casts);
+            abilityTools.setMap(map);
+            abilityTools.setVisionTools(visionTools);
+            player1castedAbilities = new ArrayList<>();
+            player2castedAbilities = new ArrayList<>();
+            player1oppCastedAbilities = new ArrayList<>();
+            player2oppCastedAbilities = new ArrayList<>();
+            castedAbilities = new ArrayList<>();
+            for (Cast cast : casts) {
+                if (casts1.contains(cast)) {
+                    abilityTools.setMyHeroes(players[0].getHeroes());
+                    abilityTools.setOppHeroes(players[1].getHeroes());
+                    cast(cast, 1, fortifiedHeroes);
+                } else {
+                    abilityTools.setMyHeroes(players[1].getHeroes());
+                    abilityTools.setOppHeroes(players[0].getHeroes());
+                    cast(cast, 2, fortifiedHeroes);
+                }
+            }
+        }
+    }
+
+    private void move(ClientTurnMessage message1, ClientTurnMessage message2) {
         if (state.equals(GameState.MOVE)) {
             //sort
             List<Move> moves1 = message1.getMoves(); //todo merge same hero moves in one move in getMoves //todo filter dead hero moves
@@ -184,54 +234,21 @@ public class GameEngine {
             }
             //end of vision for players
         }
+    }
 
-
-        Map<Hero, Ability> fortifiedHeroes = new HashMap<>();
-
-        //cast
-        if (state.equals(GameState.CAST)) {
-            //cast
-            List<Cast> casts1 = message1.getCasts();
-            List<Cast> casts2 = message2.getCasts();
-
-            List<Cast> casts = new ArrayList<>();
-            casts.addAll(casts1);
-            casts.addAll(casts2);
-            Collections.sort(casts);
-            abilityTools.setMap(map);
-            abilityTools.setVisionTools(visionTools);
-            player1castedAbilities = new ArrayList<>();
-            player2castedAbilities = new ArrayList<>();
-            player1oppCastedAbilities = new ArrayList<>();
-            player2oppCastedAbilities = new ArrayList<>();
-            castedAbilities = new ArrayList<>();
-            for (Cast cast : casts) {
-                if (casts1.contains(cast)) {
-                    abilityTools.setMyHeroes(players[0].getHeroes());
-                    abilityTools.setOppHeroes(players[1].getHeroes());
-                    cast(cast, 1, fortifiedHeroes);
-                } else {
-                    abilityTools.setMyHeroes(players[1].getHeroes());
-                    abilityTools.setOppHeroes(players[0].getHeroes());
-                    cast(cast, 2, fortifiedHeroes);
-                }
-            }
-        }
-
-        checkKilledHeroes();
-
-        if (currentTurn.get() >= PICK_OFFSET) {
-            int turn = currentTurn.get() - PICK_OFFSET;
-            if (turn % (NUM_OF_CAST_TURN + NUM_OF_MOVE_TURN) < NUM_OF_MOVE_TURN) {
-                state = GameState.MOVE;
+    private void pick(ClientTurnMessage message1, ClientTurnMessage message2) {
+        if (state.equals(GameState.PICK)) {
+            if (message1.getType().equals(GameState.PICK) && message2.getType().equals(GameState.PICK))
+                doPickTurn(message1.getHeroId(), message2.getHeroId());
+            else if (message1.getType().equals(GameState.PICK)) {
+                doPickTurn(message1.getHeroId(), Math.abs(new Random().nextInt()) % heroes.size());
+            } else if (message2.getType().equals(GameState.PICK)) {
+                doPickTurn(Math.abs(new Random().nextInt()) % heroes.size(), message2.getHeroId());
             } else {
-                state = GameState.CAST;
+                doPickTurn(Math.abs(new Random().nextInt()) % heroes.size(), Math.abs(new Random().nextInt()) % heroes.size());
             }
-        } else {
-            state = GameState.PICK;
+            currentTurn.incrementAndGet();
         }
-
-        //todo assign scores
     }
 
     private void checkKilledHeroes() {
