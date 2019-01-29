@@ -1,8 +1,12 @@
 package ir.sharif.aichallenge.server.hamid.controller;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import ir.sharif.aichallenge.server.common.model.Event;
 import ir.sharif.aichallenge.server.common.network.Json;
 import ir.sharif.aichallenge.server.common.network.data.Message;
+import ir.sharif.aichallenge.server.engine.config.FileParam;
 import ir.sharif.aichallenge.server.engine.core.GameLogic;
 import ir.sharif.aichallenge.server.hamid.model.Cell;
 import ir.sharif.aichallenge.server.hamid.model.Hero;
@@ -16,16 +20,22 @@ import ir.sharif.aichallenge.server.hamid.model.client.hero.ClientHero;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.Cooldown;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.EmptyHero;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
+import ir.sharif.aichallenge.server.hamid.model.message.InitialMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.PickMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.TurnMessage;
 import ir.sharif.aichallenge.server.hamid.utils.VisionTools;
 import lombok.extern.log4j.Log4j;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 @Log4j
 public class GameHandler implements GameLogic {
+
+    public static final FileParam PARAM_MAP = new FileParam("Map", null, ".*\\.map");
 
     public static final int CLIENT_NUM = 2;
     public static final int CLIENT_RESPONSE_TIME = 0;
@@ -51,8 +61,34 @@ public class GameHandler implements GameLogic {
 
     @Override
     public void init() {
-        //todo read from map
-        //todo initialize game
+        String initStr = readMapFile(PARAM_MAP);
+        InitialMessage initialMessage = null;
+        try {
+            initialMessage = Json.GSON.fromJson(initStr, InitialMessage[].class)[0];
+        } catch (JsonSyntaxException e) {
+            System.err.println("Invalid map file!");
+            System.exit(0);
+        }
+        gameEngine.initialize(initialMessage);
+    }
+
+    private String readMapFile(FileParam paramMap) {
+        StringBuilder result = new StringBuilder();
+        File mapFile = paramMap.getValue();
+        if (mapFile == null || !mapFile.exists()) {
+            System.err.println("Invalid map file!");
+            System.exit(0);
+        }
+        try (Scanner in = new Scanner(mapFile)) {
+            while (in.hasNext()) {
+                result.append(in.nextLine());
+                result.append("\n");
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return result.toString();
     }
 
     @Override
