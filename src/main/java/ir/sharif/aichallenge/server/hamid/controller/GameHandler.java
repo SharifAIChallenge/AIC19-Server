@@ -106,22 +106,20 @@ public class GameHandler implements GameLogic {
         Event[] playerOneEvents = clientsEvent[0];
         Event[] playerTwoEvents = clientsEvent[1];
 
-        ClientTurnMessage message1 = new ClientTurnMessage();
-        ClientTurnMessage message2 = new ClientTurnMessage();
+        ClientTurnMessage message1 = prepareClientMessage(playerOneEvents, 0);
+        ClientTurnMessage message2 = prepareClientMessage(playerTwoEvents, 1);
 
-        prepareClientMessage(playerOneEvents, message1, 0);
-        prepareClientMessage(playerTwoEvents, message2, 1);
-
-        gameEngine.doTurn(message1 , message2);
+        gameEngine.doTurn(message1, message2);
 
     }
 
-    private void prepareClientMessage(Event[] events, ClientTurnMessage message, int player) {
+    private ClientTurnMessage prepareClientMessage(Event[] events, int player) {
+        ClientTurnMessage message = new ClientTurnMessage();
         for (Event event : events) {
             try {
                 switch (event.getType()) {
                     case "cast":
-                        Cast cast = prepareCast(message, player, event);
+                        Cast cast = prepareCast(player, event);
                         message.getCasts().add(cast);
                         message.setType(GameState.CAST);
                         break;
@@ -141,6 +139,7 @@ public class GameHandler implements GameLogic {
 
             }
         }
+        return message;
     }
 
     private Move prepareMove(int player, Event event) {
@@ -167,7 +166,7 @@ public class GameHandler implements GameLogic {
         return new Move(directions, hero);
     }
 
-    private Cast prepareCast(ClientTurnMessage message1, int player, Event event) {
+    private Cast prepareCast(int player, Event event) {
         int heroId = Integer.parseInt(event.getArgs()[0]);
         String abilityName = event.getArgs()[0];
         int targetRow = Integer.parseInt(event.getArgs()[2]);
@@ -175,8 +174,7 @@ public class GameHandler implements GameLogic {
         Hero hero = gameEngine.getPlayers()[player].getHero(heroId);
         if (hero == null)
             return null;
-        Cast cast = new Cast(hero, hero.getAbility(abilityName), targetRow, targetCollumn);
-        return cast;
+        return new Cast(hero, hero.getAbility(abilityName), targetRow, targetCollumn);
     }
 
     @Override
