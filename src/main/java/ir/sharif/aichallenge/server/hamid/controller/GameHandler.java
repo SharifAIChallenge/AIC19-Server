@@ -4,9 +4,11 @@ import ir.sharif.aichallenge.server.common.model.Event;
 import ir.sharif.aichallenge.server.common.network.Json;
 import ir.sharif.aichallenge.server.common.network.data.Message;
 import ir.sharif.aichallenge.server.engine.core.GameLogic;
-import ir.sharif.aichallenge.server.hamid.model.*;
+import ir.sharif.aichallenge.server.hamid.model.Cell;
+import ir.sharif.aichallenge.server.hamid.model.Hero;
+import ir.sharif.aichallenge.server.hamid.model.Map;
+import ir.sharif.aichallenge.server.hamid.model.Player;
 import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
-import ir.sharif.aichallenge.server.hamid.model.client.CastedAbility;
 import ir.sharif.aichallenge.server.hamid.model.client.ClientCell;
 import ir.sharif.aichallenge.server.hamid.model.client.ClientMap;
 import ir.sharif.aichallenge.server.hamid.model.client.EmptyCell;
@@ -16,7 +18,6 @@ import ir.sharif.aichallenge.server.hamid.model.client.hero.EmptyHero;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
 import ir.sharif.aichallenge.server.hamid.model.message.PickMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.TurnMessage;
-import ir.sharif.aichallenge.server.hamid.utils.Pair;
 import ir.sharif.aichallenge.server.hamid.utils.VisionTools;
 import lombok.extern.log4j.Log4j;
 
@@ -236,7 +237,7 @@ public class GameHandler implements GameLogic {
                     clientCell.setInMyRespawnZone(map.getPlayer2RespawnZone().contains(cell));
                     clientCell.setInOppRespawnZone(map.getPlayer1RespawnZone().contains(cell));
                 }
-                clientCell.setInObjectZone(map.getObjectiveZone().contains(cell));
+                clientCell.setInObjectiveZone(map.getObjectiveZone().contains(cell));
                 //vision
                 clientCell.setInVision(false);
                 for (Hero hero : heroes) {
