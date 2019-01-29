@@ -1,15 +1,13 @@
 package ir.sharif.aichallenge.server.hamid.controller;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import ir.sharif.aichallenge.server.common.model.Event;
 import ir.sharif.aichallenge.server.common.network.Json;
 import ir.sharif.aichallenge.server.common.network.data.Message;
 import ir.sharif.aichallenge.server.engine.config.FileParam;
 import ir.sharif.aichallenge.server.engine.core.GameLogic;
-import ir.sharif.aichallenge.server.hamid.model.Cell;
-import ir.sharif.aichallenge.server.hamid.model.Hero;
-import ir.sharif.aichallenge.server.hamid.model.Map;
-import ir.sharif.aichallenge.server.hamid.model.Player;
+import ir.sharif.aichallenge.server.hamid.model.*;
 import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
 import ir.sharif.aichallenge.server.hamid.model.client.ClientCell;
 import ir.sharif.aichallenge.server.hamid.model.client.ClientMap;
@@ -17,6 +15,7 @@ import ir.sharif.aichallenge.server.hamid.model.client.EmptyCell;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.ClientHero;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.Cooldown;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.EmptyHero;
+import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
 import ir.sharif.aichallenge.server.hamid.model.message.InitialMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.PickMessage;
@@ -40,6 +39,7 @@ public class GameHandler implements GameLogic {
     public static final int CLIENT_RESPONSE_TIME = 0;
     public static final int TURN_TIMEOUT = 0;
     private GameEngine gameEngine = new GameEngine();
+    private Gson gson = new Gson();
     private AtomicInteger currentTrun;
 
     @Override
@@ -103,7 +103,80 @@ public class GameHandler implements GameLogic {
 
     @Override
     public void simulateEvents(Event[] environmentEvent, Event[][] clientsEvent) {
-        //todo handle turn
+        Event[] playerOneEvents = clientsEvent[0];
+        Event[] playerTwoEvents = clientsEvent[1];
+
+        ClientTurnMessage message1 = new ClientTurnMessage();
+        ClientTurnMessage message2 = new ClientTurnMessage();
+
+        prepareClientMessage(playerOneEvents, message1, 0);
+        prepareClientMessage(playerTwoEvents, message2, 1);
+
+        gameEngine.doTurn(message1 , message2);
+
+    }
+
+    private void prepareClientMessage(Event[] events, ClientTurnMessage message, int player) {
+        for (Event event : events) {
+            try {
+                switch (event.getType()) {
+                    case "cast":
+                        Cast cast = prepareCast(message, player, event);
+                        message.getCasts().add(cast);
+                        message.setType(GameState.CAST);
+                        break;
+                    case "move":
+                        Move move = prepareMove(player, event);
+                        message.getMoves().add(move);
+                        message.setType(GameState.MOVE);
+
+                        break;
+                    case "pick":
+                        int heroId = Integer.parseInt(event.getArgs()[0]);
+                        message.setHeroId(heroId);
+                        message.setType(GameState.PICK);
+                        break;
+                }
+            } catch (Exception ignore) {
+
+            }
+        }
+    }
+
+    private Move prepareMove(int player, Event event) {
+        Hero hero;
+        int heroId = Integer.parseInt(event.getArgs()[0]);
+        String list = event.getArgs()[1];
+
+        hero = gameEngine.getPlayers()[player].getHero(heroId);
+        if (hero == null)
+            return null;
+        List<Direction> directions = new ArrayList<>();
+        String[] moves = list.split(",");
+        for (String move : moves) {
+            if (move.contains("UP")) {
+                directions.add(Direction.UP);
+            } else if (move.contains("DOWN")) {
+                directions.add(Direction.DOWN);
+            } else if (move.contains("RIGHT")) {
+                directions.add(Direction.RIGHT);
+            } else if (move.contains("LEFT")) {
+                directions.add(Direction.LEFT);
+            }
+        }
+        return new Move(directions, hero);
+    }
+
+    private Cast prepareCast(ClientTurnMessage message1, int player, Event event) {
+        int heroId = Integer.parseInt(event.getArgs()[0]);
+        String abilityName = event.getArgs()[0];
+        int targetRow = Integer.parseInt(event.getArgs()[2]);
+        int targetCollumn = Integer.parseInt(event.getArgs()[3]);
+        Hero hero = gameEngine.getPlayers()[player].getHero(heroId);
+        if (hero == null)
+            return null;
+        Cast cast = new Cast(hero, hero.getAbility(abilityName), targetRow, targetCollumn);
+        return cast;
     }
 
     @Override
@@ -175,8 +248,7 @@ public class GameHandler implements GameLogic {
             if (i == 0) {
                 turnMessage.setMyCastedAbilities(gameEngine.getPlayer1castedAbilities());
                 turnMessage.setOppCastedAbilities(gameEngine.getPlayer1oppCastedAbilities());
-            }
-            else {
+            } else {
                 turnMessage.setMyCastedAbilities(gameEngine.getPlayer2castedAbilities());
                 turnMessage.setOppCastedAbilities(gameEngine.getPlayer2oppCastedAbilities());
             }
@@ -222,7 +294,7 @@ public class GameHandler implements GameLogic {
 
     private List<ClientHero> getClientOppHeroes(int i) {
         Player[] players = gameEngine.getPlayers();
-        Player opponent = players[1-i];
+        Player opponent = players[1 - i];
         List<ClientHero> clientHeroes = new ArrayList<>();
         for (Hero hero : opponent.getHeroes()) {
             ClientHero clientHero = new ClientHero();
@@ -274,8 +346,7 @@ public class GameHandler implements GameLogic {
                 if (playerNum == 0) {
                     clientCell.setInMyRespawnZone(map.getPlayer1RespawnZone().contains(cell));
                     clientCell.setInOppRespawnZone(map.getPlayer2RespawnZone().contains(cell));
-                }
-                else {
+                } else {
                     clientCell.setInMyRespawnZone(map.getPlayer2RespawnZone().contains(cell));
                     clientCell.setInOppRespawnZone(map.getPlayer1RespawnZone().contains(cell));
                 }
