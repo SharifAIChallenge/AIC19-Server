@@ -1,7 +1,5 @@
 package ir.sharif.aichallenge.server.hamid.controller;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import ir.sharif.aichallenge.server.common.model.Event;
 import ir.sharif.aichallenge.server.common.network.Json;
