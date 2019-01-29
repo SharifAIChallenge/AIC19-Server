@@ -363,30 +363,6 @@ public class GameEngine {
         }
     }
 
-    private List<Hero> getHeroesInAreaOfEffect(Cast cast) {
-        Ability ability = cast.getAbility();
-        List<Hero> heroes = new ArrayList<>();
-        for (int i = -1 * ability.getRange(); i <= ability.getRange(); i++) {
-            for (int j = -1 * ability.getRange(); i <= ability.getRange(); j++) {
-                if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow(), cast.getTargetColumn()), map.getCell(cast.getTargetRow() + i, cast.getTargetColumn() + j)) <= ability.getRange()) {
-                    heroes.addAll(map.getCell(cast.getTargetRow() + i, cast.getTargetColumn() + j).getHeroes());
-                }
-            }
-        }
-        return heroes;
-    }
-
-
-    private void fortify(Cast cast, int player, List<Hero> fortifiedHeroes) {
-        if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow(), cast.getTargetColumn()), cast.getHero().getCell()) <= cast.getAbility().getRange()) {
-            for (Hero hero : map.getCell(cast.getTargetRow(), cast.getTargetColumn()).getHeroes()) {
-                if (players[player - 1].getHeroes().contains(hero)) {
-                    fortifiedHeroes.add(hero);
-                }
-            }
-        }
-    }
-
     // check final location of heroes
     private void prepareMove(Move move) {
         Cell cell = move.getHero().getCell(); //not change cell
