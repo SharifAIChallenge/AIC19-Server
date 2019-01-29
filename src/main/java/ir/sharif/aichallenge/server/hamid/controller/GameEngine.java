@@ -66,8 +66,7 @@ public class GameEngine {
 
     }
 
-    private void setGameConstants(Map<String, Integer> gameConstants)
-    {
+    private void setGameConstants(Map<String, Integer> gameConstants) {
         GameHandler.TURN_TIMEOUT = gameConstants.get("timeout");
         this.killScore = gameConstants.get("killScore");
         this.objectiveZoneScore = gameConstants.get("objectiveZoneScore");
@@ -91,7 +90,7 @@ public class GameEngine {
                 doPickTurn(message1.getHeroId(), message2.getHeroId());
             else if (message1.getType().equals(GameState.PICK)) {
                 doPickTurn(message1.getHeroId(), Math.abs(new Random().nextInt()) % heroes.size());
-            } else if (message2.getType().equals(GameState.PICK)){
+            } else if (message2.getType().equals(GameState.PICK)) {
                 doPickTurn(Math.abs(new Random().nextInt()) % heroes.size(), message2.getHeroId());
             } else {
                 doPickTurn(Math.abs(new Random().nextInt()) % heroes.size(), Math.abs(new Random().nextInt()) % heroes.size());
@@ -240,17 +239,36 @@ public class GameEngine {
                 if (hero.getCell() == null) {
                     hero.setRespawnTime(hero.getRespawnTime() - 1);
                     if (hero.getRespawnTime() <= 0) {
-                        if (players[0].equals(player)) {
-                            Cell cell = map.getPlayer1RespawnZone().get(Math.abs(new Random().nextInt() % map.getPlayer1RespawnZone().size()));
-                            hero.moveTo(cell);
-                        } else {
-                            Cell cell = map.getPlayer2RespawnZone().get(Math.abs(new Random().nextInt() % map.getPlayer2RespawnZone().size()));
-                            hero.moveTo(cell);
-                        }
+                        Cell cell = getValidRespawnCell(player);
+                        hero.moveTo(cell);
                     }
                 }
             }
         }
+    }
+
+    private Cell getValidRespawnCell(Player player) {
+        Cell cell = null;
+        boolean isFinish = false;
+        while (!isFinish) {
+            cell = getRespawnZone(player).get(Math.abs(new Random().nextInt() % getRespawnZone(player).size()));
+            isFinish = true;
+            for (Hero cellHero : cell.getHeroes()) {
+                if (player.getHeroes().contains(cellHero)) {
+                    isFinish = false;
+                    break;
+                }
+            }
+        }
+        return cell;
+    }
+
+    //this function wrote because of bad models
+    private List<Cell> getRespawnZone(Player player) {
+        if (players[0].equals(player)) {
+            return map.getPlayer1RespawnZone();
+        }
+        return map.getPlayer2RespawnZone();
     }
 
     private void cast(Cast cast, int player, Map<Hero, Ability> fortifiedHeroes) {
@@ -274,14 +292,14 @@ public class GameEngine {
                             player = 1;
                         if (players[player - 1].getHeroes().contains(hero)) {
                             if (player == 2) {
-                                if (map.getPlayer1RespawnZone().contains(hero))
+                                if (getRespawnZone(players[0]).contains(hero.getCell()))
                                     break;
-                                if (map.getPlayer2RespawnZone().contains(cast.getHero()))
+                                if (getRespawnZone(players[1]).contains(cast.getHero().getCell()))
                                     break;
                             } else {
-                                if (map.getPlayer1RespawnZone().contains(cast.getHero()))
+                                if (getRespawnZone(players[0]).contains(cast.getHero().getCell()))
                                     break;
-                                if (map.getPlayer2RespawnZone().contains(hero))
+                                if (getRespawnZone(players[1]).contains(hero.getCell()))
                                     break;
                             }
                             if (fortifiedHeroes.containsKey(hero)) {
@@ -354,8 +372,7 @@ public class GameEngine {
             if (clientOppCastedAbility.getStartCell() != null || clientOppCastedAbility.getEndCell() != null ||
                     clientOppCastedAbility.getTargetHeroIds().size() > 0)
                 player2oppCastedAbilities.add(clientOppCastedAbility);
-        }
-        else {
+        } else {
             clientCastedAbility.setCasterId(castedAbility.getCasterHero().getId());
             clientCastedAbility.setAbilityName(castedAbility.getAbility().getName());
             clientCastedAbility.setStartCell(new EmptyCell(castedAbility.getStartCell()));
