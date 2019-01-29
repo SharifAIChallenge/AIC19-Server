@@ -1,8 +1,8 @@
 package ir.sharif.aichallenge.server.hamid.model.message;
 
-import ir.sharif.aichallenge.server.hamid.model.Hero;
-import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
-import ir.sharif.aichallenge.server.hamid.model.client.ClientMap;
+import ir.sharif.aichallenge.server.hamid.model.client.ClientAbilityConstants;
+import ir.sharif.aichallenge.server.hamid.model.client.ClientHeroConstants;
+import ir.sharif.aichallenge.server.hamid.model.client.ClientInitialMap;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class InitialMessage {
     private Map<String , Integer> gameConstants = new HashMap<>();
-    private ClientMap map;
-    private List<Hero> heroes = new ArrayList<>();
-    private List<Ability> abilities = new ArrayList<>();
+    private ClientInitialMap map;
+    private List<ClientHeroConstants> heroConstants = new ArrayList<>();
+    private List<ClientAbilityConstants> abilityConstants = new ArrayList<>();
 }
