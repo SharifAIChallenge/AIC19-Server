@@ -17,6 +17,9 @@ import ir.sharif.aichallenge.server.hamid.model.client.hero.Cooldown;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.EmptyHero;
 import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
+import ir.sharif.aichallenge.server.hamid.model.graphic.RemainingCooldown;
+import ir.sharif.aichallenge.server.hamid.model.graphic.StatusHero;
+import ir.sharif.aichallenge.server.hamid.model.graphic.message.StatusMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.InitialMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.PickMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.TurnMessage;
@@ -38,6 +41,7 @@ public class GameHandler implements GameLogic {
     public static final int CLIENT_NUM = 2;
     public static final int CLIENT_RESPONSE_TIME = 0;
     public static int TURN_TIMEOUT = 0;
+    public static final int CLIENT_HERO_NUM = 4;
     private GameEngine gameEngine = new GameEngine();
     private Gson gson = new Gson();
     private AtomicInteger currentTrun;
@@ -188,7 +192,27 @@ public class GameHandler implements GameLogic {
 
     @Override
     public Message getStatusMessage() {
-        return null;
+        StatusMessage statusMessage = new StatusMessage();
+        StatusHero[][] heroes = new StatusHero[CLIENT_NUM][CLIENT_HERO_NUM];
+        for (int i = 0; i < CLIENT_NUM; i++) {
+            for (int j = 0; j < CLIENT_HERO_NUM; j++) {
+                Hero hero = gameEngine.getPlayers()[i].getHeroes().get(j);
+                StatusHero statusHero = new StatusHero();
+                statusHero.setId(hero.getId());
+                statusHero.setCurrentHP(hero.getHp());
+                List<RemainingCooldown> remainingCooldowns = new ArrayList<>();
+                for (Ability ability : hero.getAbilities()) {
+                    remainingCooldowns.add(new RemainingCooldown(ability.getName(), ability.getRemainingCoolDown()));
+                }
+                statusHero.setRemainingCooldowns(remainingCooldowns);
+                heroes[i][j] = statusHero;
+            }
+        }
+        statusMessage.setHeroes(heroes);
+
+        StatusMessage[] statusMessages = new StatusMessage[1];
+        statusMessages[0] = statusMessage;
+        return new Message(Message.NAME_STATUS, Json.GSON.toJsonTree(statusMessages).getAsJsonArray());
     }
 
     @Override
