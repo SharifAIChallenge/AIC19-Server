@@ -37,7 +37,7 @@ public class GameHandler implements GameLogic {
 
     public static final int CLIENT_NUM = 2;
     public static final int CLIENT_RESPONSE_TIME = 0;
-    public static final int TURN_TIMEOUT = 0;
+    public static int TURN_TIMEOUT = 0;
     private GameEngine gameEngine = new GameEngine();
     private AtomicInteger currentTrun;
 
