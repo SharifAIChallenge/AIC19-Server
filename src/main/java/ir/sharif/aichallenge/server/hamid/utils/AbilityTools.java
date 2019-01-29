@@ -39,6 +39,11 @@ public class AbilityTools {
         }
     }
 
+    public Cell getImpactCell(Ability ability, Cell startCell, Cell targetCell) {
+        Cell[] impactCells = getImpactCells(ability, startCell, targetCell);
+        return impactCells[impactCells.length - 1];
+    }
+
     public Cell[] getImpactCells(Ability ability, Cell startCell, Cell targetCell) {
         if (ability.isLobbing()) {
             return new Cell[]{targetCell};
