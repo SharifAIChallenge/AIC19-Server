@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Data
 @Builder
@@ -14,6 +15,7 @@ import java.util.List;
 @Getter
 
 public class Hero {
+    private static int ids = -1;
     private List<Ability> abilities;
     private int maxHp;
     private int hp;
@@ -45,7 +47,7 @@ public class Hero {
         for (Ability ability : this.abilities) {
             abilities.add((Ability) ability.clone());
         }
-
-        return new Hero(abilities,maxHp, hp, cell, null, null , this.respawnTime, this.id, this.name);
+        ids = ids++;
+        return new Hero(abilities,maxHp, hp, cell, null, null , this.respawnTime, ids, this.name);
     }
 }
