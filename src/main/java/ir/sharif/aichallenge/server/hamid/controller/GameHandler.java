@@ -41,10 +41,10 @@ public class GameHandler implements GameLogic {
     public static final int CLIENT_NUM = 2;
     public static final int CLIENT_RESPONSE_TIME = 0;
     public static int TURN_TIMEOUT = 0;
+    public static int PICK_TURN_TIMEOUT = 0;
     public static final int CLIENT_HERO_NUM = 4;
     private GameEngine gameEngine = new GameEngine();
     private Gson gson = new Gson();
-    private AtomicInteger currentTrun;
 
     @Override
     public int getClientsNum() {
@@ -58,7 +58,8 @@ public class GameHandler implements GameLogic {
 
     @Override
     public long getTurnTimeout() {
-        //todo check it pick or else
+        if (gameEngine.getState() == GameState.PICK)
+            return PICK_TURN_TIMEOUT;
         return TURN_TIMEOUT;
     }
 
@@ -248,7 +249,7 @@ public class GameHandler implements GameLogic {
                 oppHeroes.add(emptyHero);
             }
             pickMessage.setMyHeroes(oppHeroes);
-            pickMessage.setCurrentTurn(gameEngine.getCurrentTurn().get());  //todo correct?
+            pickMessage.setCurrentTurn(gameEngine.getCurrentTurn().get());
             //make json array and message[i]
             PickMessage[] pickMessages = new PickMessage[1];
             pickMessages[0] = pickMessage;
