@@ -67,8 +67,10 @@ public class GameEngine {
                 doPickTurn(message1.getHeroId(), message2.getHeroId());
             else if (message1.getType().equals(GameState.PICK)) {
                 doPickTurn(message1.getHeroId(), Math.abs(new Random().nextInt()) % heroes.size());
-            } else {
+            } else if (message2.getType().equals(GameState.PICK)){
                 doPickTurn(Math.abs(new Random().nextInt()) % heroes.size(), message2.getHeroId());
+            } else {
+                doPickTurn(Math.abs(new Random().nextInt()) % heroes.size(), Math.abs(new Random().nextInt()) % heroes.size());
             }
         }
 

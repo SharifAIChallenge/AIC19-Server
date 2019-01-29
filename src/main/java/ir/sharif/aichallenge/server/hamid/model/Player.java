@@ -22,4 +22,14 @@ public class Player {
 	public void addHero(Hero hero) {
 		heroes.add(hero);
 	}
+	public Hero getHero(int heroId) {
+		Hero tempHero = new Hero();
+		tempHero.setId(heroId);
+		for (Hero hero : heroes) {
+			if (hero.equals(tempHero)) {
+				return hero;
+			}
+		}
+		return null;
+	}
 }
