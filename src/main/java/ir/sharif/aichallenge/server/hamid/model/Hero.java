@@ -14,7 +14,7 @@ import java.util.Random;
 @Setter
 @Getter
 
-public class Hero {
+public class Hero implements Cloneable{
     private static int ids = -1;
     private List<Ability> abilities;
     private int maxHp;
@@ -47,7 +47,7 @@ public class Hero {
         for (Ability ability : this.abilities) {
             abilities.add((Ability) ability.clone());
         }
-        ids = ids++;
+        ids = ids + 1;
         return new Hero(abilities,maxHp, hp, cell, null, null , this.respawnTime, ids, this.name);
     }
 }
