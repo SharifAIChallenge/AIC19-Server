@@ -33,10 +33,13 @@ public class GameEngine {
 
     public static void main(String[] args) {
         GameEngine gameEngine = new GameEngine();
+//        gameEngine.initialize();
+//        gameEngine.doPickTurn();
+//        gameEngine.doTurn();
     }
 
     public void initialize() {
-        // todo initialize heroes
+        // todo initialize heros
     }
 
     private void doPickTurn(int firstHero, int secondHero) {
@@ -163,19 +166,16 @@ public class GameEngine {
             abilityTools.setMap(map);
             abilityTools.setVisionTools(visionTools);
             for (Cast cast : casts) {
-                if (cast.getAbility().getType() == AbilityType.ATTACK) {
-                    if (casts1.contains(cast)) {
-                        abilityTools.setMyHeroes(players[0].getHeroes());
-                        abilityTools.setOppHeroes(players[1].getHeroes());
-                        cast(cast, 1, fortifiedHeroes);
-                    } else {
-                        abilityTools.setMyHeroes(players[1].getHeroes());
-                        abilityTools.setOppHeroes(players[0].getHeroes());
-                        cast(cast, 2, fortifiedHeroes);
-                    }
+                if (casts1.contains(cast)) {
+                    abilityTools.setMyHeroes(players[0].getHeroes());
+                    abilityTools.setOppHeroes(players[1].getHeroes());
+                    cast(cast, 1, fortifiedHeroes);
+                } else {
+                    abilityTools.setMyHeroes(players[1].getHeroes());
+                    abilityTools.setOppHeroes(players[0].getHeroes());
+                    cast(cast, 2, fortifiedHeroes);
                 }
             }
-
         }
 
         checkKilledHeroes();
@@ -217,7 +217,7 @@ public class GameEngine {
         AbilityType abilityType = cast.getAbility().getType();
         Ability ability = cast.getAbility();
         if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow(), cast.getTargetColumn()), cast.getHero().getCell()) <= ability.getRange()) {
-            List<Hero> targetHeroes = Arrays.asList(abilityTools.getAbilityTargets(ability, cast.getHero().getCell(), map.getCell(cast.getTargetRow(), cast.getTargetColumn())));
+            Hero[] targetHeroes = abilityTools.getAbilityTargets(ability, cast.getHero().getCell(), map.getCell(cast.getTargetRow(), cast.getTargetColumn()));
             for (Hero hero : targetHeroes) {
                 switch (abilityType) {
                     case DODGE:
@@ -239,7 +239,7 @@ public class GameEngine {
                                     break;
                                 if (map.getPlayer2RespawnZone().contains(cast.getHero()))
                                     break;
-                            }else {
+                            } else {
                                 if (map.getPlayer1RespawnZone().contains(cast.getHero()))
                                     break;
                                 if (map.getPlayer2RespawnZone().contains(hero))
@@ -347,7 +347,7 @@ public class GameEngine {
             move(reservedCell, move, hero, newPath);
             move.setMoves(newPath);
             reservedCell.add(hero.getCell());
-            hero.moveTo(startCell);
+            hero.setCell(startCell);
         }
     }
 
@@ -364,7 +364,7 @@ public class GameEngine {
                     newColumn = oldCell.getColumn();
                     newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
-                        hero.moveTo(newCell);
+                        hero.setCell(newCell);
                         newPath.add(Direction.UP);
                     }
                     break;
@@ -373,7 +373,7 @@ public class GameEngine {
                     newColumn = oldCell.getColumn();
                     newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
-                        hero.moveTo(newCell);
+                        hero.setCell(newCell);
                         newPath.add(Direction.DOWN);
                     }
                     break;
@@ -382,7 +382,7 @@ public class GameEngine {
                     newColumn = oldCell.getColumn() + 1;
                     newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
-                        hero.moveTo(newCell);
+                        hero.setCell(newCell);
                         newPath.add(Direction.LEFT);
                     }
                     break;
@@ -391,7 +391,7 @@ public class GameEngine {
                     newColumn = oldCell.getColumn() - 1;
                     newCell = getEmptyCell(newRow, newColumn);
                     if (!reservedCell.contains(newCell)) {
-                        hero.moveTo(newCell);
+                        hero.setCell(newCell);
                         newPath.add(Direction.RIGHT);
                     }
                     break;
