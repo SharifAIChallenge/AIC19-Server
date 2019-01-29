@@ -1,0 +1,11 @@
+package ir.sharif.aichallenge.server.hamid.model.graphic.message;
+
+import ir.sharif.aichallenge.server.hamid.model.graphic.GraphicHero;
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
+public class PickMessage {
+    private GraphicHero[][] heroes;     //2D array, heroes[0] is for the first user and heroes[1] for the other
+}
