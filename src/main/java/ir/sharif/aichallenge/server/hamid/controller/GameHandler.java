@@ -173,7 +173,14 @@ public class GameHandler implements GameLogic {
             turnMessage.setMap(getClientMap(i));
             turnMessage.setMyHeroes(getClientHeroes(i));
             turnMessage.setOppHeroes(getClientOppHeroes(i));
-            turnMessage.setCastAbilities(gameEngine.getCastingAbilities());
+            if (i == 0) {
+                turnMessage.setMyCastedAbilities(gameEngine.getPlayer1castedAbilities());
+                turnMessage.setOppCastedAbilities(gameEngine.getPlayer1oppCastedAbilities());
+            }
+            else {
+                turnMessage.setMyCastedAbilities(gameEngine.getPlayer2castedAbilities());
+                turnMessage.setOppCastedAbilities(gameEngine.getPlayer2oppCastedAbilities());
+            }
             //make json array and message[i]
             TurnMessage[] turnMessages = new TurnMessage[1];
             turnMessages[0] = turnMessage;
