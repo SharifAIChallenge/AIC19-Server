@@ -3,6 +3,7 @@ package ir.sharif.aichallenge.server.hamid.controller;
 import ir.sharif.aichallenge.server.hamid.model.*;
 import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
 import ir.sharif.aichallenge.server.hamid.model.client.ClientCastedAbility;
+import ir.sharif.aichallenge.server.hamid.model.client.ClientCell;
 import ir.sharif.aichallenge.server.hamid.model.client.EmptyCell;
 import ir.sharif.aichallenge.server.hamid.model.enums.AbilityType;
 import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
@@ -21,8 +22,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Setter
 public class GameEngine {
     public static final int PICK_OFFSET = 4;
-    public static final int NUM_OF_MOVE_TURN = 4;
-    public static final int NUM_OF_CAST_TURN = 4;
+    public static final int NUM_OF_MOVE_TURN = 1;
+    public static final int NUM_OF_CAST_TURN = 1;
+
+    private int killScore;
+    private int objectiveZoneScore;
+    private int maxAP;
+    private int maxTurns;
 
     private AtomicInteger currentTurn;      //todo set and update value
     private Player[] players = new Player[2];
@@ -47,8 +53,26 @@ public class GameEngine {
     }
 
     public void initialize(InitialMessage initialMessage) {
-        Map<String, Integer> gameConstants = initialMessage.getGameConstants();
+        currentTurn.set(0); // TODO is this correct?
+        state = GameState.PICK;
 
+        Map<String, Integer> gameConstants = initialMessage.getGameConstants();
+        setGameConstants(gameConstants);
+
+        ClientCell[][] cells = initialMessage.getMap().getCells();
+        map = new ir.sharif.aichallenge.server.hamid.model.Map();
+        map.init(cells);
+
+
+    }
+
+    private void setGameConstants(Map<String, Integer> gameConstants)
+    {
+        GameHandler.TURN_TIMEOUT = gameConstants.get("timeout");
+        this.killScore = gameConstants.get("killScore");
+        this.objectiveZoneScore = gameConstants.get("objectiveZoneScore");
+        this.maxAP = gameConstants.get("maxAP");
+        this.maxTurns = gameConstants.get("maxTurns");
     }
 
     private void doPickTurn(int firstHero, int secondHero) {
