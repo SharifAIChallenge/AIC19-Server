@@ -53,7 +53,8 @@ public class GameEngine {
     }
 
     public void initialize(InitialMessage initialMessage) {
-        currentTurn.set(0); // TODO is this correct?
+        currentTurn = new AtomicInteger();
+        currentTurn.set(0);
         state = GameState.PICK;
 
         Map<String, Integer> gameConstants = initialMessage.getGameConstants();
