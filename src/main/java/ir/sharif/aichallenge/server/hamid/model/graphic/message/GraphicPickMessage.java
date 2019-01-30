@@ -6,6 +6,6 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class PickMessage {
+public class GraphicPickMessage {
     private GraphicHero[][] heroes;     //2D array, heroes[0] is for the first user and heroes[1] for the other
 }
