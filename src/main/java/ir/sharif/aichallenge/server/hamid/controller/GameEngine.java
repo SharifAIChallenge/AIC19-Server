@@ -27,6 +27,7 @@ public class GameEngine {
     private int objectiveZoneScore;
     private int maxAP;
     private int maxTurns;
+    private int maxScore;
 
     private AtomicInteger currentTurn;
     private Player[] players = new Player[2];
@@ -63,6 +64,10 @@ public class GameEngine {
         ClientInitialCell[][] cells = initialMessage.getMap().getCells();
         map = new ir.sharif.aichallenge.server.hamid.model.Map();
         map.init(cells);
+        visionTools = new VisionTools(map);
+        abilityTools = new AbilityTools();
+        abilityTools.setMap(map);
+        abilityTools.setVisionTools(visionTools);
 
         List<ClientAbilityConstants> abilityConstants = initialMessage.getAbilityConstants();
         initAbilities(abilityConstants);
@@ -131,6 +136,7 @@ public class GameEngine {
         this.objectiveZoneScore = gameConstants.get("objectiveZoneScore");
         this.maxAP = gameConstants.get("maxAP");
         this.maxTurns = gameConstants.get("maxTurns");
+        this.maxScore = gameConstants.get("maxScore");
     }
 
     private void doPickTurn(String firstHero, String secondHero) { // TODO check this
@@ -181,8 +187,7 @@ public class GameEngine {
             casts.addAll(casts1);
             casts.addAll(casts2);
             Collections.sort(casts);
-            abilityTools.setMap(map);
-            abilityTools.setVisionTools(visionTools);
+
             player1castedAbilities = new ArrayList<>();
             player2castedAbilities = new ArrayList<>();
             player1oppCastedAbilities = new ArrayList<>();
