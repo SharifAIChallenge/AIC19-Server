@@ -24,16 +24,26 @@ public class ClientTurnMessage {
     public void mergeMoves()
     {
         Map<Hero, Move> movesMap = new HashMap<>();
+        List<Move> finalMoves = new ArrayList<>();
 
         for (Move move : moves)
         {
             Hero hero = move.getHero();
-            if (!movesMap.containsKey(hero))
+            if (hero.getHp() == 0)
             {
-                movesMap.put(hero, new Move(new ArrayList<>(), hero));
+                continue;
             }
             Move heroMainMove = movesMap.get(hero);
-
+            if (!movesMap.containsKey(hero))
+            {
+                heroMainMove = new Move(new ArrayList<>(), hero);
+                movesMap.put(hero, heroMainMove);
+                finalMoves.add(heroMainMove);
+            }
+            heroMainMove.merge(move);
         }
+
+        moves.clear();
+        moves.addAll(finalMoves);
     }
 }

@@ -208,9 +208,11 @@ public class GameEngine {
 
     private void move(ClientTurnMessage message1, ClientTurnMessage message2) {
         if (state.equals(GameState.MOVE)) {
+            //merge
             message1.mergeMoves();
+            message2.mergeMoves();
             //sort
-            List<Move> moves1 = message1.getMoves(); //todo merge same hero moves in one move in getMoves //todo filter dead hero moves
+            List<Move> moves1 = message1.getMoves();
             List<Move> moves2 = message2.getMoves();
             for (Move move : moves1) {
                 prepareMove(move);
@@ -279,17 +281,22 @@ public class GameEngine {
             //vision for players
             for (Player player : players) {
                 Set<Cell> vision = new HashSet<>();
-                for (int i = 0; i < map.getNumberOfRows(); i++) {
-                    for (int j = 0; j < map.getNumberOfColumns(); j++) {
-                        Cell cell = map.getCell(i, j);
-                        for (Hero hero : player.getHeroes()) {  // todo check alive
+                for (Hero hero : player.getHeroes())
+                {
+                    if (hero.getHp() == 0)
+                    {
+                        continue;
+                    }
+                    for (int i = 0; i < map.getNumberOfRows(); i++) {
+                        for (int j = 0; j < map.getNumberOfColumns(); j++) {
+                            Cell cell = map.getCell(i, j);
                             if (visionTools.isInVision(cell, hero.getCell())) {
                                 vision.add(cell);
                             }
                         }
                     }
+                    player.setVision(vision);
                 }
-                player.setVision(vision);
             }
             //end of vision for players
         }
@@ -354,9 +361,17 @@ public class GameEngine {
     private void cast(Cast cast, int player, Map<Hero, Ability> fortifiedHeroes) {
         AbilityType abilityType = cast.getAbility().getType();
         Ability ability = cast.getAbility();
-        if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow(), cast.getTargetColumn()), cast.getHero().getCell()) <= ability.getRange()) {  //todo ap
-            List<Hero> targetHeroes = Arrays.asList(abilityTools.getAbilityTargets(ability, cast.getHero().getCell(), map.getCell(cast.getTargetRow(), cast.getTargetColumn())));
+        if (ability.getApCost() > players[player - 1].getActionPoint())
+        {
+            return;
+        }
+        if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow(), cast.getTargetColumn()),
+                cast.getHero().getCell()) <= ability.getRange()) {
+
+            List<Hero> targetHeroes = Arrays.asList(abilityTools.getAbilityTargets(ability, cast.getHero().getCell(),
+                    map.getCell(cast.getTargetRow(), cast.getTargetColumn())));
             addCastedAbility(cast, player, targetHeroes);
+
             for (Hero hero : targetHeroes) {
                 switch (abilityType) {
                     case HEAL:

@@ -16,4 +16,9 @@ import java.util.List;
 public class Move {
     private List<Direction> moves;
     private Hero hero;
+
+    public void merge(Move move)
+    {
+        moves.addAll(move.getMoves());
+    }
 }
