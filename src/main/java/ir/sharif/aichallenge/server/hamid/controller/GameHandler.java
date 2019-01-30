@@ -140,11 +140,19 @@ public class GameHandler implements GameLogic {
                 switch (event.getType()) {
                     case "cast":
                         Cast cast = prepareCast(player, event);
+                        if (cast == null)
+                        {
+                            continue;
+                        }
                         message.getCasts().add(cast);
                         message.setType(GameState.CAST);
                         break;
                     case "move":
                         Move move = prepareMove(player, event);
+                        if (move == null)
+                        {
+                            continue;
+                        }
                         message.getMoves().add(move);
                         message.setType(GameState.MOVE);
 
@@ -186,15 +194,20 @@ public class GameHandler implements GameLogic {
         return new Move(directions, hero);
     }
 
-    private Cast prepareCast(int player, Event event) {
+    private Cast prepareCast(int playerNum, Event event) {
+        Player player = gameEngine.getPlayers()[playerNum];
         int heroId = Integer.parseInt(event.getArgs()[0]);
-        String abilityName = event.getArgs()[0];
-        int targetRow = Integer.parseInt(event.getArgs()[2]);
-        int targetCollumn = Integer.parseInt(event.getArgs()[3]);
-        Hero hero = gameEngine.getPlayers()[player].getHero(heroId);
+        Hero hero = player.getHero(heroId);
         if (hero == null)
             return null;
-        return new Cast(hero, hero.getAbility(abilityName), targetRow, targetCollumn);
+
+        String abilityName = event.getArgs()[0];
+        Ability ability = hero.getAbility(abilityName);
+
+        int targetRow = Integer.parseInt(event.getArgs()[2]);
+        int targetColumn = Integer.parseInt(event.getArgs()[3]);
+
+        return new Cast(hero, ability, targetRow, targetColumn);
     }
 
     @Override
