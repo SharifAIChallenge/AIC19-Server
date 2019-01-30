@@ -1,5 +1,6 @@
 package ir.sharif.aichallenge.server.hamid.model.ability;
 
+import ir.sharif.aichallenge.server.hamid.model.client.ClientAbilityConstants;
 import ir.sharif.aichallenge.server.hamid.model.enums.AbilityType;
 import lombok.*;
 
@@ -12,7 +13,7 @@ import java.util.Objects;
 @Setter
 @Getter
 
-public class Ability {
+public class Ability implements Cloneable{
 	private String name;
 	private AbilityType type;
 	private int range;
@@ -26,7 +27,21 @@ public class Ability {
 	private boolean isLobbing;
 	private boolean isPiercing;
 
-	@Override
+	public Ability(ClientAbilityConstants abilityConstant)
+	{
+		this.name = abilityConstant.getName();
+		this.type = abilityConstant.getType();
+		this.range = abilityConstant.getRange();
+		this.apCost = abilityConstant.getAPCost();
+		this.coolDown = abilityConstant.getCooldown();
+		this.areaOfEffect = abilityConstant.getAreaOfEffect();
+		this.power = abilityConstant.getPower();
+		this.isLobbing = abilityConstant.isLobbing();
+		this.isPiercing = abilityConstant.isPiercing();
+		this.remainingCoolDown = 0;
+	}
+
+    @Override
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
 	}

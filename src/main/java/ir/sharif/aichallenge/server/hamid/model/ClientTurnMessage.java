@@ -15,6 +15,6 @@ public class ClientTurnMessage {
     private GameState type;
     private List<Integer> heroesId;
     private List<Move> moves;
-    private Integer heroId;
+    private String heroName;
     private List<Cast> casts;
 }

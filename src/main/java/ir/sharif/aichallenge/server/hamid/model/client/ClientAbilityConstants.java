@@ -1,5 +1,6 @@
 package ir.sharif.aichallenge.server.hamid.model.client;
 
+import ir.sharif.aichallenge.server.hamid.model.enums.AbilityType;
 import lombok.*;
 
 @Data
@@ -12,7 +13,7 @@ import lombok.*;
 public class ClientAbilityConstants
 {
     private String name;
-    private String type;
+    private AbilityType type;
     private int range;
     private int APCost;
     private int cooldown;

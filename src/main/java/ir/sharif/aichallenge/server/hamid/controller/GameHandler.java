@@ -31,7 +31,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Log4j
 public class GameHandler implements GameLogic {
@@ -45,6 +44,8 @@ public class GameHandler implements GameLogic {
     public static final int CLIENT_HERO_NUM = 4;
     private GameEngine gameEngine = new GameEngine();
     private Gson gson = new Gson();
+
+    private InitialMessage initialMessage; // we need this field when we are sending it to the clients
 
     @Override
     public int getClientsNum() {
@@ -74,6 +75,7 @@ public class GameHandler implements GameLogic {
             System.exit(0);
         }
         gameEngine.initialize(initialMessage);
+        this.initialMessage = initialMessage;
     }
 
     private String readMapFile(FileParam paramMap) {
@@ -134,9 +136,9 @@ public class GameHandler implements GameLogic {
                         message.setType(GameState.MOVE);
 
                         break;
-                    case "pick":
-                        int heroId = Integer.parseInt(event.getArgs()[0]);
-                        message.setHeroId(heroId);
+                    case "pick": // TODO check this
+                        String heroName = event.getArgs()[0];
+                        message.setHeroName(heroName);
                         message.setType(GameState.PICK);
                         break;
                 }

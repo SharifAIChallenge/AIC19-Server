@@ -2,9 +2,7 @@ package ir.sharif.aichallenge.server.hamid.controller;
 
 import ir.sharif.aichallenge.server.hamid.model.*;
 import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
-import ir.sharif.aichallenge.server.hamid.model.client.ClientCastedAbility;
-import ir.sharif.aichallenge.server.hamid.model.client.ClientCell;
-import ir.sharif.aichallenge.server.hamid.model.client.EmptyCell;
+import ir.sharif.aichallenge.server.hamid.model.client.*;
 import ir.sharif.aichallenge.server.hamid.model.enums.AbilityType;
 import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
@@ -33,7 +31,8 @@ public class GameEngine {
     private AtomicInteger currentTurn;
     private Player[] players = new Player[2];
     private GameState state;
-    private Map<Integer, Hero> heroes;
+    private Map<String, Hero> heroes;
+    private Map<String, Ability> abilities;
     private ir.sharif.aichallenge.server.hamid.model.Map map;
     private VisionTools visionTools;
     private AbilityTools abilityTools;
@@ -64,7 +63,51 @@ public class GameEngine {
         map = new ir.sharif.aichallenge.server.hamid.model.Map();
         map.init(cells);
 
+        List<ClientAbilityConstants> abilityConstants = initialMessage.getAbilityConstants();
+        initAbilities(abilityConstants);
 
+        List<ClientHeroConstants> heroConstants = initialMessage.getHeroConstants();
+        initHeroes(heroConstants);
+    }
+
+    private void initHeroes(List<ClientHeroConstants> heroConstants)
+    {
+        heroes = new HashMap<>();
+        for (ClientHeroConstants heroConstant : heroConstants)
+        {
+            List<Ability> heroAbilities = cloneAbilities(heroConstant.getAbilityNames());
+            Hero hero = new Hero(heroConstant, heroAbilities);
+            heroes.put(hero.getName(), hero);
+        }
+    }
+
+    private List<Ability> cloneAbilities(String[] abilityNames)
+    {
+        List<Ability> wantedAbilities = new ArrayList<>();
+
+        for (String abilityName : abilityNames)
+        {
+            try
+            {
+                wantedAbilities.add((Ability) abilities.get(abilityName).clone());
+            } catch (CloneNotSupportedException e)
+            {
+                e.printStackTrace(); //TODO someone handle this pls
+            }
+        }
+
+        return wantedAbilities;
+    }
+
+    private void initAbilities(List<ClientAbilityConstants> abilityConstants)
+    {
+        abilities = new HashMap<>();
+
+        for (ClientAbilityConstants abilityConstant : abilityConstants)
+        {
+            Ability ability = new Ability(abilityConstant);
+            abilities.put(ability.getName(), ability);
+        }
     }
 
     private void setGameConstants(Map<String, Integer> gameConstants) {
@@ -75,7 +118,7 @@ public class GameEngine {
         this.maxTurns = gameConstants.get("maxTurns");
     }
 
-    private void doPickTurn(int firstHero, int secondHero) {
+    private void doPickTurn(String firstHero, String secondHero) { // TODO check this
         try {
             players[0].addHero((Hero) heroes.get(firstHero).clone());
             players[1].addHero((Hero) heroes.get(secondHero).clone());
@@ -236,16 +279,19 @@ public class GameEngine {
         }
     }
 
-    private void pick(ClientTurnMessage message1, ClientTurnMessage message2) {
+    private void pick(ClientTurnMessage message1, ClientTurnMessage message2) { // TODO check this
+        List<String> heroNames = new ArrayList<>(heroes.keySet());
+        Random random = new Random(); // TODO this can even be a class field
+
         if (state.equals(GameState.PICK)) {
             if (message1.getType().equals(GameState.PICK) && message2.getType().equals(GameState.PICK))
-                doPickTurn(message1.getHeroId(), message2.getHeroId());
+                doPickTurn(message1.getHeroName(), message2.getHeroName());
             else if (message1.getType().equals(GameState.PICK)) {
-                doPickTurn(message1.getHeroId(), Math.abs(new Random().nextInt()) % heroes.size());
+                doPickTurn(message1.getHeroName(), heroNames.get(random.nextInt(heroes.size())));
             } else if (message2.getType().equals(GameState.PICK)) {
-                doPickTurn(Math.abs(new Random().nextInt()) % heroes.size(), message2.getHeroId());
+                doPickTurn(heroNames.get(random.nextInt(heroes.size())), message2.getHeroName());
             } else {
-                doPickTurn(Math.abs(new Random().nextInt()) % heroes.size(), Math.abs(new Random().nextInt()) % heroes.size());
+                doPickTurn(heroNames.get(random.nextInt(heroes.size())), heroNames.get(random.nextInt(heroes.size())));
             }
             currentTurn.incrementAndGet();
         }
