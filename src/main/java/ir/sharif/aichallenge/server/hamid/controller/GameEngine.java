@@ -152,11 +152,9 @@ public class GameEngine {
         //cast
         cast(message1, message2);
 
-        checkKilledHeroes();
+        checkKilledHeroesAndAssignScores();
 
         changeStateAndTurn();
-
-        //todo assign scores
     }
 
     private void changeStateAndTurn() {
@@ -175,9 +173,7 @@ public class GameEngine {
     private void cast(ClientTurnMessage message1, ClientTurnMessage message2) {
         Map<Hero, Ability> fortifiedHeroes = new HashMap<>();
 
-        //cast
         if (state.equals(GameState.CAST)) {
-            //cast
             List<Cast> casts1 = message1.getCasts();
             List<Cast> casts2 = message2.getCasts();
 
@@ -313,15 +309,29 @@ public class GameEngine {
         }
     }
 
-    private void checkKilledHeroes() {
+    private void checkKilledHeroesAndAssignScores() {
         for (Player player : players) {
             for (Hero hero : player.getHeroes()) {
-                if (hero.getCell() == null) { // FIXME the condition
-                    hero.setRespawnTime(hero.getMaxRespawnTime() - 1);
+                if (hero.getHp() <= 0) {
+                    hero.setHp(0);
+                    if (hero.getCell() != null) {
+                        hero.moveTo(null);
+                        hero.setRespawnTime(hero.getMaxRespawnTime());
+                        player.getOpponent().setScore(player.getOpponent().getScore() + killScore);
+                    }
+                    hero.setRespawnTime(hero.getRespawnTime() - 1);
                     if (hero.getRespawnTime() <= 0) {
                         Cell cell = getValidRespawnCell(player);
                         hero.moveTo(cell);
+                        hero.resetValues();
                     }
+                }
+            }
+        }
+        for (Player player : players) {
+            for (Hero hero : player.getHeroes()) {
+                if (map.getObjectiveZone().contains(hero.getCell())) {      //todo List<Cell> in map --> Set<Cell> for contains
+                    player.setScore(player.getScore() + objectiveZoneScore);
                 }
             }
         }
