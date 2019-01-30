@@ -17,6 +17,7 @@ public class Player {
 	private List<Hero> heroes;
 	private int actionPoint;
 	private Set<Cell> vision;	// hashcode and equals not matter
+	private Player opponent;
 
 
 	public void addHero(Hero hero) {

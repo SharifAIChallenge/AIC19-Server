@@ -55,6 +55,7 @@ public class GameEngine {
         currentTurn = new AtomicInteger();
         currentTurn.set(0);
         state = GameState.PICK;
+        initPlayers();
 
         Map<String, Integer> gameConstants = initialMessage.getGameConstants();
         setGameConstants(gameConstants);
@@ -68,6 +69,20 @@ public class GameEngine {
 
         List<ClientHeroConstants> heroConstants = initialMessage.getHeroConstants();
         initHeroes(heroConstants);
+    }
+
+    private void initPlayers()
+    {
+        for (int i = 0; i < players.length; i++)
+        {
+            Player player = new Player();
+            player.setScore(0);
+            player.setActionPoint(maxAP);
+            players[i] = player;
+        }
+
+        players[0].setOpponent(players[1]);
+        players[1].setOpponent(players[0]);
     }
 
     private void initHeroes(List<ClientHeroConstants> heroConstants)
@@ -193,6 +208,7 @@ public class GameEngine {
 
     private void move(ClientTurnMessage message1, ClientTurnMessage message2) {
         if (state.equals(GameState.MOVE)) {
+            message1.mergeMoves();
             //sort
             List<Move> moves1 = message1.getMoves(); //todo merge same hero moves in one move in getMoves //todo filter dead hero moves
             List<Move> moves2 = message2.getMoves();
