@@ -1,12 +1,12 @@
 package ir.sharif.aichallenge.server.hamid.model;
 
 import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
+import ir.sharif.aichallenge.server.hamid.model.client.ClientHeroConstants;
 import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 @Data
 @Builder
@@ -24,9 +24,18 @@ public class Hero implements Cloneable{
     private List<Cell> recentPath;
     private List<Cell> recentPathForOpponent;
     private int respawnTime;
-    public static int MAX_RESPAWN_TIME = 10;
+    public static int MAX_RESPAWN_TIME = 10; // TODO why is this final?
     private int id;         // todo make final
     private String name;    // todo make final
+
+    public Hero(ClientHeroConstants heroConstant, List<Ability> abilities)
+    {
+        this.abilities = abilities;
+        this.maxHp = heroConstant.getMaxHP();
+        this.respawnTime = heroConstant.getRespawnTime();
+        this.name = heroConstant.getName();
+        this.hp = this.maxHp;
+    }
 
     public void addToRecentPathForOpponent(Cell cell) {
         recentPathForOpponent.add(cell);
