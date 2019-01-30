@@ -26,7 +26,6 @@ public class Hero implements Cloneable{
     private List<Cell> recentPathForOpponent;
     private int maxRespawnTime;
     private int respawnTime;
-    public static int MAX_RESPAWN_TIME = 10; // TODO why is this final?
     private int id;         // todo make final
     private String name;    // todo make final
 
@@ -53,6 +52,10 @@ public class Hero implements Cloneable{
         cell = targetCell;
         if (cell != null)
             cell.getHeroes().add(this);
+    }
+
+    public void resetValues() {     //not necessary to reset respawnTime it's reset when a hero dies.
+        hp = maxHp;
     }
 
     @Override
