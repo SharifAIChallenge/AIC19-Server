@@ -212,6 +212,7 @@ public class GameHandler implements GameLogic {
 
     @Override
     public void generateOutputs() {
+        // statistical logs
     }
 
     @Override
@@ -424,8 +425,12 @@ public class GameHandler implements GameLogic {
 
     @Override
     public boolean isGameFinished() {
-        //todo check number if turns
-        return false;
+        Player[] players = gameEngine.getPlayers();
+        int maxScore = gameEngine.getMaxScore();
+        int maxTurns = gameEngine.getMaxTurns();
+
+        return gameEngine.getCurrentTurn().get() >= maxTurns || players[0].getScore() >= maxScore ||
+                players[1].getScore() >= maxScore;
     }
 
     @Override

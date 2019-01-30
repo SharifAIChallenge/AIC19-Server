@@ -5,6 +5,7 @@ import ir.sharif.aichallenge.server.hamid.model.Hero;
 import ir.sharif.aichallenge.server.hamid.model.Map;
 import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
 import ir.sharif.aichallenge.server.hamid.model.enums.AbilityType;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@NoArgsConstructor
 @Setter
 public class AbilityTools {
     private Map map;
