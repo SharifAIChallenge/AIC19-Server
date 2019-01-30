@@ -1,6 +1,6 @@
 package ir.sharif.aichallenge.server.hamid.model;
 
-import ir.sharif.aichallenge.server.hamid.model.client.ClientCell;
+import ir.sharif.aichallenge.server.hamid.model.client.ClientInitialCell;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class Cell {
 	private int row;
 	private int column;
 
-	public Cell(ClientCell clientCell)
+	public Cell(ClientInitialCell clientCell)
 	{
 		this.isWall = clientCell.isWall();
 		this.isObjectiveZone = clientCell.isInObjectiveZone();

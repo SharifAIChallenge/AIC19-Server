@@ -13,5 +13,5 @@ public class ClientInitialMap
 {
     private int rowNum;
     private int columnNum;
-    private ClientCell[][] cells;
+    private ClientInitialCell[][] cells;
 }
