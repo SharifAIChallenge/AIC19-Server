@@ -1,6 +1,8 @@
 package ir.sharif.aichallenge.server.hamid.controller;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import ir.sharif.aichallenge.server.common.model.Event;
 import ir.sharif.aichallenge.server.common.network.Json;
@@ -91,7 +93,8 @@ public class GameHandler implements GameLogic {
                 result.append("\n");
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            System.err.println("Map file not found!");
+            System.exit(0);
         }
 
         return result.toString();
@@ -104,8 +107,19 @@ public class GameHandler implements GameLogic {
 
     @Override
     public Message[] getClientInitialMessages() {
-        //todo prepare map
-        return new Message[0];
+        Message[] messages = new Message[2];
+
+        for (int i = 0; i < CLIENT_NUM; i++)
+        {
+            JsonArray clientInitialJsonArray = new JsonArray();
+            JsonObject initialJsonObject = Json.GSON.toJsonTree(initialMessage).getAsJsonObject();
+            initialJsonObject.remove("map");
+            JsonArray mapJsonArray = gameEngine.getMap().getClientInitialMap(i);
+            initialJsonObject.add("map", mapJsonArray);
+            clientInitialJsonArray.add(initialJsonObject);
+            messages[i] = new Message(Message.NAME_INIT, clientInitialJsonArray);
+        }
+        return messages;
     }//for clients
 
     @Override
@@ -117,7 +131,6 @@ public class GameHandler implements GameLogic {
         ClientTurnMessage message2 = prepareClientMessage(playerTwoEvents, 1);
 
         gameEngine.doTurn(message1, message2);
-
     }
 
     private ClientTurnMessage prepareClientMessage(Event[] events, int player) {
@@ -311,7 +324,7 @@ public class GameHandler implements GameLogic {
             EmptyCell[] recentPath = new EmptyCell[recentPathList.size()];
             recentPath = recentPathList.toArray(recentPath);
             clientHero.setRecentPath(recentPath);
-            clientHero.setRespawnTime(hero.getRespawnTime());
+            clientHero.setRespawnTime(hero.getMaxRespawnTime());
             clientHeroes.add(clientHero);
         }
         return clientHeroes;
@@ -351,7 +364,7 @@ public class GameHandler implements GameLogic {
             EmptyCell[] recentPath = new EmptyCell[recentPathList.size()];
             recentPath = recentPathList.toArray(recentPath);
             clientHero.setRecentPath(recentPath);
-            clientHero.setRespawnTime(hero.getRespawnTime());
+            clientHero.setRespawnTime(hero.getMaxRespawnTime());
             clientHeroes.add(clientHero);
         }
         return clientHeroes;

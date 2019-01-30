@@ -23,7 +23,7 @@ public class GameEngine {
     public static final int NUM_OF_MOVE_TURN = 1;
     public static final int NUM_OF_CAST_TURN = 1;
 
-    private int killScore;
+    private int killScore; // TODO set these scores using the class Set
     private int objectiveZoneScore;
     private int maxAP;
     private int maxTurns;
@@ -59,7 +59,7 @@ public class GameEngine {
         Map<String, Integer> gameConstants = initialMessage.getGameConstants();
         setGameConstants(gameConstants);
 
-        ClientCell[][] cells = initialMessage.getMap().getCells();
+        ClientInitialCell[][] cells = initialMessage.getMap().getCells();
         map = new ir.sharif.aichallenge.server.hamid.model.Map();
         map.init(cells);
 
@@ -300,8 +300,8 @@ public class GameEngine {
     private void checkKilledHeroes() {
         for (Player player : players) {
             for (Hero hero : player.getHeroes()) {
-                if (hero.getCell() == null) {
-                    hero.setRespawnTime(hero.getRespawnTime() - 1);
+                if (hero.getCell() == null) { // FIXME the condition
+                    hero.setRespawnTime(hero.getMaxRespawnTime() - 1);
                     if (hero.getRespawnTime() <= 0) {
                         Cell cell = getValidRespawnCell(player);
                         hero.moveTo(cell);
@@ -374,8 +374,7 @@ public class GameEngine {
                                 hero.setHp(hero.getHp() - ability.getPower());
                             if (hero.getHp() <= 0) {
                                 hero.setHp(0);
-                                hero.moveTo(null);
-                                hero.setRespawnTime(hero.MAX_RESPAWN_TIME);
+                                hero.moveTo(null); // FIXME fix this shit lol
                             }
                         }
                         break;

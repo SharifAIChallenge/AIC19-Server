@@ -18,11 +18,13 @@ import java.util.Objects;
 public class Hero implements Cloneable{
     private static int ids = -1;
     private List<Ability> abilities;
+    private int moveApCost;
     private int maxHp;
     private int hp;
     private Cell cell;
     private List<Cell> recentPath;
     private List<Cell> recentPathForOpponent;
+    private int maxRespawnTime;
     private int respawnTime;
     public static int MAX_RESPAWN_TIME = 10; // TODO why is this final?
     private int id;         // todo make final
@@ -32,9 +34,11 @@ public class Hero implements Cloneable{
     {
         this.abilities = abilities;
         this.maxHp = heroConstant.getMaxHP();
-        this.respawnTime = heroConstant.getRespawnTime();
+        this.maxRespawnTime = heroConstant.getRespawnTime();
         this.name = heroConstant.getName();
+        this.moveApCost = heroConstant.getMoveAPCost();
         this.hp = this.maxHp;
+        this.respawnTime = 0;
     }
 
     public void addToRecentPathForOpponent(Cell cell) {
@@ -58,7 +62,8 @@ public class Hero implements Cloneable{
             abilities.add((Ability) ability.clone());
         }
         ids = ids + 1;
-        return new Hero(abilities,maxHp, hp, cell, null, null , this.respawnTime, ids, this.name);
+        return new Hero(abilities, moveApCost, maxHp, hp, cell, null, null , maxRespawnTime,
+                respawnTime, ids, name);
     }
 
     @Override
