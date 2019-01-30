@@ -413,10 +413,6 @@ public class GameEngine {
                                 }
                             } else
                                 hero.setHp(hero.getHp() - ability.getPower());
-                            if (hero.getHp() <= 0) {
-                                hero.setHp(0);
-                                hero.moveTo(null); // FIXME fix this shit lol
-                            }
                         }
                         break;
                     case FORTIFY:
