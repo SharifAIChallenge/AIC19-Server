@@ -2,6 +2,7 @@ package ir.sharif.aichallenge.server.hamid.model;
 
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -14,11 +15,10 @@ import java.util.Set;
 
 public class Player {
 	private int score;
-	private List<Hero> heroes;
+	private List<Hero> heroes = new ArrayList<>();
 	private int actionPoint;
 	private Set<Cell> vision;	// hashcode and equals not matter
 	private Player opponent;
-
 
 	public void addHero(Hero hero) {
 		heroes.add(hero);
