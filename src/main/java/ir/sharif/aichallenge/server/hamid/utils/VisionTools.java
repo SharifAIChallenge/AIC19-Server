@@ -1,12 +1,15 @@
 package ir.sharif.aichallenge.server.hamid.utils;
 
 import ir.sharif.aichallenge.server.hamid.model.Cell;
+import ir.sharif.aichallenge.server.hamid.model.Hero;
 import ir.sharif.aichallenge.server.hamid.model.Map;
 import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 @AllArgsConstructor
 public class VisionTools {
@@ -114,5 +117,21 @@ public class VisionTools {
     private boolean isInMap(int cellRow, int cellColumn) {
         return cellRow >= 0 && cellColumn >= 0 &&
                 cellRow < map.getNumberOfRows() && cellColumn < map.getNumberOfColumns();
+    }
+
+    public Set<Cell> getHeroVision(Hero hero)
+    {
+        Set<Cell> vision = new HashSet<>();
+
+        for (int i = 0; i < map.getNumberOfRows(); i++) {
+            for (int j = 0; j < map.getNumberOfColumns(); j++) {
+                Cell cell = map.getCell(i, j);
+                if (isInVision(cell, hero.getCell())) {
+                    vision.add(cell);
+                }
+            }
+        }
+
+        return vision;
     }
 }
