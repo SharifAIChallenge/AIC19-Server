@@ -23,7 +23,7 @@ public class GameEngine {
     public static final int NUM_OF_MOVE_TURN = 1;
     public static final int NUM_OF_CAST_TURN = 1;
 
-    private int killScore; // TODO set these scores using the class Set
+    private int killScore;
     private int objectiveZoneScore;
     private int maxAP;
     private int maxTurns;
