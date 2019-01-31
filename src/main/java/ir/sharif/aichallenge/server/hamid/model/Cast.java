@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -25,5 +28,14 @@ public class Cast implements Comparable{
         } else {
             return 1;
         }
+    }
+
+    public static List<Cast> extractCasts(List<Cast> casts, AbilityType abilityType) {
+        List<Cast> extractedCasts = new ArrayList<>();
+        for (Cast cast : casts) {
+            if (cast.getAbility().getType() == abilityType)
+                extractedCasts.add(cast);
+        }
+        return extractedCasts;
     }
 }

@@ -45,6 +45,7 @@ public class GameEngine {
     private List<ClientCastedAbility> player2castedAbilities;
     private List<ClientCastedAbility> player1oppCastedAbilities;
     private List<ClientCastedAbility> player2oppCastedAbilities;
+    private Map<Hero, Ability> fortifiedHeroes;
 
     public static void main(String[] args) {
         GameEngine gameEngine = new GameEngine();
@@ -192,7 +193,7 @@ public class GameEngine {
     }
 
     private void cast(ClientTurnMessage message1, ClientTurnMessage message2) {
-        Map<Hero, Ability> fortifiedHeroes = new HashMap<>();
+         fortifiedHeroes = new HashMap<>();
 
         if (!state.equals(GameState.CAST)) {
             return;
@@ -201,17 +202,28 @@ public class GameEngine {
         List<Cast> casts1 = message1.getCasts();
         List<Cast> casts2 = message2.getCasts();
 
-        List<Cast> casts = new ArrayList<>();
-        casts.addAll(casts1);
-        casts.addAll(casts2);
-        Collections.sort(casts);
-
         // TODO implementing a reset method and clearing the lists there is better in my opinion
         player1castedAbilities = new ArrayList<>();
         player2castedAbilities = new ArrayList<>();
         player1oppCastedAbilities = new ArrayList<>();
         player2oppCastedAbilities = new ArrayList<>();
         castedAbilities = new ArrayList<>();
+
+        castByAbility(casts1, casts2, AbilityType.FORTIFY);
+        castByAbility(casts1, casts2, AbilityType.HEAL);
+        List<Cast> validDodgeCasts1 = new ArrayList<>(new DodgeHandler(map, players[0], casts1).getValidDodgeCasts());
+        List<Cast> validDodgeCasts2 = new ArrayList<>(new DodgeHandler(map, players[1], casts2).getValidDodgeCasts());
+        castByAbility(validDodgeCasts1, validDodgeCasts2, AbilityType.DODGE);
+        castByAbility(casts1, casts2, AbilityType.ATTACK);
+
+/*
+        List<Cast> casts = new ArrayList<>();
+        casts.addAll(casts1);
+        casts.addAll(casts2);
+        Collections.sort(casts);
+*/
+
+/*
         for (Cast cast : casts) {
             if (casts1.contains(cast)) {
                 abilityTools.setMyHeroes(players[0].getHeroes());
@@ -221,6 +233,32 @@ public class GameEngine {
                 abilityTools.setMyHeroes(players[1].getHeroes());
                 abilityTools.setOppHeroes(players[0].getHeroes());
                 cast(cast, 2, fortifiedHeroes);
+            }
+        }
+*/
+
+
+    }
+
+    private void castByAbility(List<Cast> casts1, List<Cast> casts2, AbilityType abilityType) {  //todo clean this shit hole
+        abilityTools.setMyHeroes(players[0].getHeroes());
+        abilityTools.setOppHeroes(players[1].getHeroes());
+        for (Cast cast : casts1) {
+            if (cast.getAbility().getType() == abilityType) {
+                if (cast.getAbility().getApCost() <= players[0].getActionPoint()) {
+                    cast(cast, 1, fortifiedHeroes);
+                    players[0].setActionPoint(players[0].getActionPoint() - cast.getAbility().getApCost());
+                }
+            }
+        }
+        abilityTools.setMyHeroes(players[1].getHeroes());
+        abilityTools.setOppHeroes(players[0].getHeroes());
+        for (Cast cast : casts2) {
+            if (cast.getAbility().getType() == abilityType) {
+                if (cast.getAbility().getApCost() <= players[1].getActionPoint()) {
+                    cast(cast, 2, fortifiedHeroes);
+                    players[1].setActionPoint(players[1].getActionPoint() - cast.getAbility().getApCost());
+                }
             }
         }
     }
@@ -416,7 +454,7 @@ public class GameEngine {
         Ability ability = cast.getAbility();
         Player player1 = players[player - 1];
         Player opponent = player1.getOpponent();
-        if (ability.getApCost() > player1.getActionPoint())
+        if (ability.getApCost() > player1.getActionPoint()) //todo clean this
         {
             return;
         }
