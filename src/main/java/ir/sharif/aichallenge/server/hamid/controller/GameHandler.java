@@ -19,8 +19,10 @@ import ir.sharif.aichallenge.server.hamid.model.client.hero.Cooldown;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.EmptyHero;
 import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
+import ir.sharif.aichallenge.server.hamid.model.graphic.GraphicHero;
 import ir.sharif.aichallenge.server.hamid.model.graphic.RemainingCooldown;
 import ir.sharif.aichallenge.server.hamid.model.graphic.StatusHero;
+import ir.sharif.aichallenge.server.hamid.model.graphic.message.GraphicPickMessage;
 import ir.sharif.aichallenge.server.hamid.model.graphic.message.StatusMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.InitialMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.PickMessage;
@@ -217,7 +219,40 @@ public class GameHandler implements GameLogic {
 
     @Override
     public Message getUIMessage() {
+        GameState state = gameEngine.getState();
+        switch (state) {
+            case PICK:
+                return getUIPickMessage();
+                break;
+            case MOVE:
+                return getUIMoveMessage();
+                break;
+            case CAST:
+                return getUIActionMessage();
+                break;
+        }
         return null;
+    }
+
+    private Message getUIPickMessage() {
+        GraphicPickMessage graphicPickMessage = new GraphicPickMessage();
+        GraphicHero[][] heroes = new GraphicHero[CLIENT_NUM][CLIENT_HERO_NUM];
+        for (int i = 0; i < CLIENT_NUM; i++) {
+            for (int j = 0; j < CLIENT_HERO_NUM; j++) {
+                Hero hero = gameEngine.getPlayers()[i].getHeroes().get(j);
+                heroes[i][j] = new GraphicHero(hero.getId(), hero.getName(),
+                        hero.getCell().getRow(), hero.getCell().getColumn());   //todo respawn heroes just after last pick
+            }
+        }
+        graphicPickMessage.setHeroes(heroes);
+
+        GraphicPickMessage[] graphicPickMessages = new GraphicPickMessage[1];
+        graphicPickMessages[0] = graphicPickMessage;
+        return new Message(Message.NAME_PICK, Json.GSON.toJsonTree(graphicPickMessages).getAsJsonArray());
+    }
+
+    private Message getUIMoveMessage() {
+
     }
 
     @Override
