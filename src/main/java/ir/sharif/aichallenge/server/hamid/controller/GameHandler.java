@@ -223,13 +223,10 @@ public class GameHandler implements GameLogic {
         switch (state) {
             case PICK:
                 return getUIPickMessage();
-                break;
             case MOVE:
                 return getUIMoveMessage();
-                break;
             case CAST:
                 return getUIActionMessage();
-                break;
         }
         return null;
     }
@@ -252,7 +249,11 @@ public class GameHandler implements GameLogic {
     }
 
     private Message getUIMoveMessage() {
+        return null; //todo
+    }
 
+    private Message getUIActionMessage() {
+        return null; //todo
     }
 
     @Override
