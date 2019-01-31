@@ -1,6 +1,7 @@
 package ir.sharif.aichallenge.server.hamid.controller;
 
 import ir.sharif.aichallenge.server.hamid.model.*;
+import ir.sharif.aichallenge.server.hamid.model.enums.AbilityType;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,18 +11,18 @@ import java.util.Set;
 public class DodgeHandler {
     private Map map;
     private List<Cast> dodgeCasts;
-    private Set<Cast> okCasts = new HashSet<>();
     private Set<Cast> tmpCasts;
     private Player player;
     private java.util.Map<Hero, Cell> mainHeroCells = new HashMap<>();
 
-    public DodgeHandler(Map map, Player player, List<Cast> dodgeCasts) {
+    public DodgeHandler(Map map, Player player, List<Cast> casts) {
         this.map = map;
         this.player = player;
-        this.dodgeCasts = dodgeCasts;
+        this.dodgeCasts = Cast.extractCasts(casts, AbilityType.DODGE);
     }
 
     public Set<Cast> getValidDodgeCasts() {
+        Set<Cast> okCasts = new HashSet<>();
         fillMainHeroCells();
         int remainingAp = player.getActionPoint();
 
