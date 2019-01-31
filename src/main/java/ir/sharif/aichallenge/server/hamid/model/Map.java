@@ -18,9 +18,10 @@ public class Map {
 	private Cell[][] cells;
 	private int numberOfRows;
 	private int numberOfColumns;
+	private List<Cell> ObjectiveZone;
+	// TODO fields below should go to the Player class
 	private List<Cell> player1RespawnZone;
 	private List<Cell> player2RespawnZone;
-	private List<Cell> ObjectiveZone;
 
 	public Cell getCell(int row, int column) {
 		return cells[row][column];
