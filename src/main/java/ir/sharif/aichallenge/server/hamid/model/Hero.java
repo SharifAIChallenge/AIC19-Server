@@ -2,6 +2,9 @@ package ir.sharif.aichallenge.server.hamid.model;
 
 import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
 import ir.sharif.aichallenge.server.hamid.model.client.ClientHeroConstants;
+import ir.sharif.aichallenge.server.hamid.model.client.EmptyCell;
+import ir.sharif.aichallenge.server.hamid.model.client.hero.ClientHero;
+import ir.sharif.aichallenge.server.hamid.model.client.hero.Cooldown;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -40,6 +43,35 @@ public class Hero implements Cloneable{
         this.respawnTime = 0;
     }
 
+    public ClientHero getClientHero()
+    {
+        ClientHero clientHero = new ClientHero();
+        clientHero.setId(this.getId());
+        clientHero.setType(this.getName());
+        clientHero.setCurrentHP(this.getHp());
+        //cooldowns
+        List<Cooldown> cooldowns = new ArrayList<>();
+        for (Ability ability : this.getAbilities()) {
+            Cooldown cooldown = new Cooldown(ability.getName(), ability.getRemainingCoolDown());
+            cooldowns.add(cooldown);
+        }
+        Cooldown[] cool = new Cooldown[cooldowns.size()];
+        cool = cooldowns.toArray(cool);
+        clientHero.setCooldowns(cool);  //end of cooldowns
+        clientHero.setCurrentCell(new EmptyCell(this.getCell().getRow(), this.getCell().getColumn()));
+        //recent path
+        List<EmptyCell> recentPathList = new ArrayList<>();
+        for (Cell cell : this.getRecentPath()) {
+            EmptyCell emptyCell = new EmptyCell(cell.getRow(), cell.getColumn());
+            recentPathList.add(emptyCell);
+        }
+        EmptyCell[] recentPath = new EmptyCell[recentPathList.size()];
+        recentPath = recentPathList.toArray(recentPath);
+        clientHero.setRecentPath(recentPath);
+        clientHero.setRespawnTime(this.getMaxRespawnTime());
+        return clientHero;
+    }
+
     public void addToRecentPathForOpponent(Cell cell) {
         recentPathForOpponent.add(cell);
     }
@@ -65,7 +97,7 @@ public class Hero implements Cloneable{
             abilities.add((Ability) ability.clone());
         }
         ids = ids + 1;
-        return new Hero(abilities, moveApCost, maxHp, hp, cell, null, null , maxRespawnTime,
+        return new Hero(abilities, moveApCost, maxHp, hp, cell, new ArrayList<>(), new ArrayList<>() , maxRespawnTime,
                 respawnTime, ids, name);
     }
 

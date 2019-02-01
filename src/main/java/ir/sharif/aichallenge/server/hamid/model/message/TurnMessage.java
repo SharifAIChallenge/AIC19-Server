@@ -1,9 +1,12 @@
 package ir.sharif.aichallenge.server.hamid.model.message;
 
 import ir.sharif.aichallenge.server.hamid.model.client.ClientCastedAbility;
-import ir.sharif.aichallenge.server.hamid.model.client.ClientMap;
+import ir.sharif.aichallenge.server.hamid.model.client.ClientCell;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.ClientHero;
-import lombok.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -19,9 +22,10 @@ public class TurnMessage extends Message{
     private int oppScore;
     private String currentPhase;
     private int currentTurn;
-    private ClientMap map;
+    private int AP;
+    private ClientCell[][] map;
     private List<ClientHero> myHeroes;
     private List<ClientHero> oppHeroes;
-    private List<ClientCastedAbility> myCastedAbilities;
-    private List<ClientCastedAbility> oppCastedAbilities;
+    private List<ClientCastedAbility> myCastAbilities;
+    private List<ClientCastedAbility> oppCastAbilities;
 }

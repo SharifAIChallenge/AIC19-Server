@@ -17,9 +17,9 @@ import java.util.Map;
 public class ClientTurnMessage {
     private GameState type;
     private List<Integer> heroesId;
-    private List<Move> moves;
+    private List<Move> moves = new ArrayList<>();
     private String heroName;
-    private List<Cast> casts;
+    private List<Cast> casts = new ArrayList<>();
 
     public void mergeMoves()
     {

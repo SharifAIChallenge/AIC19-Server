@@ -1,6 +1,7 @@
 package ir.sharif.aichallenge.server.hamid.model;
 
 import ir.sharif.aichallenge.server.hamid.model.client.ClientInitialCell;
+import ir.sharif.aichallenge.server.hamid.model.client.EmptyCell;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -41,5 +42,10 @@ public class Cell {
 	@Override
 	public int hashCode() {
 		return Objects.hash(row, column);
+	}
+
+	public EmptyCell getEmptyCell()
+	{
+		return new EmptyCell(this.row, this.column);
 	}
 }
