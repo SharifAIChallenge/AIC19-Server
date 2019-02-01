@@ -10,5 +10,12 @@ import java.util.List;
 public class StatusHero {
     private int id;
     private int currentHP;
+    private int remRespawnTime;
     private List<RemainingCooldown> remainingCooldowns;
+
+    public StatusHero(int id, int currentHP, int remRespawnTime) {
+        this.id = id;
+        this.currentHP = currentHP;
+        this.remRespawnTime = remRespawnTime;
+    }
 }

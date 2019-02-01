@@ -50,7 +50,6 @@ public class GameHandler implements GameLogic {
     public static int PICK_TURN_TIMEOUT = 0;
     public static final int CLIENT_HERO_NUM = 4;
     private GameEngine gameEngine = new GameEngine();
-    private Gson gson = new Gson();
 
     private InitialMessage initialMessage; // we need this field when we are sending it to the clients
 
@@ -88,6 +87,8 @@ public class GameHandler implements GameLogic {
         }
         gameEngine.initialize(initialMessage);
         this.initialMessage = initialMessage;
+
+        gameEngine.getGraphicHandler().addInitMessage(initialMessage);
     }
 
     private String readMapFile(FileParam paramMap) {
@@ -285,7 +286,7 @@ public class GameHandler implements GameLogic {
 
     @Override
     public Message getStatusMessage() {
-        StatusMessage statusMessage = new StatusMessage();
+        /*StatusMessage statusMessage = new StatusMessage();
         StatusHero[][] heroes = new StatusHero[CLIENT_NUM][CLIENT_HERO_NUM];
         for (int i = 0; i < CLIENT_NUM; i++) {
             for (int j = 0; j < CLIENT_HERO_NUM; j++) {
@@ -305,7 +306,8 @@ public class GameHandler implements GameLogic {
 
         StatusMessage[] statusMessages = new StatusMessage[1];
         statusMessages[0] = statusMessage;
-        return new Message(Message.NAME_STATUS, Json.GSON.toJsonTree(statusMessages).getAsJsonArray());
+        return new Message(Message.NAME_STATUS, Json.GSON.toJsonTree(statusMessages).getAsJsonArray());*/
+        return null;
     }
 
     @Override
