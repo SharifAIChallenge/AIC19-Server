@@ -41,7 +41,7 @@ public class GameEngine {
     private ir.sharif.aichallenge.server.hamid.model.Map map;
     private VisionTools visionTools;
     private AbilityTools abilityTools;
-    private List<List<ClientCastedAbility>> myCastedAbilities = new ArrayList<>(2); //list of cast and target hero //todo set value and check each hero use at most 1 ability and handle players ap
+    private List<List<ClientCastedAbility>> myCastedAbilities = new ArrayList<>(2); //todo set value --> in refactor
     private List<List<ClientCastedAbility>> oppCastedAbilities = new ArrayList<>(2);
     private List<CastedAbility> castedAbilities = new ArrayList<>();
     // TODO fields below can be Player Class's fields
@@ -54,6 +54,7 @@ public class GameEngine {
 
     private JsonArray serverViewJsons = new JsonArray();
     private GraphicHandler graphicHandler = new GraphicHandler(this);
+    private Random random = new Random();
 
 
     public static void main(String[] args) throws InterruptedException
@@ -471,7 +472,6 @@ public class GameEngine {
 
     private void pick(ClientTurnMessage message1, ClientTurnMessage message2) { // TODO check this
         List<String> heroNames = new ArrayList<>(heroes.keySet());
-        Random random = new Random(); // TODO this can even be a class field
 
         if (state.equals(GameState.PICK)) {
             if (message1.getType() == GameState.PICK && message2.getType() == GameState.PICK)
