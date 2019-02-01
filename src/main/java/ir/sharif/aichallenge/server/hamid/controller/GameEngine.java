@@ -1,5 +1,9 @@
 package ir.sharif.aichallenge.server.hamid.controller;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import ir.sharif.aichallenge.server.common.network.Json;
+import ir.sharif.aichallenge.server.engine.core.GameServer;
 import ir.sharif.aichallenge.server.hamid.model.*;
 import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
 import ir.sharif.aichallenge.server.hamid.model.client.*;
@@ -12,8 +16,8 @@ import ir.sharif.aichallenge.server.hamid.utils.VisionTools;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.*;
 import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
@@ -39,24 +43,26 @@ public class GameEngine {
     private AbilityTools abilityTools;
     private List<List<ClientCastedAbility>> myCastedAbilities = new ArrayList<>(2); //list of cast and target hero //todo set value and check each hero use at most 1 ability and handle players ap
     private List<List<ClientCastedAbility>> oppCastedAbilities = new ArrayList<>(2);
-    private List<CastedAbility> castedAbilities;
+    private List<CastedAbility> castedAbilities = new ArrayList<>();
     // TODO fields below can be Player Class's fields
-    private List<ClientCastedAbility> player1castedAbilities;
-    private List<ClientCastedAbility> player2castedAbilities;
-    private List<ClientCastedAbility> player1oppCastedAbilities;
-    private List<ClientCastedAbility> player2oppCastedAbilities;
+    private List<ClientCastedAbility> player1castedAbilities = new ArrayList<>();
+    private List<ClientCastedAbility> player2castedAbilities = new ArrayList<>();
+    private List<ClientCastedAbility> player1oppCastedAbilities = new ArrayList<>();
+    private List<ClientCastedAbility> player2oppCastedAbilities = new ArrayList<>();
     private Map<Hero, Ability> fortifiedHeroes;
 
-    public static void main(String[] args) {
-        GameEngine gameEngine = new GameEngine();
-//        gameEngine.initialize();
-//        gameEngine.pick();
-//        gameEngine.doTurn();
+    private JsonArray serverViewJsons = new JsonArray();
+
+
+    public static void main(String[] args) throws InterruptedException
+    {
+        AtomicInteger currentTurn = new AtomicInteger(0);
+        GameServer gameServer = new GameServer(new GameHandler(currentTurn), args, currentTurn);
+        gameServer.start();
+        gameServer.waitForFinish();
     }
 
     public void initialize(InitialMessage initialMessage) {
-        currentTurn = new AtomicInteger();
-        currentTurn.set(0);
         state = GameState.PICK;
         initPlayers();
 
@@ -76,6 +82,8 @@ public class GameEngine {
 
         List<ClientHeroConstants> heroConstants = initialMessage.getHeroConstants();
         initHeroes(heroConstants);
+
+        serverViewJsons.add(Json.GSON.toJsonTree(initialMessage));
     }
 
     private void initPlayers()
@@ -166,6 +174,28 @@ public class GameEngine {
 
         changeStateAndTurn();
         // TODO put a reset method to make things cleaner
+        updateLogs();
+    }
+
+    private void updateLogs()
+    {
+        updateServerViewLog();
+    }
+
+    private void updateServerViewLog()
+    {
+        JsonObject log = new JsonObject();
+        log.addProperty("currentTurn", currentTurn.get());
+        log.addProperty("currentPhase", state.name());
+        JsonArray castAbilitiesJson = Json.GSON.toJsonTree(castedAbilities).getAsJsonArray();
+        log.add("castAbilities", castAbilitiesJson);
+        JsonArray playersJson = new JsonArray();
+        for (Player player : players)
+        {
+            player.updateServerViewLog(playersJson);
+        }
+        log.add("players", playersJson);
+        serverViewJsons.add(log);
     }
 
     private void assignScores()
@@ -180,22 +210,38 @@ public class GameEngine {
     }
 
     private void changeStateAndTurn() {
+        System.out.println(currentTurn.get());
         if (currentTurn.get() >= PICK_OFFSET) {
-            if (state == GameState.CAST) {
+            System.out.println(state);
+            if (state == GameState.ACTION) {
                 currentTurn.incrementAndGet();
                 state = GameState.MOVE;
+            } else if (state == GameState.MOVE){
+                state = GameState.ACTION;
             } else {
-                state = GameState.CAST;
+                state = GameState.MOVE;
+                respawnAllHeroes();
             }
         } else {
             state = GameState.PICK;
         }
     }
 
+    private void respawnAllHeroes()
+    {
+        for (Player player : players)
+        {
+            for (Hero hero : player.getHeroes())
+            {
+                respawnHero(hero, player);
+            }
+        }
+    }
+
     private void cast(ClientTurnMessage message1, ClientTurnMessage message2) {
          fortifiedHeroes = new HashMap<>();
 
-        if (!state.equals(GameState.CAST)) {
+        if (!state.equals(GameState.ACTION)) {
             return;
         }
 
@@ -319,7 +365,8 @@ public class GameEngine {
             for (Hero hero : player.getHeroes()) {
                 List<Cell> path = hero.getRecentPathForOpponent();
                 List<Cell> ans = new ArrayList<>();
-                ans.add(path.get(0));
+                if (path.size() > 0)
+                    ans.add(path.get(0));
                 for (int i = 1; i < path.size(); i++) {
                     if (path.get(i) != path.get(i - 1))
                         ans.add(path.get(i));
@@ -385,11 +432,11 @@ public class GameEngine {
         Random random = new Random(); // TODO this can even be a class field
 
         if (state.equals(GameState.PICK)) {
-            if (message1.getType().equals(GameState.PICK) && message2.getType().equals(GameState.PICK))
+            if (message1.getType() == GameState.PICK && message2.getType() == GameState.PICK)
                 doPickTurn(message1.getHeroName(), message2.getHeroName());
-            else if (message1.getType().equals(GameState.PICK)) {
+            else if (message1.getType() == GameState.PICK) {
                 doPickTurn(message1.getHeroName(), heroNames.get(random.nextInt(heroes.size())));
-            } else if (message2.getType().equals(GameState.PICK)) {
+            } else if (message2.getType() == GameState.PICK) {
                 doPickTurn(heroNames.get(random.nextInt(heroes.size())), message2.getHeroName());
             } else {
                 doPickTurn(heroNames.get(random.nextInt(heroes.size())), heroNames.get(random.nextInt(heroes.size())));
@@ -419,10 +466,15 @@ public class GameEngine {
         }
         hero.setRespawnTime(hero.getRespawnTime() - 1);
         if (hero.getRespawnTime() <= 0) {
-            Cell cell = getValidRespawnCell(player);
-            hero.moveTo(cell);
-            hero.resetValues();
+            respawnHero(hero, player);
         }
+    }
+
+    private void respawnHero(Hero hero, Player player)
+    {
+        Cell cell = getValidRespawnCell(player);
+        hero.moveTo(cell);
+        hero.resetValues();
     }
 
     private Cell getValidRespawnCell(Player player) {

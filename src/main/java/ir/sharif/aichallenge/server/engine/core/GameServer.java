@@ -286,14 +286,16 @@ public class GameServer {
 
                 try {
                     mGameLogic.simulateEvents(environmentEvents, clientEvents);
-                    mOutputController.putMessage(mGameLogic.getUIMessage());
-                    mOutputController.putMessage(mGameLogic.getStatusMessage());
+//                    mOutputController.putMessage(mGameLogic.getUIMessage()); TODO don't forget these
+//                    mOutputController.putMessage(mGameLogic.getStatusMessage());
                 } catch (Exception e) {
                     err("Simulation", e);
+                    e.printStackTrace();
                 }
 
                 if (mGameLogic.isGameFinished()) {
                     try {
+                        mGameLogic.generateOutputs(); // added at AIC 2019
                         mGameLogic.terminate();
 //                        Message shutdown = new Message(Message.NAME_SHUTDOWN, new Object[]{});
 //                        for (int i = 0; i < mClientsNum; i++) {

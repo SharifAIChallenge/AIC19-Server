@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import ir.sharif.aichallenge.server.hamid.model.client.ClientInitialCell;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -18,7 +19,7 @@ public class Map {
 	private Cell[][] cells;
 	private int numberOfRows;
 	private int numberOfColumns;
-	private List<Cell> ObjectiveZone;
+	private List<Cell> objectiveZone;
 	// TODO fields below should go to the Player class
 	private List<Cell> player1RespawnZone;
 	private List<Cell> player2RespawnZone;
@@ -36,6 +37,11 @@ public class Map {
 	{
 		numberOfRows = cells.length;
 		numberOfColumns = cells[0].length;
+
+		this.cells = new Cell[numberOfRows][numberOfColumns];
+		this.objectiveZone = new ArrayList<>();
+		this.player1RespawnZone = new ArrayList<>();
+		this.player2RespawnZone = new ArrayList<>();
 
 		for (ClientInitialCell[] row : cells)
 		{
@@ -55,13 +61,14 @@ public class Map {
 
 				if (clientCell.isInObjectiveZone())
 				{
-					ObjectiveZone.add(cell);
+					objectiveZone.add(cell);
 				}
+				this.cells[cell.getRow()][cell.getColumn()] = cell;
 			}
 		}
 	}
 
-    public JsonArray getClientInitialMap(int clientNum)
+    public JsonObject getClientInitialMap(int clientNum)
     {
         String firstClientPropertyName = clientNum == 1 ? "isInMyRespawnZone" : "isInOppRespawnZone";
         String secondClientPropertyName = clientNum == 1 ? "isInOppRespawnZone" : "isInMyRespawnZone";
@@ -88,6 +95,7 @@ public class Map {
             cellsArray.add(rowArray);
         }
 
-        return cellsArray;
+        mapObject.add("cells", cellsArray);
+        return mapObject;
     }
 }

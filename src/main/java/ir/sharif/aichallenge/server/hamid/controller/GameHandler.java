@@ -28,21 +28,24 @@ import ir.sharif.aichallenge.server.hamid.model.message.InitialMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.PickMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.TurnMessage;
 import ir.sharif.aichallenge.server.hamid.utils.VisionTools;
-import lombok.extern.log4j.Log4j;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 
-@Log4j
+
 public class GameHandler implements GameLogic {
 
     public static final FileParam PARAM_MAP = new FileParam("Map", null, ".*\\.map");
 
     public static final int CLIENT_NUM = 2;
-    public static final int CLIENT_RESPONSE_TIME = 0;
+    public static final int CLIENT_RESPONSE_TIME = 500;
     public static int TURN_TIMEOUT = 0;
     public static int PICK_TURN_TIMEOUT = 0;
     public static final int CLIENT_HERO_NUM = 4;
@@ -50,6 +53,11 @@ public class GameHandler implements GameLogic {
     private Gson gson = new Gson();
 
     private InitialMessage initialMessage; // we need this field when we are sending it to the clients
+
+    public GameHandler(AtomicInteger currentTurn)
+    {
+        gameEngine.setCurrentTurn(currentTurn);
+    }
 
     @Override
     public int getClientsNum() {
@@ -116,9 +124,11 @@ public class GameHandler implements GameLogic {
             JsonArray clientInitialJsonArray = new JsonArray();
             JsonObject initialJsonObject = Json.GSON.toJsonTree(initialMessage).getAsJsonObject();
             initialJsonObject.remove("map");
-            JsonArray mapJsonArray = gameEngine.getMap().getClientInitialMap(i);
-            initialJsonObject.add("map", mapJsonArray);
+            JsonObject mapJsonObject = gameEngine.getMap().getClientInitialMap(i);
+            initialJsonObject.add("map", mapJsonObject);
+
             clientInitialJsonArray.add(initialJsonObject);
+            System.out.println(clientInitialJsonArray.toString());
             messages[i] = new Message(Message.NAME_INIT, clientInitialJsonArray);
         }
         return messages;
@@ -147,7 +157,7 @@ public class GameHandler implements GameLogic {
                             continue;
                         }
                         message.getCasts().add(cast);
-                        message.setType(GameState.CAST);
+                        message.setType(GameState.ACTION);
                         break;
                     case "move":
                         Move move = prepareMove(player, event);
@@ -172,24 +182,23 @@ public class GameHandler implements GameLogic {
         return message;
     }
 
-    private Move prepareMove(int player, Event event) {
+    private Move prepareMove(int player, Event event) { // TODO check in case
         Hero hero;
         int heroId = Integer.parseInt(event.getArgs()[0]);
-        String list = event.getArgs()[1];
+        String[] moves = Json.GSON.fromJson(event.getArgs()[1], String[].class);
 
         hero = gameEngine.getPlayers()[player].getHero(heroId);
         if (hero == null)
             return null;
         List<Direction> directions = new ArrayList<>();
-        String[] moves = list.split(",");
         for (String move : moves) {
-            if (move.contains("UP")) {
+            if (move.equals("UP")) {
                 directions.add(Direction.UP);
-            } else if (move.contains("DOWN")) {
+            } else if (move.equals("DOWN")) {
                 directions.add(Direction.DOWN);
-            } else if (move.contains("RIGHT")) {
+            } else if (move.equals("RIGHT")) {
                 directions.add(Direction.RIGHT);
-            } else if (move.contains("LEFT")) {
+            } else if (move.equals("LEFT")) {
                 directions.add(Direction.LEFT);
             }
         }
@@ -203,7 +212,7 @@ public class GameHandler implements GameLogic {
         if (hero == null)
             return null;
 
-        String abilityName = event.getArgs()[0];
+        String abilityName = event.getArgs()[1];
         Ability ability = hero.getAbility(abilityName);
 
         int targetRow = Integer.parseInt(event.getArgs()[2]);
@@ -215,6 +224,24 @@ public class GameHandler implements GameLogic {
     @Override
     public void generateOutputs() {
         // statistical logs
+        StringBuilder context = new StringBuilder();
+        context.append("[");
+        for (int i = 0; i < gameEngine.getServerViewJsons().size(); i++)
+        {
+            context.append(Json.GSON.toJson(gameEngine.getServerViewJsons().get(i)));
+            if (i == gameEngine.getServerViewJsons().size() - 1)
+                break;
+            context.append(",\n");
+        }
+        context.append("]");
+
+        try
+        {
+            Files.write(Paths.get("server_view.log"), context.toString().getBytes());
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -225,7 +252,7 @@ public class GameHandler implements GameLogic {
                 return getUIPickMessage();
             case MOVE:
                 return getUIMoveMessage();
-            case CAST:
+            case ACTION:
                 return getUIActionMessage();
         }
         return null;
@@ -292,7 +319,7 @@ public class GameHandler implements GameLogic {
                 setMessagesForPick(players, messages);
                 break;
             case MOVE:
-            case CAST:
+            case ACTION:
                 setMessagesForTurn(players, messages);
                 break;
         }
@@ -313,12 +340,15 @@ public class GameHandler implements GameLogic {
                 EmptyHero emptyHero = new EmptyHero(hero.getId(), hero.getName());
                 oppHeroes.add(emptyHero);
             }
-            pickMessage.setMyHeroes(oppHeroes);
+            pickMessage.setMyHeroes(myHeroes);
+            pickMessage.setOppHeroes(oppHeroes);
             pickMessage.setCurrentTurn(gameEngine.getCurrentTurn().get());
             //make json array and message[i]
             PickMessage[] pickMessages = new PickMessage[1];
             pickMessages[0] = pickMessage;
-            messages[i] = new Message(Message.NAME_PICK, Json.GSON.toJsonTree(pickMessages).getAsJsonArray());
+
+            JsonArray messageArray = Json.GSON.toJsonTree(pickMessages).getAsJsonArray();
+            messages[i] = new Message(Message.NAME_PICK, messageArray);
         }
     }
 
@@ -330,15 +360,16 @@ public class GameHandler implements GameLogic {
             turnMessage.setOppScore(players[1 - i].getScore()); // client_num must be 2
             turnMessage.setCurrentPhase(gameEngine.getState().name());
             turnMessage.setCurrentTurn(gameEngine.getCurrentTurn().get());
-            turnMessage.setMap(getClientMap(i));
+            turnMessage.setAP(players[i].getActionPoint());
+            turnMessage.setMap(getClientMap(i).getCells());
             turnMessage.setMyHeroes(getClientHeroes(i));
             turnMessage.setOppHeroes(getClientOppHeroes(i));
             if (i == 0) {
-                turnMessage.setMyCastedAbilities(gameEngine.getPlayer1castedAbilities());
-                turnMessage.setOppCastedAbilities(gameEngine.getPlayer1oppCastedAbilities());
+                turnMessage.setMyCastAbilities(gameEngine.getPlayer1castedAbilities());
+                turnMessage.setOppCastAbilities(gameEngine.getPlayer1oppCastedAbilities());
             } else {
-                turnMessage.setMyCastedAbilities(gameEngine.getPlayer2castedAbilities());
-                turnMessage.setOppCastedAbilities(gameEngine.getPlayer2oppCastedAbilities());
+                turnMessage.setMyCastAbilities(gameEngine.getPlayer2castedAbilities());
+                turnMessage.setOppCastAbilities(gameEngine.getPlayer2oppCastedAbilities());
             }
             //make json array and message[i]
             TurnMessage[] turnMessages = new TurnMessage[1];
@@ -351,31 +382,7 @@ public class GameHandler implements GameLogic {
         Player[] players = gameEngine.getPlayers();
         List<ClientHero> clientHeroes = new ArrayList<>();
         for (Hero hero : players[i].getHeroes()) {
-            ClientHero clientHero = new ClientHero();
-            clientHero.setId(hero.getId());
-            clientHero.setType(hero.getName());
-            clientHero.setCurrentHP(hero.getHp());
-            //cooldowns
-            List<Cooldown> cooldowns = new ArrayList<>();
-            for (Ability ability : hero.getAbilities()) {
-                Cooldown cooldown = new Cooldown(ability.getName(), ability.getRemainingCoolDown());
-                cooldowns.add(cooldown);
-            }
-            Cooldown[] cool = new Cooldown[cooldowns.size()];
-            cool = cooldowns.toArray(cool);
-            clientHero.setCooldowns(cool);  //end of cooldowns
-            clientHero.setCurrentCell(new EmptyCell(hero.getCell().getRow(), hero.getCell().getColumn()));
-            //recent path
-            List<EmptyCell> recentPathList = new ArrayList<>();
-            for (Cell cell : hero.getRecentPath()) {
-                EmptyCell emptyCell = new EmptyCell(cell.getRow(), cell.getColumn());
-                recentPathList.add(emptyCell);
-            }
-            EmptyCell[] recentPath = new EmptyCell[recentPathList.size()];
-            recentPath = recentPathList.toArray(recentPath);
-            clientHero.setRecentPath(recentPath);
-            clientHero.setRespawnTime(hero.getMaxRespawnTime());
-            clientHeroes.add(clientHero);
+            clientHeroes.add(hero.getClientHero());
         }
         return clientHeroes;
     }
@@ -449,6 +456,8 @@ public class GameHandler implements GameLogic {
                 //end of vision
                 clientCell.setRow(i);
                 clientCell.setColumn(j);
+
+                clientCells[i][j] = clientCell;
             }
         }
         return new ClientMap(clientCells);
