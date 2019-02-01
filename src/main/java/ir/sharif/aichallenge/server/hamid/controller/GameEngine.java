@@ -161,7 +161,7 @@ public class GameEngine {
     }
 
     public void doTurn(ClientTurnMessage message1, ClientTurnMessage message2) {
-        updateAbilityCooldowns();
+        preProcess();
 
         //pick
         pick(message1, message2);
@@ -179,6 +179,12 @@ public class GameEngine {
         updateStateAndTurn();
         // TODO put a reset method to make things cleaner
         updateLogs();
+    }
+
+    private void preProcess() {
+        updateAbilityCooldowns();
+        for (Player player : players)
+            player.setActionPoint(maxAP);
     }
 
     private void updateAbilityCooldowns() {
@@ -240,6 +246,7 @@ public class GameEngine {
                 graphicHandler.addPickMessage();
                 state = GameState.MOVE;
                 respawnAllHeroes();
+                updatePlayerVisions();
             }
         } else {
             state = GameState.PICK;
