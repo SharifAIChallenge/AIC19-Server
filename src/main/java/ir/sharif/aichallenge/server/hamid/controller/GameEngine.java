@@ -161,6 +161,8 @@ public class GameEngine {
     }
 
     public void doTurn(ClientTurnMessage message1, ClientTurnMessage message2) {
+        updateAbilityCooldowns();
+
         //pick
         pick(message1, message2);
 
@@ -177,6 +179,17 @@ public class GameEngine {
         updateStateAndTurn();
         // TODO put a reset method to make things cleaner
         updateLogs();
+    }
+
+    private void updateAbilityCooldowns() {
+        for (Player player : players) {
+            for (Hero hero : player.getHeroes()) {
+                for (Ability ability : hero.getAbilities()) {
+                    if (ability.getCoolDown() > 0)
+                        ability.setCoolDown(ability.getCoolDown() - 1);
+                }
+            }
+        }
     }
 
     private void updateLogs()
@@ -254,6 +267,9 @@ public class GameEngine {
         List<Cast> casts1 = message1.getCasts();
         List<Cast> casts2 = message2.getCasts();
 
+        casts1 = filterCasts(casts1, players[0]);
+        casts2 = filterCasts(casts2, players[1]);
+
         // TODO implementing a reset method and clearing the lists there is better in my opinion
         player1castedAbilities = new ArrayList<>();
         player2castedAbilities = new ArrayList<>();
@@ -290,6 +306,19 @@ public class GameEngine {
 */
 
 
+    }
+
+    private List<Cast> filterCasts(List<Cast> casts, Player player) {
+        Set<Hero> seenHeroes = new HashSet<>();
+        List<Cast> ans = new ArrayList<>();
+        for (Cast cast : casts) {
+            if (player.getHeroes().contains(cast.getHero()) && cast.getAbility().getCoolDown() == 0 &&
+                    !seenHeroes.contains(cast.getHero())) {
+                ans.add(cast);
+                seenHeroes.add(cast.getHero());
+            }
+        }
+        return ans;
     }
 
     private void castByAbility(List<Cast> casts1, List<Cast> casts2, AbilityType abilityType) {  //todo clean this shit hole
