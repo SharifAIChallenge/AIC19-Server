@@ -5,6 +5,7 @@ import ir.sharif.aichallenge.server.hamid.model.client.ClientHeroConstants;
 import ir.sharif.aichallenge.server.hamid.model.client.EmptyCell;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.ClientHero;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.Cooldown;
+import ir.sharif.aichallenge.server.hamid.model.graphic.GraphicHero;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -29,8 +30,8 @@ public class Hero implements Cloneable{
     private List<Cell> recentPathForOpponent;
     private int maxRespawnTime;
     private int respawnTime;
-    private int id;         // todo make final
-    private String name;    // todo make final
+    private int id;         // make final
+    private String name;    // make final
 
     public Hero(ClientHeroConstants heroConstant, List<Ability> abilities)
     {
@@ -70,6 +71,10 @@ public class Hero implements Cloneable{
         clientHero.setRecentPath(recentPath);
         clientHero.setRespawnTime(this.getMaxRespawnTime());
         return clientHero;
+    }
+
+    public GraphicHero getGraphicHero() {
+        return new GraphicHero(id, name, cell.getRow(), cell.getColumn());
     }
 
     public void addToRecentPathForOpponent(Cell cell) {

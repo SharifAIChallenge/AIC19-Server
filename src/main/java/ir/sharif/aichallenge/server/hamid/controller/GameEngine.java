@@ -50,8 +50,10 @@ public class GameEngine {
     private List<ClientCastedAbility> player1oppCastedAbilities = new ArrayList<>();
     private List<ClientCastedAbility> player2oppCastedAbilities = new ArrayList<>();
     private Map<Hero, Ability> fortifiedHeroes;
+    private List<Hero> respawnedHeroes;
 
     private JsonArray serverViewJsons = new JsonArray();
+    private GraphicHandler graphicHandler = new GraphicHandler(this);
 
 
     public static void main(String[] args) throws InterruptedException
@@ -172,7 +174,7 @@ public class GameEngine {
 
         assignScores();
 
-        changeStateAndTurn();
+        updateStateAndTurn();
         // TODO put a reset method to make things cleaner
         updateLogs();
     }
@@ -209,16 +211,20 @@ public class GameEngine {
         }
     }
 
-    private void changeStateAndTurn() {
+    private void updateStateAndTurn() {
         System.out.println(currentTurn.get());
         if (currentTurn.get() >= PICK_OFFSET) {
             System.out.println(state);
             if (state == GameState.ACTION) {
+                graphicHandler.addActionMessage();
+                graphicHandler.addStatusMessage();
                 currentTurn.incrementAndGet();
                 state = GameState.MOVE;
             } else if (state == GameState.MOVE){
+                graphicHandler.addMoveMessage();
                 state = GameState.ACTION;
             } else {
+                graphicHandler.addPickMessage();
                 state = GameState.MOVE;
                 respawnAllHeroes();
             }
@@ -446,6 +452,7 @@ public class GameEngine {
     }
 
     private void updateKilledHeroes() {
+        respawnedHeroes = new ArrayList<>();
         for (Player player : players) {
             for (Hero hero : player.getHeroes()) {
                 if (hero.getHp() > 0) {
@@ -475,6 +482,7 @@ public class GameEngine {
         Cell cell = getValidRespawnCell(player);
         hero.moveTo(cell);
         hero.resetValues();
+        respawnedHeroes.add(hero);
     }
 
     private Cell getValidRespawnCell(Player player) {

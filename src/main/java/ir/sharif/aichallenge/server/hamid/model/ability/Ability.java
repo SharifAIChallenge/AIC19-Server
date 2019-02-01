@@ -19,7 +19,7 @@ public class Ability implements Cloneable{
 	private int range;
 	private int apCost;
 	private int coolDown;
-	private int remainingCoolDown;
+	private int remainingCoolDown;	//todo update value asap
 
 	// power ability
 	private int areaOfEffect;

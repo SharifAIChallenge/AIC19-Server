@@ -2,6 +2,7 @@ package ir.sharif.aichallenge.server.hamid.model;
 
 import ir.sharif.aichallenge.server.hamid.model.client.ClientInitialCell;
 import ir.sharif.aichallenge.server.hamid.model.client.EmptyCell;
+import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -47,5 +48,21 @@ public class Cell {
 	public EmptyCell getEmptyCell()
 	{
 		return new EmptyCell(this.row, this.column);
+	}
+
+	public Direction getDirectionTo(Cell nextCell) {
+		int nextRow = nextCell.getRow();
+		int nextColumn = nextCell.getColumn();
+
+		if (nextRow == row + 1)
+			return Direction.DOWN;
+		if (nextRow == row - 1)
+			return Direction.UP;
+		if (nextColumn == column + 1)
+			return Direction.RIGHT;
+		if (nextColumn == column - 1)
+			return Direction.LEFT;
+
+		return null;
 	}
 }

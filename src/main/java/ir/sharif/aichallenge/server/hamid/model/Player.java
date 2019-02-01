@@ -22,7 +22,7 @@ import java.util.Set;
 public class Player {
 	private int score;
 	private List<Hero> heroes = new ArrayList<>();
-	private int actionPoint;
+	private int actionPoint;	//todo reset each turn
 	private Set<Cell> vision = new HashSet<>();	// hashcode and equals not matter
 	private Player opponent;
 
