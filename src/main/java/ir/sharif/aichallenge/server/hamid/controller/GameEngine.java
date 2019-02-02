@@ -353,6 +353,7 @@ public class GameEngine {
                 if (cast.getAbility().getApCost() <= players[0].getActionPoint()) {
                     cast(cast, 1, fortifiedHeroes);
                     players[0].setActionPoint(players[0].getActionPoint() - cast.getAbility().getApCost());
+                    cast.getAbility().setRemainingCoolDown(cast.getAbility().getCoolDown());
                 }
             }
         }
@@ -363,6 +364,7 @@ public class GameEngine {
                 if (cast.getAbility().getApCost() <= players[1].getActionPoint()) {
                     cast(cast, 2, fortifiedHeroes);
                     players[1].setActionPoint(players[1].getActionPoint() - cast.getAbility().getApCost());
+                    cast.getAbility().setRemainingCoolDown(cast.getAbility().getCoolDown());
                 }
             }
         }
@@ -566,10 +568,6 @@ public class GameEngine {
         Ability ability = cast.getAbility();
         Player player1 = players[player - 1];
         Player opponent = player1.getOpponent();
-        if (ability.getApCost() > player1.getActionPoint()) //todo clean this
-        {
-            return;
-        }
         if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow(), cast.getTargetColumn()),
                 cast.getHero().getCell()) <= ability.getRange()) { // FIXME even if it's out of range it will hit the last cell possible
 
