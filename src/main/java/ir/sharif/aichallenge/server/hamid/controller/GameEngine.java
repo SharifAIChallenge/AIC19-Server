@@ -65,10 +65,10 @@ public class GameEngine {
 
     public void initialize(InitialMessage initialMessage) {
         state = GameState.PICK;
-        initPlayers();
 
         Map<String, Integer> gameConstants = initialMessage.getGameConstants();
         setGameConstants(gameConstants);
+        initPlayers();
 
         ClientInitialCell[][] cells = initialMessage.getMap().getCells();
         map = new ir.sharif.aichallenge.server.hamid.model.Map();
@@ -173,11 +173,11 @@ public class GameEngine {
 
         assignScores();
 
+        updateLogs();
+
         postProcess();
 
         updateStateAndTurn();
-        // TODO put a reset method to make things cleaner
-        updateLogs();
     }
 
     private void postProcess() {
@@ -397,7 +397,7 @@ public class GameEngine {
             }
         }
         for (int stepNumber = 0; stepNumber < maxIter; stepNumber++) {
-            moveHeroesOneStep(stepNumber);
+            moveHeroesOneStep(stepNumber); // TODO check move ap on prepare
             updateHeroVisions();
         }
         updateOpponentHeroRecentPaths();
