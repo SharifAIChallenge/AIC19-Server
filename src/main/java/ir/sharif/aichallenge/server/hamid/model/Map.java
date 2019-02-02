@@ -25,7 +25,7 @@ public class Map {
 	private List<Cell> player2RespawnZone;
 
 	public Cell getCell(int row, int column) {
-		if (row < 0 || row >= numberOfRows || column < 0 || column >= numberOfColumns)
+		if (!isInMap(row, column))
 			return null;
 		return cells[row][column];
 	}

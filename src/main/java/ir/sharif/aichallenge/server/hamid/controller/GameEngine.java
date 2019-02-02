@@ -192,8 +192,8 @@ public class GameEngine {
         for (Player player : players) {
             for (Hero hero : player.getHeroes()) {
                 for (Ability ability : hero.getAbilities()) {
-                    if (ability.getCoolDown() > 0)
-                        ability.setCoolDown(ability.getCoolDown() - 1);
+                    if (ability.getRemainingCoolDown() > 0)
+                        ability.setRemainingCoolDown(ability.getRemainingCoolDown() - 1);
                 }
             }
         }
