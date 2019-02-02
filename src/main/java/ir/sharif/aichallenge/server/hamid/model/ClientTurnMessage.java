@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class ClientTurnMessage {
     private GameState type;
-    private List<Integer> heroesId;
+    private List<Integer> heroesId;     //todo what the fuck is it doing here? why we don't have Player instead?
     private List<Move> moves = new ArrayList<>();
     private String heroName;
     private List<Cast> casts = new ArrayList<>();
@@ -44,6 +44,6 @@ public class ClientTurnMessage {
         }
 
         moves.clear();
-        moves.addAll(finalMoves);
+        moves.addAll(finalMoves);   //todo why not "moves = finalMoves" ?
     }
 }

@@ -21,4 +21,8 @@ public class Move {
     {
         moves.addAll(move.getMoves());
     }
+
+    public int getGreedyApCost() {
+        return hero.getMoveApCost() * moves.size();
+    }
 }
