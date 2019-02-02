@@ -374,14 +374,16 @@ public class GameEngine {
         if (!state.equals(GameState.MOVE)) {
             return;
         }
+
+        //these must be empty after move
         castedAbilities = new ArrayList<>();
         player1castedAbilities = new ArrayList<>();
         player2castedAbilities = new ArrayList<>();
         player1oppCastedAbilities = new ArrayList<>();
         player2oppCastedAbilities = new ArrayList<>();
 
-        List<Move> moves1 = preprocessMessageMoves(message1);
-        List<Move> moves2 = preprocessMessageMoves(message2);
+        List<Move> moves1 = preprocessMessageMoves(message1, players[0]);
+        List<Move> moves2 = preprocessMessageMoves(message2, players[1]);
 
         //set heroes recentPath
         updateHeroRecentPaths(moves1);
@@ -480,17 +482,39 @@ public class GameEngine {
         }
     }
 
-    private List<Move> preprocessMessageMoves(ClientTurnMessage message1)
-    {
-        message1.mergeMoves();
-        List<Move> moves = message1.getMoves();
+    private List<Move> preprocessMessageMoves(ClientTurnMessage message, Player player) {
+        message.mergeMoves();
+        List<Move> moves = message.getMoves();
         for (Move move : moves) {
             prepareMove(move);
         }
+        moves = fixMoveMessage(moves, player);  //for ap
         moves.sort(Comparator.comparingInt(o -> o.getMoves().size()));
         postPrepare(moves);
 
+        //setting ap for players
+        calculateMoveAp(moves, player);
+
         return moves;
+    }
+
+    private void calculateMoveAp(List<Move> moves, Player player) {
+        for (Move move : moves) {
+            player.setActionPoint(player.getActionPoint() - move.getGreedyApCost());
+        }
+    }
+
+    private List<Move> fixMoveMessage(List<Move> moves, Player player) {
+        List<Move> newMoves = new ArrayList<>();
+        int ap = player.getActionPoint();
+        for (Move move : moves) {
+            ap -= move.getGreedyApCost();
+            if (ap < 0)
+                break;
+            newMoves.add(move);
+        }
+
+        return newMoves;
     }
 
     private void pick(ClientTurnMessage message1, ClientTurnMessage message2) { // TODO check this
@@ -704,9 +728,9 @@ public class GameEngine {
         }
     }
 
-    // check final location of heroes
+    // deletes invalid moves
     private void prepareMove(Move move) {
-        Cell cell = move.getHero().getCell(); //not change cell
+        Cell cell = move.getHero().getCell();
         List<Direction> newMoves = new ArrayList<>();
         for (Direction direction : move.getMoves()) {
             Cell nextCell = nextCellIfNotWall(cell, direction);
