@@ -84,7 +84,7 @@ public class GraphicHandler {
                 num = Math.max(num, hero.getRecentPath().size());
             }
         }
-        StringBuilder[] stringBuilders = new StringBuilder[num - 1]; //todo num-1 correct?
+        StringBuilder[] stringBuilders = new StringBuilder[Math.max(0, num - 1)]; //todo correct?
         for (int i = 0; i < num - 1; i++)
             stringBuilders[i] = new StringBuilder("nnnnnnnn");
 
@@ -98,16 +98,16 @@ public class GraphicHandler {
                     Cell prevCell = hero.getRecentPath().get(i - 1);
                     switch (prevCell.getDirectionTo(cell)) {
                         case LEFT:
-                            stringBuilders[i].setCharAt(id, 'l');
+                            stringBuilders[i - 1].setCharAt(id, 'l');
                             break;
                         case RIGHT:
-                            stringBuilders[i].setCharAt(id, 'r');
+                            stringBuilders[i - 1].setCharAt(id, 'r');
                             break;
                         case UP:
-                            stringBuilders[i].setCharAt(id, 'u');
+                            stringBuilders[i - 1].setCharAt(id, 'u');
                             break;
                         case DOWN:
-                            stringBuilders[i].setCharAt(id, 'd');
+                            stringBuilders[i - 1].setCharAt(id, 'd');
                             break;
                     }
                 }

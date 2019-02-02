@@ -59,7 +59,10 @@ public class Hero implements Cloneable{
         Cooldown[] cool = new Cooldown[cooldowns.size()];
         cool = cooldowns.toArray(cool);
         clientHero.setCooldowns(cool);  //end of cooldowns
-        clientHero.setCurrentCell(new EmptyCell(this.getCell().getRow(), this.getCell().getColumn()));
+        if (this.getCell() != null)// TODO correct?
+        {
+            clientHero.setCurrentCell(new EmptyCell(this.getCell().getRow(), this.getCell().getColumn()));
+        }
         //recent path
         List<EmptyCell> recentPathList = new ArrayList<>();
         for (Cell cell : this.getRecentPath()) {
@@ -121,11 +124,11 @@ public class Hero implements Cloneable{
 
 
     public Ability getAbility(String name) {
-        Ability tempAbility = new Ability();
-        tempAbility.setName(name);
+//        Ability tempAbility = new Ability();
+//        tempAbility.setName(name);
         for (Ability ability : abilities) {
-            if (ability.equals(tempAbility))
-                return tempAbility;
+            if (ability.getName().equals(name))
+                return ability;
         }
         return null;
     }

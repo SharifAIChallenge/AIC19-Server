@@ -201,7 +201,10 @@ public class GameEngine {
 
     private void updateLogs()
     {
-        updateServerViewLog();
+        if (state != GameState.PICK)
+        {
+            updateServerViewLog();
+        }
     }
 
     private void updateServerViewLog()
@@ -209,7 +212,7 @@ public class GameEngine {
         JsonObject log = new JsonObject();
         log.addProperty("currentTurn", currentTurn.get());
         log.addProperty("currentPhase", state.name());
-        JsonArray castAbilitiesJson = Json.GSON.toJsonTree(castedAbilities).getAsJsonArray();
+        JsonArray castAbilitiesJson = getCastAbilitiesJson();
         log.add("castAbilities", castAbilitiesJson);
         JsonArray playersJson = new JsonArray();
         for (Player player : players)
@@ -218,6 +221,18 @@ public class GameEngine {
         }
         log.add("players", playersJson);
         serverViewJsons.add(log);
+    }
+
+    private JsonArray getCastAbilitiesJson()
+    {
+        JsonArray array = new JsonArray();
+        for (CastedAbility castedAbility : castedAbilities)
+        {
+            JsonObject object = castedAbility.getJsonObject();
+            array.add(object);
+        }
+
+        return array;
     }
 
     private void assignScores()
@@ -244,9 +259,9 @@ public class GameEngine {
                 graphicHandler.addMoveMessage();
                 state = GameState.ACTION;
             } else {
+                respawnAllHeroes();
                 graphicHandler.addPickMessage();
                 state = GameState.MOVE;
-                respawnAllHeroes();
                 updatePlayerVisions();
             }
         } else {
@@ -320,8 +335,9 @@ public class GameEngine {
         Set<Hero> seenHeroes = new HashSet<>();
         List<Cast> ans = new ArrayList<>();
         for (Cast cast : casts) {
-            if (player.getHeroes().contains(cast.getHero()) && cast.getAbility().getCoolDown() == 0 &&
-                    !seenHeroes.contains(cast.getHero())) {
+            if (player.getHeroes().contains(cast.getHero()) && cast.getAbility().getRemainingCoolDown() == 0 &&
+                    !seenHeroes.contains(cast.getHero()) &&
+                    map.getCell(cast.getTargetRow(), cast.getTargetColumn()) != null) {
                 ans.add(cast);
                 seenHeroes.add(cast.getHero());
             }
