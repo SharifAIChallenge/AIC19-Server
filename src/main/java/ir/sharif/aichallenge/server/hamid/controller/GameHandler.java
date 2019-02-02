@@ -1,6 +1,5 @@
 package ir.sharif.aichallenge.server.hamid.controller;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -20,10 +19,7 @@ import ir.sharif.aichallenge.server.hamid.model.client.hero.EmptyHero;
 import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
 import ir.sharif.aichallenge.server.hamid.model.graphic.GraphicHero;
-import ir.sharif.aichallenge.server.hamid.model.graphic.RemainingCooldown;
-import ir.sharif.aichallenge.server.hamid.model.graphic.StatusHero;
 import ir.sharif.aichallenge.server.hamid.model.graphic.message.GraphicPickMessage;
-import ir.sharif.aichallenge.server.hamid.model.graphic.message.StatusMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.InitialMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.PickMessage;
 import ir.sharif.aichallenge.server.hamid.model.message.TurnMessage;
