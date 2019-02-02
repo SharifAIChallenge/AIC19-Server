@@ -41,11 +41,9 @@ public class GameEngine {
     private ir.sharif.aichallenge.server.hamid.model.Map map;
     private VisionTools visionTools;
     private AbilityTools abilityTools;
-    private List<List<ClientCastedAbility>> myCastedAbilities = new ArrayList<>(2); //todo set value --> in refactor
-    private List<List<ClientCastedAbility>> oppCastedAbilities = new ArrayList<>(2);
     private List<CastedAbility> castedAbilities = new ArrayList<>();
     // TODO fields below can be Player Class's fields
-    private List<ClientCastedAbility> player1castedAbilities = new ArrayList<>();
+    private List<ClientCastedAbility> player1castedAbilities = new ArrayList<>();   //todo list<list>
     private List<ClientCastedAbility> player2castedAbilities = new ArrayList<>();
     private List<ClientCastedAbility> player1oppCastedAbilities = new ArrayList<>();
     private List<ClientCastedAbility> player2oppCastedAbilities = new ArrayList<>();
@@ -162,8 +160,6 @@ public class GameEngine {
     }
 
     public void doTurn(ClientTurnMessage message1, ClientTurnMessage message2) {
-        preProcess();
-
         //pick
         pick(message1, message2);
 
@@ -177,12 +173,17 @@ public class GameEngine {
 
         assignScores();
 
+        postProcess();
+
         updateStateAndTurn();
         // TODO put a reset method to make things cleaner
         updateLogs();
     }
 
-    private void preProcess() {
+    private void postProcess() {
+        if (state != GameState.ACTION)
+            return;
+
         updateAbilityCooldowns();
         for (Player player : players)
             player.setActionPoint(maxAP);
@@ -201,8 +202,7 @@ public class GameEngine {
 
     private void updateLogs()
     {
-        if (state != GameState.PICK)
-        {
+        if (state != GameState.PICK) {
             updateServerViewLog();
         }
     }
@@ -374,6 +374,11 @@ public class GameEngine {
         if (!state.equals(GameState.MOVE)) {
             return;
         }
+        castedAbilities = new ArrayList<>();
+        player1castedAbilities = new ArrayList<>();
+        player2castedAbilities = new ArrayList<>();
+        player1oppCastedAbilities = new ArrayList<>();
+        player2oppCastedAbilities = new ArrayList<>();
 
         List<Move> moves1 = preprocessMessageMoves(message1);
         List<Move> moves2 = preprocessMessageMoves(message2);
