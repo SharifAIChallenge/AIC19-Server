@@ -307,6 +307,8 @@ public class GameEngine {
         castByAbility(validDodgeCasts1, validDodgeCasts2, AbilityType.DODGE);
         castByAbility(casts1, casts2, AbilityType.ATTACK);
 
+        updatePlayerVisions();  //because of dodges TODO any extra action needed?
+
 /*
         List<Cast> casts = new ArrayList<>();
         casts.addAll(casts1);
@@ -386,6 +388,7 @@ public class GameEngine {
         List<Move> moves2 = preprocessMessageMoves(message2, players[1]);
 
         //set heroes recentPath
+        resetHeroesRecentPaths();
         updateHeroRecentPaths(moves1);
         updateHeroRecentPaths(moves2); // TODO ask ruhollah why is this here
 
@@ -467,18 +470,25 @@ public class GameEngine {
         }
     }
 
+    private void resetHeroesRecentPaths() {
+        for (Player player : players) {
+            for (Hero hero : player.getHeroes()) {
+                hero.setRecentPath(new ArrayList<>());
+            }
+        }
+    }
+
     private void updateHeroRecentPaths(List<Move> moves)
     {
         for (Move move : moves) {
             Hero hero = move.getHero();
-            List<Cell> recentPath = new ArrayList<>();
+            List<Cell> recentPath = hero.getRecentPath();
             Cell cell = hero.getCell();
             recentPath.add(cell);
             for (Direction direction : move.getMoves()) {
                 cell = nextCellIfNotWall(cell, direction); //it's valid
                 recentPath.add(cell);
             }
-            hero.setRecentPath(recentPath);
         }
     }
 
@@ -646,7 +656,9 @@ public class GameEngine {
             }
             if (abilityType.equals(AbilityType.DODGE)) {    //todo check validation
                 Hero hero = cast.getHero();
-                hero.moveTo(map.getCell(cast.getTargetRow(), cast.getTargetColumn()));
+                Cell cell = map.getCell(cast.getTargetRow(), cast.getTargetColumn());
+                hero.moveTo(cell);
+                hero.getRecentPath().add(cell);
             }
         }
     }
