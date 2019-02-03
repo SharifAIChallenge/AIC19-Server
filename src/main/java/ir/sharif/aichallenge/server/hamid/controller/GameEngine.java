@@ -48,7 +48,7 @@ public class GameEngine {
     private List<ClientCastedAbility> player1oppCastedAbilities = new ArrayList<>();
     private List<ClientCastedAbility> player2oppCastedAbilities = new ArrayList<>();
     private Map<Hero, Ability> fortifiedHeroes;
-    private List<Hero> respawnedHeroes;
+    private List<Hero> respawnedHeroes = new ArrayList<>();
 
     private JsonArray serverViewJsons = new JsonArray();
     private GraphicHandler graphicHandler = new GraphicHandler(this);
@@ -545,6 +545,9 @@ public class GameEngine {
     }
 
     private void updateKilledHeroes() {
+        if (state != GameState.ACTION)
+            return;
+
         respawnedHeroes = new ArrayList<>();
         for (Player player : players) {
             for (Hero hero : player.getHeroes()) {
