@@ -25,6 +25,7 @@ public class Player {
 	private int actionPoint;	//todo reset each turn
 	private Set<Cell> vision = new HashSet<>();	// hashcode and equals not matter
 	private Player opponent;
+	private int totalUsedAp = 0;
 
 	public void addHero(Hero hero) {
 		heroes.add(hero);
