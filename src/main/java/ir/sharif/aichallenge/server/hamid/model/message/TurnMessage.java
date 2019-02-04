@@ -21,6 +21,7 @@ public class TurnMessage extends Message{
     private int myScore;
     private int oppScore;
     private String currentPhase;
+    private int movePhaseNum;
     private int currentTurn;
     private int AP;
     private ClientCell[][] map;
