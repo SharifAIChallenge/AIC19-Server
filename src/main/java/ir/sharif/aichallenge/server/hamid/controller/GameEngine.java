@@ -53,11 +53,10 @@ public class GameEngine {
     private JsonArray serverViewJsons = new JsonArray();
     private GraphicHandler graphicHandler = new GraphicHandler(this);
     private Random random = new Random();
-    private int numberOfMoveTurn = 0;
+    private int moveTurnNumber = 0;
 
 
-    public static void main(String[] args) throws InterruptedException
-    {
+    public static void main(String[] args) throws InterruptedException {
         AtomicInteger currentTurn = new AtomicInteger(0);
         GameServer gameServer = new GameServer(new GameHandler(currentTurn), args, currentTurn);
         gameServer.start();
@@ -88,10 +87,8 @@ public class GameEngine {
         serverViewJsons.add(Json.GSON.toJsonTree(initialMessage));
     }
 
-    private void initPlayers()
-    {
-        for (int i = 0; i < players.length; i++)
-        {
+    private void initPlayers() {
+        for (int i = 0; i < players.length; i++) {
             Player player = new Player();
             player.setScore(0);
             player.setActionPoint(maxAP);
@@ -102,28 +99,22 @@ public class GameEngine {
         players[1].setOpponent(players[0]);
     }
 
-    private void initHeroes(List<ClientHeroConstants> heroConstants)
-    {
+    private void initHeroes(List<ClientHeroConstants> heroConstants) {
         heroes = new HashMap<>();
-        for (ClientHeroConstants heroConstant : heroConstants)
-        {
+        for (ClientHeroConstants heroConstant : heroConstants) {
             List<Ability> heroAbilities = cloneAbilities(heroConstant.getAbilityNames());
             Hero hero = new Hero(heroConstant, heroAbilities);
             heroes.put(hero.getName(), hero);
         }
     }
 
-    private List<Ability> cloneAbilities(String[] abilityNames)
-    {
+    private List<Ability> cloneAbilities(String[] abilityNames) {
         List<Ability> wantedAbilities = new ArrayList<>();
 
-        for (String abilityName : abilityNames)
-        {
-            try
-            {
+        for (String abilityName : abilityNames) {
+            try {
                 wantedAbilities.add((Ability) abilities.get(abilityName).clone());
-            } catch (CloneNotSupportedException e)
-            {
+            } catch (CloneNotSupportedException e) {
                 e.printStackTrace(); //TODO someone handle this pls
             }
         }
@@ -131,19 +122,17 @@ public class GameEngine {
         return wantedAbilities;
     }
 
-    private void initAbilities(List<ClientAbilityConstants> abilityConstants)
-    {
+    private void initAbilities(List<ClientAbilityConstants> abilityConstants) {
         abilities = new HashMap<>();
 
-        for (ClientAbilityConstants abilityConstant : abilityConstants)
-        {
+        for (ClientAbilityConstants abilityConstant : abilityConstants) {
             Ability ability = new Ability(abilityConstant);
             abilities.put(ability.getName(), ability);
         }
     }
 
     private void setGameConstants(Map<String, Integer> gameConstants) {
-        GameHandler.TURN_TIMEOUT = gameConstants.get("timeout");
+//        GameHandler.TURN_TIMEOUT = gameConstants.get("timeout");
         this.killScore = gameConstants.get("killScore");
         this.objectiveZoneScore = gameConstants.get("objectiveZoneScore");
         this.maxAP = gameConstants.get("maxAP");
@@ -153,8 +142,12 @@ public class GameEngine {
 
     private void doPickTurn(String firstHero, String secondHero) { // TODO check this
         try {
-            players[0].addHero((Hero) heroes.get(firstHero).clone());
-            players[1].addHero((Hero) heroes.get(secondHero).clone());
+            Hero hero = heroes.get(firstHero);
+            if (hero != null)
+                players[0].addHero((Hero) hero.clone());
+            hero = heroes.get(secondHero);
+            if (hero != null)
+                players[1].addHero((Hero) hero.clone());
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
@@ -201,34 +194,29 @@ public class GameEngine {
         }
     }
 
-    private void updateLogs()
-    {
+    private void updateLogs() {
         if (state != GameState.PICK) {
             updateServerViewLog();
         }
     }
 
-    private void updateServerViewLog()
-    {
+    private void updateServerViewLog() {
         JsonObject log = new JsonObject();
         log.addProperty("currentTurn", currentTurn.get());
         log.addProperty("currentPhase", state.name());
         JsonArray castAbilitiesJson = getCastAbilitiesJson();
         log.add("castAbilities", castAbilitiesJson);
         JsonArray playersJson = new JsonArray();
-        for (Player player : players)
-        {
+        for (Player player : players) {
             player.updateServerViewLog(playersJson);
         }
         log.add("players", playersJson);
         serverViewJsons.add(log);
     }
 
-    private JsonArray getCastAbilitiesJson()
-    {
+    private JsonArray getCastAbilitiesJson() {
         JsonArray array = new JsonArray();
-        for (CastedAbility castedAbility : castedAbilities)
-        {
+        for (CastedAbility castedAbility : castedAbilities) {
             JsonObject object = castedAbility.getJsonObject();
             array.add(object);
         }
@@ -236,8 +224,7 @@ public class GameEngine {
         return array;
     }
 
-    private void assignScores()
-    {
+    private void assignScores() {
         for (Player player : players) {
             for (Hero hero : player.getHeroes()) {
                 if (map.getObjectiveZone().contains(hero.getCell())) {      //todo List<Cell> in map --> Set<Cell> for contains
@@ -257,10 +244,10 @@ public class GameEngine {
                 graphicHandler.addStatusMessage();
                 currentTurn.incrementAndGet();
                 state = GameState.MOVE;
-            } else if (state == GameState.MOVE){
-                numberOfMoveTurn = (numberOfMoveTurn + 1) % NUM_OF_MOVE_TURN;
+            } else if (state == GameState.MOVE) {
+                moveTurnNumber = (moveTurnNumber + 1) % NUM_OF_MOVE_TURN;
                 graphicHandler.addMoveMessage();
-                if (numberOfMoveTurn == 0)
+                if (moveTurnNumber == 0)
                     state = GameState.ACTION;
             } else {
                 respawnAllHeroes();
@@ -273,19 +260,16 @@ public class GameEngine {
         }
     }
 
-    private void respawnAllHeroes()
-    {
-        for (Player player : players)
-        {
-            for (Hero hero : player.getHeroes())
-            {
+    private void respawnAllHeroes() {
+        for (Player player : players) {
+            for (Hero hero : player.getHeroes()) {
                 respawnHero(hero, player);
             }
         }
     }
 
     private void cast(ClientTurnMessage message1, ClientTurnMessage message2) {
-         fortifiedHeroes = new HashMap<>();
+        fortifiedHeroes = new HashMap<>();
 
         if (!state.equals(GameState.ACTION)) {
             return;
@@ -418,14 +402,11 @@ public class GameEngine {
         //end of vision for players
     }
 
-    private void updatePlayerVisions()
-    {
+    private void updatePlayerVisions() {
         for (Player player : players) {
             Set<Cell> vision = new HashSet<>();
-            for (Hero hero : player.getHeroes())
-            {
-                if (hero.getHp() == 0)
-                {
+            for (Hero hero : player.getHeroes()) {
+                if (hero.getHp() == 0) {
                     continue;
                 }
                 vision.addAll(visionTools.getHeroVision(hero));
@@ -434,8 +415,7 @@ public class GameEngine {
         }
     }
 
-    private void updateOpponentHeroRecentPaths()
-    {
+    private void updateOpponentHeroRecentPaths() {
         for (Player player : players) {
             for (Hero hero : player.getHeroes()) {
                 List<Cell> path = hero.getRecentPathForOpponent();
@@ -451,8 +431,7 @@ public class GameEngine {
         }
     }
 
-    private void updateHeroVisions()
-    {
+    private void updateHeroVisions() {
         for (Hero firstPlayerHero : players[0].getHeroes()) {
             for (Hero secondPlayerHero : players[1].getHeroes()) {
                 if (visionTools.isInVision(firstPlayerHero.getCell(), secondPlayerHero.getCell())) {
@@ -463,8 +442,7 @@ public class GameEngine {
         }
     }
 
-    private void moveHeroesOneStep(int stepNumber)
-    {
+    private void moveHeroesOneStep(int stepNumber) {
         for (Player player : players) {
             for (Hero hero : player.getHeroes()) {
                 if (stepNumber < hero.getRecentPath().size()) {
@@ -482,8 +460,7 @@ public class GameEngine {
         }
     }
 
-    private void updateHeroRecentPaths(List<Move> moves)
-    {
+    private void updateHeroRecentPaths(List<Move> moves) {
         for (Move move : moves) {
             Hero hero = move.getHero();
             List<Cell> recentPath = hero.getRecentPath();
@@ -563,8 +540,7 @@ public class GameEngine {
         }
     }
 
-    private void updateDeadHeroStats(Player player, Hero hero)
-    {
+    private void updateDeadHeroStats(Player player, Hero hero) {
         hero.setHp(0);
         if (hero.getCell() != null) {
             hero.moveTo(null);
@@ -577,8 +553,7 @@ public class GameEngine {
         }
     }
 
-    private void respawnHero(Hero hero, Player player)
-    {
+    private void respawnHero(Hero hero, Player player) {
         Cell cell = getValidRespawnCell(player);
         hero.moveTo(cell);
         hero.resetValues();
@@ -614,59 +589,56 @@ public class GameEngine {
         Ability ability = cast.getAbility();
         Player player1 = players[player - 1];
         Player opponent = player1.getOpponent();
-        if (visionTools.manhattanDistance(map.getCell(cast.getTargetRow(), cast.getTargetColumn()),
-                cast.getHero().getCell()) <= ability.getRange()) { // FIXME even if it's out of range it will hit the last cell possible
 
-            List<Hero> targetHeroes = Arrays.asList(abilityTools.getAbilityTargets(ability, cast.getHero().getCell(),
-                    map.getCell(cast.getTargetRow(), cast.getTargetColumn())));
-            addCastedAbility(cast, player, targetHeroes);
+        List<Hero> targetHeroes = Arrays.asList(abilityTools.getAbilityTargets(ability, cast.getHero().getCell(),
+                map.getCell(cast.getTargetRow(), cast.getTargetColumn())));
+        addCastedAbility(cast, player, targetHeroes);
 
-            for (Hero hero : targetHeroes) {
-                switch (abilityType) {
-                    case HEAL:
-                        if (player1.getHeroes().contains(hero)) {
-                            int hp = Math.min(hero.getHp() + ability.getPower(), hero.getMaxHp());
-                            hero.setHp(hp);
+        for (Hero hero : targetHeroes) {
+            switch (abilityType) {
+                case HEAL:
+                    if (player1.getHeroes().contains(hero)) {
+                        int hp = Math.min(hero.getHp() + ability.getPower(), hero.getMaxHp());
+                        hero.setHp(hp);
+                    }
+                    break;
+                case ATTACK:
+                    if (player == 1)
+                        player = 2;
+                    else
+                        player = 1;
+                    if (players[player - 1].getHeroes().contains(hero)) {
+                        if (player == 2) {
+                            if (getRespawnZone(players[0]).contains(hero.getCell()))
+                                break;
+                            if (getRespawnZone(players[1]).contains(cast.getHero().getCell()))
+                                break;
+                        } else {
+                            if (getRespawnZone(players[0]).contains(cast.getHero().getCell()))
+                                break;
+                            if (getRespawnZone(players[1]).contains(hero.getCell()))
+                                break;
                         }
-                        break;
-                    case ATTACK:
-                        if (player == 1)
-                            player = 2;
-                        else
-                            player = 1;
-                        if (players[player - 1].getHeroes().contains(hero)) {
-                            if (player == 2) {
-                                if (getRespawnZone(players[0]).contains(hero.getCell()))
-                                    break;
-                                if (getRespawnZone(players[1]).contains(cast.getHero().getCell()))
-                                    break;
-                            } else {
-                                if (getRespawnZone(players[0]).contains(cast.getHero().getCell()))
-                                    break;
-                                if (getRespawnZone(players[1]).contains(hero.getCell()))
-                                    break;
+                        if (fortifiedHeroes.containsKey(hero)) {
+                            if (ability.getPower() > fortifiedHeroes.get(hero).getPower()) {
+                                hero.setHp(hero.getHp() + fortifiedHeroes.get(hero).getPower() - ability.getPower());
                             }
-                            if (fortifiedHeroes.containsKey(hero)) {
-                                if (ability.getPower() > fortifiedHeroes.get(hero).getPower()) {
-                                    hero.setHp(hero.getHp() + fortifiedHeroes.get(hero).getPower() - ability.getPower());
-                                }
-                            } else
-                                hero.setHp(hero.getHp() - ability.getPower());
-                        }
-                        break;
-                    case FORTIFY:
-                        if (players[player - 1].getHeroes().contains(hero)) {
-                            fortifiedHeroes.put(hero, ability);
-                        }
-                        break;
-                }
+                        } else
+                            hero.setHp(hero.getHp() - ability.getPower());
+                    }
+                    break;
+                case FORTIFY:
+                    if (players[player - 1].getHeroes().contains(hero)) {
+                        fortifiedHeroes.put(hero, ability);
+                    }
+                    break;
             }
-            if (abilityType.equals(AbilityType.DODGE)) {    //todo check validation
-                Hero hero = cast.getHero();
-                Cell cell = map.getCell(cast.getTargetRow(), cast.getTargetColumn());
-                hero.moveTo(cell);
-                hero.getRecentPath().add(cell);
-            }
+        }
+        if (abilityType.equals(AbilityType.DODGE)) {    //todo check validation
+            Hero hero = cast.getHero();
+            Cell cell = map.getCell(cast.getTargetRow(), cast.getTargetColumn());
+            hero.moveTo(cell);
+            hero.getRecentPath().add(cell);
         }
     }
 
