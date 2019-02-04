@@ -41,7 +41,10 @@ public class GameHandler implements GameLogic {
     public static final FileParam PARAM_MAP = new FileParam("Map", null, ".*\\.map");
 
     public static final int CLIENT_NUM = 2;
-    public static final int CLIENT_RESPONSE_TIME = 500;
+    public static final int CLIENT_RESPONSE_TIME = 200;
+    public static final int CLIENT_AFTER_PICK_RESPONSE_TIME = 2000;
+    public static final int CLIENT_FIRST_MOVE_RESPONSE_TIME = 500;
+
     public static int TURN_TIMEOUT = 0;
     public static int PICK_TURN_TIMEOUT = 0;
     public static final int CLIENT_HERO_NUM = 4;
@@ -61,14 +64,19 @@ public class GameHandler implements GameLogic {
 
     @Override
     public long getClientResponseTimeout() {
+        int turn = gameEngine.getCurrentTurn().get();
+        GameState state = gameEngine.getState();
+        if (state == GameState.MOVE && turn == GameEngine.PICK_OFFSET + 1)  //todo asap is correct?
+            return CLIENT_AFTER_PICK_RESPONSE_TIME;
+        if (gameEngine.getMoveTurnNumber() == 0)
+            return CLIENT_FIRST_MOVE_RESPONSE_TIME;
+
         return CLIENT_RESPONSE_TIME;
     }
 
     @Override
     public long getTurnTimeout() {
-        if (gameEngine.getState() == GameState.PICK)
-            return PICK_TURN_TIMEOUT;
-        return TURN_TIMEOUT;
+        return getClientResponseTimeout() + 50;
     }
 
     @Override
@@ -168,6 +176,8 @@ public class GameHandler implements GameLogic {
                         break;
                     case "pick": // TODO check this
                         String heroName = event.getArgs()[0];
+                        if (!gameEngine.getHeroes().keySet().contains(heroName))
+                            break;
                         message.setHeroName(heroName);
                         message.setType(GameState.PICK);
                         break;
@@ -204,16 +214,33 @@ public class GameHandler implements GameLogic {
 
     private Cast prepareCast(int playerNum, Event event) {
         Player player = gameEngine.getPlayers()[playerNum];
-        int heroId = Integer.parseInt(event.getArgs()[0]);
+        int heroId;
+        try {
+            heroId = Integer.parseInt(event.getArgs()[0]);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return null;
+        }
         Hero hero = player.getHero(heroId);
         if (hero == null)
             return null;
 
         String abilityName = event.getArgs()[1];
         Ability ability = hero.getAbility(abilityName);
+        if (ability == null)
+            return null;
 
-        int targetRow = Integer.parseInt(event.getArgs()[2]);
-        int targetColumn = Integer.parseInt(event.getArgs()[3]);
+        int targetRow;
+        int targetColumn;
+        try {
+            targetRow = Integer.parseInt(event.getArgs()[2]);
+            targetColumn = Integer.parseInt(event.getArgs()[3]);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return null;
+        }
+        if (!gameEngine.getMap().isInMap(targetRow, targetColumn))
+            return null;
 
         return new Cast(hero, ability, targetRow, targetColumn);
     }
