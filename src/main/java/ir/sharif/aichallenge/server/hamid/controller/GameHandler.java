@@ -76,7 +76,8 @@ public class GameHandler implements GameLogic {
         String initStr = readMapFile(PARAM_MAP);
         InitialMessage initialMessage = null;
         try {
-            initialMessage = Json.GSON.fromJson(initStr, InitialMessage[].class)[0];
+            JsonObject initJson = cleanCells(initStr);
+            initialMessage = Json.GSON.fromJson(initJson, InitialMessage.class);
         } catch (JsonSyntaxException e) {
             System.err.println("Invalid map file!");
             System.exit(0);
@@ -85,6 +86,36 @@ public class GameHandler implements GameLogic {
         this.initialMessage = initialMessage;
 
         gameEngine.getGraphicHandler().addInitMessage(initialMessage);
+    }
+
+    private JsonObject cleanCells(String initStr)
+    {
+        JsonObject initJson = Json.GSON.fromJson(initStr, JsonObject.class);
+        JsonObject map = initJson.getAsJsonObject("map");
+        JsonArray oldCells = map.get("cells").getAsJsonArray();
+        JsonArray newCells = new JsonArray();
+        int rowNum = map.get("rowNum").getAsInt();
+        int columnNum = map.get("columnNum").getAsInt();
+
+        for (int i = 0; i < rowNum; i++)
+        {
+            JsonArray newRow = new JsonArray();
+
+            for (int j = 0; j < columnNum; j++)
+            {
+                JsonObject oldCell = oldCells.get(i*columnNum + j).getAsJsonObject();
+                newRow.add(oldCell);
+            }
+
+            newCells.add(newRow);
+        }
+
+        map.remove("cells");
+        map.add("cells", newCells);
+        initJson.remove("map");
+        initJson.add("map", map);
+
+        return initJson;
     }
 
     private String readMapFile(FileParam paramMap) {
