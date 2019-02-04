@@ -497,7 +497,7 @@ public class GameEngine {
     }
 
     private List<Move> preprocessMessageMoves(ClientTurnMessage message, Player player) {
-        message.mergeMoves();
+        message.mergeMoves();   //filters moves (in new version)
         List<Move> moves = message.getMoves();
         for (Move move : moves) {
             prepareMove(move);
