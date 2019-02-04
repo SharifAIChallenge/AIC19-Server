@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Setter
 public class GameEngine {
     public static final int PICK_OFFSET = 4;
-    public static final int NUM_OF_MOVE_TURN = 1;
+    public static final int NUM_OF_MOVE_TURN = 6;
     public static final int NUM_OF_CAST_TURN = 1;
 
     private int killScore;
@@ -53,6 +53,7 @@ public class GameEngine {
     private JsonArray serverViewJsons = new JsonArray();
     private GraphicHandler graphicHandler = new GraphicHandler(this);
     private Random random = new Random();
+    private int numberOfMoveTurn = 0;
 
 
     public static void main(String[] args) throws InterruptedException
@@ -247,8 +248,9 @@ public class GameEngine {
     }
 
     private void updateStateAndTurn() {
-        System.out.println(currentTurn.get());
-        if (currentTurn.get() >= PICK_OFFSET) {
+        int turn = currentTurn.get();
+        System.out.println(turn);
+        if (turn >= PICK_OFFSET) {
             System.out.println(state);
             if (state == GameState.ACTION) {
                 graphicHandler.addActionMessage();
@@ -256,8 +258,10 @@ public class GameEngine {
                 currentTurn.incrementAndGet();
                 state = GameState.MOVE;
             } else if (state == GameState.MOVE){
+                numberOfMoveTurn = (numberOfMoveTurn + 1) % NUM_OF_MOVE_TURN;
                 graphicHandler.addMoveMessage();
-                state = GameState.ACTION;
+                if (numberOfMoveTurn == 0)
+                    state = GameState.ACTION;
             } else {
                 respawnAllHeroes();
                 graphicHandler.addPickMessage();
