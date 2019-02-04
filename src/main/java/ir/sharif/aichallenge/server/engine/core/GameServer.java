@@ -134,11 +134,12 @@ public class GameServer {
                 throw new RuntimeException("Waiting for ui interrupted");
             }
 
-            Message[] initialMessages = mGameLogic.getClientInitialMessages();
-            for (int i = 0; i < initialMessages.length; ++i) {
-                mClientNetwork.queue(i, initialMessages[i]);
-            }
-            mClientNetwork.sendAllBlocking();
+            // Uncomment this if you want to send init and first turn message at the same time
+//            Message[] initialMessages = mGameLogic.getClientInitialMessages();
+//            for (int i = 0; i < initialMessages.length; ++i) {
+//                mClientNetwork.queue(i, initialMessages[i]);
+//            }
+//            mClientNetwork.sendAllBlocking();
         } else {
             mClientNetwork.listen(Configs.PARAM_CLIENTS_PORT.getValue());
 
@@ -148,11 +149,12 @@ public class GameServer {
                 throw new RuntimeException("Waiting for clients interrupted");
             }
 
-            Message[] initialMessages = mGameLogic.getClientInitialMessages();
-            for (int i = 0; i < initialMessages.length; ++i) {
-                mClientNetwork.queue(i, initialMessages[i]);
-            }
-            mClientNetwork.sendAllBlocking();
+            // Uncomment this if you want to send init and first turn message at the same time
+//            Message[] initialMessages = mGameLogic.getClientInitialMessages();
+//            for (int i = 0; i < initialMessages.length; ++i) {
+//                mClientNetwork.queue(i, initialMessages[i]);
+//            }
+//            mClientNetwork.sendAllBlocking();
         }
     }
 

@@ -15,7 +15,6 @@ import ir.sharif.aichallenge.server.hamid.model.client.ClientCell;
 import ir.sharif.aichallenge.server.hamid.model.client.ClientMap;
 import ir.sharif.aichallenge.server.hamid.model.client.EmptyCell;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.ClientHero;
-import ir.sharif.aichallenge.server.hamid.model.client.hero.Cooldown;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.EmptyHero;
 import ir.sharif.aichallenge.server.hamid.model.enums.AbilityType;
 import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
@@ -44,7 +43,7 @@ public class GameHandler implements GameLogic {
 
     public static final int CLIENT_NUM = 2;
     public static final int CLIENT_RESPONSE_TIME = 200;
-    public static final int CLIENT_AFTER_PICK_RESPONSE_TIME = 2000;
+    public static final int CLIENT_FIRST_TURN_RESPONSE_TIME = 2000;
     public static final int CLIENT_FIRST_MOVE_RESPONSE_TIME = 500;
 
     public static int TURN_TIMEOUT = 0;
@@ -68,11 +67,10 @@ public class GameHandler implements GameLogic {
     public long getClientResponseTimeout() {
         int turn = gameEngine.getCurrentTurn().get();
         GameState state = gameEngine.getState();
-        if (state == GameState.MOVE && turn == GameEngine.PICK_OFFSET + 1)  //todo asap is correct?
-            return CLIENT_AFTER_PICK_RESPONSE_TIME;
-        if (gameEngine.getMoveTurnNumber() == 0)
+        if (turn == 0)  //todo asap is correct?
+            return CLIENT_FIRST_TURN_RESPONSE_TIME;
+        if (state == GameState.MOVE && gameEngine.getMoveTurnNumber() == 0)
             return CLIENT_FIRST_MOVE_RESPONSE_TIME;
-
         return CLIENT_RESPONSE_TIME;
     }
 
@@ -94,6 +92,9 @@ public class GameHandler implements GameLogic {
         }
         gameEngine.initialize(initialMessage);
         this.initialMessage = initialMessage;
+        this.initialMessage.getGameConstants().put("preprocessTimeout", CLIENT_FIRST_TURN_RESPONSE_TIME);
+        this.initialMessage.getGameConstants().put("firstMoveTimeout", CLIENT_FIRST_MOVE_RESPONSE_TIME);
+        this.initialMessage.getGameConstants().put("normalTimeout", CLIENT_RESPONSE_TIME);
         fixFortify();
         gameEngine.getGraphicHandler().addInitMessage(initialMessage);
     }
@@ -395,6 +396,11 @@ public class GameHandler implements GameLogic {
 
     @Override
     public Message[] getClientMessages() {
+        if (gameEngine.getCurrentTurn().get() == 0)
+        {
+            return getClientInitialMessages();
+        }
+
         Player[] players = gameEngine.getPlayers();
         Message[] messages = new Message[2];
         GameState state = gameEngine.getState();
@@ -456,7 +462,7 @@ public class GameHandler implements GameLogic {
                 turnMessage.setMyCastAbilities(gameEngine.getPlayer2castedAbilities());
                 turnMessage.setOppCastAbilities(gameEngine.getPlayer2oppCastedAbilities());
             }
-            //make json array and message[i]
+            // make json array and message[i]
             TurnMessage[] turnMessages = new TurnMessage[1];
             turnMessages[0] = turnMessage;
             messages[i] = new Message(Message.NAME_TURN, Json.GSON.toJsonTree(turnMessages).getAsJsonArray());
