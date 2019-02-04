@@ -1,11 +1,10 @@
 package ir.sharif.aichallenge.server.hamid.model;
 
+import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.Map;
 
 @Builder
@@ -23,7 +22,7 @@ public class ClientTurnMessage {
 
     public void mergeMoves()
     {
-        Map<Hero, Move> movesMap = new HashMap<>();
+/*        Map<Hero, Move> movesMap = new HashMap<>();
         List<Move> finalMoves = new ArrayList<>();
 
         for (Move move : moves)
@@ -44,6 +43,27 @@ public class ClientTurnMessage {
         }
 
         moves.clear();
-        moves.addAll(finalMoves);   //todo why not "moves = finalMoves" ?
+        moves.addAll(finalMoves);*/
+
+        Set<Hero> heroes = new HashSet<>();
+        List<Move> finalMoves = new ArrayList<>();
+
+        for (Move move : moves) {
+            if (heroes.contains(move.getHero()))
+                continue;
+            heroes.add(move.getHero());
+            List<Direction> directions = move.getMoves();
+            Direction direction;
+            if (directions.size() > 0) {
+                direction = directions.get(0);
+                directions.clear();
+                directions.add(direction);
+            }
+
+            finalMoves.add(move);
+        }
+
+        moves.clear();
+        moves.addAll(finalMoves);
     }
 }
