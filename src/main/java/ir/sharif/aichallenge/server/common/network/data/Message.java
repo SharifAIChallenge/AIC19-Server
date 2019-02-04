@@ -15,6 +15,7 @@ public class Message {
     public static final String NAME_INIT = "init";
     public static final String NAME_STATUS = "status";
     public static final String NAME_SHUTDOWN = "shutdown";
+    public static final String NAME_END = "end";
     public static final String NAME_WRONG_TOKEN = "wrong token";
 
     public final String name;

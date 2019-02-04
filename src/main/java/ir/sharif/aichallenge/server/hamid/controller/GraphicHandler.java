@@ -8,10 +8,7 @@ import ir.sharif.aichallenge.server.hamid.model.Hero;
 import ir.sharif.aichallenge.server.hamid.model.Player;
 import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
 import ir.sharif.aichallenge.server.hamid.model.graphic.*;
-import ir.sharif.aichallenge.server.hamid.model.graphic.message.ActionMessage;
-import ir.sharif.aichallenge.server.hamid.model.graphic.message.GraphicPickMessage;
-import ir.sharif.aichallenge.server.hamid.model.graphic.message.MoveMessage;
-import ir.sharif.aichallenge.server.hamid.model.graphic.message.StatusMessage;
+import ir.sharif.aichallenge.server.hamid.model.graphic.message.*;
 import ir.sharif.aichallenge.server.hamid.model.message.InitialMessage;
 
 import java.io.IOException;
@@ -164,6 +161,35 @@ public class GraphicHandler {
         StatusMessage[] statusMessages = new StatusMessage[1];
         statusMessages[0] = statusMessage;
         Message message = new Message(Message.NAME_STATUS, statusMessages);
+        addMessageToLog(message);
+    }
+
+    public void addEndMessage() {
+        EndMessage endMessage = new EndMessage();
+        int[] scores = new int[CLIENT_NUM];
+        for (int i = 0; i < CLIENT_NUM; i++) {
+            scores[i] = gameEngine.getPlayers()[i].getScore();
+        }
+        endMessage.setScores(scores);
+
+        if (scores[1] > scores[0]) {
+            endMessage.setWinner(1);
+        }
+        else if (scores[0] > scores[1]) {
+            endMessage.setWinner(0);
+        } else {
+            int ap0 = gameEngine.getPlayers()[0].getTotalUsedAp();
+            int ap1 = gameEngine.getPlayers()[1].getTotalUsedAp();
+            if (ap0 < ap1)
+                endMessage.setWinner(0);
+            else if (ap1 < ap0)
+                endMessage.setWinner(1);
+            else
+                endMessage.setWinner(-1);
+        }
+
+        EndMessage[] endMessages = new EndMessage[]{endMessage};
+        Message message = new Message(Message.NAME_END, endMessages);
         addMessageToLog(message);
     }
 
