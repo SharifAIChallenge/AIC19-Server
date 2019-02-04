@@ -289,11 +289,11 @@ public class GameEngine {
         castedAbilities = new ArrayList<>();
 
         castByAbility(casts1, casts2, AbilityType.FORTIFY);
-        castByAbility(casts1, casts2, AbilityType.HEAL);
+        castByAbility(casts1, casts2, AbilityType.DEFENSIVE);
         List<Cast> validDodgeCasts1 = new ArrayList<>(new DodgeHandler(map, players[0], casts1).getValidDodgeCasts());
         List<Cast> validDodgeCasts2 = new ArrayList<>(new DodgeHandler(map, players[1], casts2).getValidDodgeCasts());
         castByAbility(validDodgeCasts1, validDodgeCasts2, AbilityType.DODGE);
-        castByAbility(casts1, casts2, AbilityType.ATTACK);
+        castByAbility(casts1, casts2, AbilityType.OFFENSIVE);
 
         updatePlayerVisions();  //because of dodges TODO any extra action needed?
 
@@ -596,13 +596,13 @@ public class GameEngine {
 
         for (Hero hero : targetHeroes) {
             switch (abilityType) {
-                case HEAL:
+                case DEFENSIVE:
                     if (player1.getHeroes().contains(hero)) {
                         int hp = Math.min(hero.getHp() + ability.getPower(), hero.getMaxHp());
                         hero.setHp(hp);
                     }
                     break;
-                case ATTACK:
+                case OFFENSIVE:
                     if (player == 1)
                         player = 2;
                     else
