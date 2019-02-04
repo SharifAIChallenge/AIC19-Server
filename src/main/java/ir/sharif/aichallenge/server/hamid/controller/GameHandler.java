@@ -450,6 +450,7 @@ public class GameHandler implements GameLogic {
             turnMessage.setMyScore(player.getScore());
             turnMessage.setOppScore(players[1 - i].getScore()); // client_num must be 2
             turnMessage.setCurrentPhase(gameEngine.getState().name());
+            turnMessage.setMovePhaseNum(gameEngine.getState() == GameState.MOVE ? gameEngine.getMoveTurnNumber() + 1 : -1);
             turnMessage.setCurrentTurn(gameEngine.getCurrentTurn().get());
             turnMessage.setAP(players[i].getActionPoint());
             turnMessage.setMap(getClientMap(i).getCells());
@@ -573,6 +574,6 @@ public class GameHandler implements GameLogic {
 
     @Override
     public void terminate() {
-
+        gameEngine.getGraphicHandler().addEndMessage();
     }
 }
