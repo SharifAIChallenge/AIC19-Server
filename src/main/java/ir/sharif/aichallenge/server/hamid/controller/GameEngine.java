@@ -179,8 +179,10 @@ public class GameEngine {
             return;
 
         updateAbilityCooldowns();
-        for (Player player : players)
+        for (Player player : players) {
+            player.setTotalUsedAp(player.getTotalUsedAp() + (maxAP - player.getActionPoint()));
             player.setActionPoint(maxAP);
+        }
     }
 
     private void updateAbilityCooldowns() {
