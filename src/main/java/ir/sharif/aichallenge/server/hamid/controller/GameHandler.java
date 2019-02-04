@@ -10,12 +10,14 @@ import ir.sharif.aichallenge.server.engine.config.FileParam;
 import ir.sharif.aichallenge.server.engine.core.GameLogic;
 import ir.sharif.aichallenge.server.hamid.model.*;
 import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
+import ir.sharif.aichallenge.server.hamid.model.client.ClientAbilityConstants;
 import ir.sharif.aichallenge.server.hamid.model.client.ClientCell;
 import ir.sharif.aichallenge.server.hamid.model.client.ClientMap;
 import ir.sharif.aichallenge.server.hamid.model.client.EmptyCell;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.ClientHero;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.Cooldown;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.EmptyHero;
+import ir.sharif.aichallenge.server.hamid.model.enums.AbilityType;
 import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
 import ir.sharif.aichallenge.server.hamid.model.graphic.GraphicHero;
@@ -92,8 +94,19 @@ public class GameHandler implements GameLogic {
         }
         gameEngine.initialize(initialMessage);
         this.initialMessage = initialMessage;
-
+        fixFortify();
         gameEngine.getGraphicHandler().addInitMessage(initialMessage);
+    }
+
+    private void fixFortify()
+    {
+        for (ClientAbilityConstants abilityConstants : initialMessage.getAbilityConstants())
+        {
+            if (abilityConstants.getType() == AbilityType.FORTIFY)
+            {
+                abilityConstants.setType(AbilityType.DEFENSIVE);
+            }
+        }
     }
 
     private JsonObject cleanCells(String initStr)
