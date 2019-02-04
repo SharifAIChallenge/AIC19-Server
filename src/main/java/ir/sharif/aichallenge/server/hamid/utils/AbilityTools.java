@@ -34,7 +34,7 @@ public class AbilityTools {
         for (Cell cell : impactCells) {
             affectedCells.addAll(getCellsInAOE(cell, ability.getAreaOfEffect()));
         }
-        if (ability.getType() == AbilityType.HEAL) {
+        if (ability.getType() == AbilityType.DEFENSIVE) {
             return getMyHeroesInCells(affectedCells.toArray(new Cell[0]));
         } else {
             return getOppHeroesInCells(affectedCells.toArray(new Cell[0]));
@@ -60,8 +60,8 @@ public class AbilityTools {
             if (visionTools.manhattanDistance(startCell, cell) > ability.getRange())
                 break;
             lastCell = cell;
-            if ((getOppHero(cell) != null && !ability.getType().equals(AbilityType.HEAL))
-                    || ((getMyHero(cell) != null && ability.getType().equals(AbilityType.HEAL)))) {
+            if ((getOppHero(cell) != null && !ability.getType().equals(AbilityType.DEFENSIVE))
+                    || ((getMyHero(cell) != null && ability.getType().equals(AbilityType.DEFENSIVE)))) {
                 impactCells.add(cell);
                 if (!ability.isPiercing()) break;
             }
