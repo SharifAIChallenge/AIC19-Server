@@ -18,28 +18,29 @@ public class VisionTools {
     public boolean isInVision(Cell startCell, Cell endCell) {
         if (startCell.isWall() || endCell.isWall())
             return false;
-        Cell[] rayCells = getRayCells(startCell, endCell);
+        Cell[] rayCells = getRayCells(startCell, endCell, false);
         Cell lastCell = rayCells[rayCells.length - 1];
         return lastCell == endCell;
     }
 
-    Cell[] getRayCells(Cell startCell, Cell targetCell) {
+    public Cell[] getRayCells(Cell startCell, Cell targetCell, boolean wallPiercing) {
         ArrayList<Cell> path = new ArrayList<>();
-        dfs(startCell, startCell, targetCell, new HashMap<>(), path);
+        dfs(startCell, startCell, targetCell, new HashMap<>(), path, wallPiercing);
         return path.toArray(new Cell[0]);
     }
 
-    private void dfs(Cell currentCell, Cell startCell, Cell targetCell, HashMap<Cell, Boolean> isSeen, ArrayList<Cell> path) {
+    private void dfs(Cell currentCell, Cell startCell, Cell targetCell, HashMap<Cell, Boolean> isSeen,
+                     ArrayList<Cell> path, boolean wallPiercing) {
         isSeen.put(currentCell, true);
         path.add(currentCell);
         for (Direction direction : Direction.values()) {
             Cell nextCell = getNextCell(currentCell, direction);
             if (nextCell != null && !isSeen.containsKey(nextCell) && isCloser(currentCell, targetCell, nextCell)) {
                 int collisionState = squareCollision(startCell, targetCell, nextCell);
-                if ((collisionState == 0 || collisionState == 1) && nextCell.isWall())
+                if ((collisionState == 0 || collisionState == 1) && (!wallPiercing && nextCell.isWall()))
                     return;
                 if (collisionState == 1) {
-                    dfs(nextCell, startCell, targetCell, isSeen, path);
+                    dfs(nextCell, startCell, targetCell, isSeen, path, wallPiercing);
                     return;
                 }
             }
@@ -49,13 +50,13 @@ public class VisionTools {
                 int newRow = currentCell.getRow() + dRow;
                 int newColumn = currentCell.getColumn() + dColumn;
                 Cell nextCell = null;
-                if (isInMap(newRow, newColumn)) nextCell = map.getCell(newRow, newColumn);
+                if (map.isInMap(newRow, newColumn)) nextCell = map.getCell(newRow, newColumn);
                 if (nextCell != null && !isSeen.containsKey(nextCell) && isCloser(currentCell, targetCell, nextCell)) {
                     int collisionState = squareCollision(startCell, targetCell, nextCell);
-                    if (collisionState == 0 || collisionState == 1 && nextCell.isWall())
+                    if (collisionState == 0 || collisionState == 1 && (!wallPiercing && nextCell.isWall()))
                         return;
                     if (collisionState == 1) {
-                        dfs(nextCell, startCell, targetCell, isSeen, path);
+                        dfs(nextCell, startCell, targetCell, isSeen, path, wallPiercing);
                     }
                 }
             }
@@ -64,22 +65,22 @@ public class VisionTools {
     private Cell getNextCell(Cell cell, Direction direction) {
         switch (direction) {
             case UP:
-                if (isInMap(cell.getRow() - 1, cell.getColumn()))
+                if (map.isInMap(cell.getRow() - 1, cell.getColumn()))
                     return map.getCell(cell.getRow() - 1, cell.getColumn());
                 else
                     return null;
             case DOWN:
-                if (isInMap(cell.getRow() + 1, cell.getColumn()))
+                if (map.isInMap(cell.getRow() + 1, cell.getColumn()))
                     return map.getCell(cell.getRow() + 1, cell.getColumn());
                 else
                     return null;
             case LEFT:
-                if (isInMap(cell.getRow(), cell.getColumn() - 1))
+                if (map.isInMap(cell.getRow(), cell.getColumn() - 1))
                     return map.getCell(cell.getRow(), cell.getColumn() - 1);
                 else
                     return null;
             case RIGHT:
-                if (isInMap(cell.getRow(), cell.getColumn() + 1))
+                if (map.isInMap(cell.getRow(), cell.getColumn() + 1))
                     return map.getCell(cell.getRow(), cell.getColumn() + 1);
                 else
                     return null;
@@ -96,7 +97,9 @@ public class VisionTools {
     }
 
     private int squareCollision(Cell startCell, Cell targetCell, Cell cell) {
-        boolean hasNegative = false, hasPositive = false, hasZero = false;
+        boolean hasNegative = false;
+        boolean hasPositive = false;
+        boolean hasZero = false;
         for (int row = 2 * cell.getRow(); row <= 2 * (cell.getRow() + 1); row += 2)
             for (int column = 2 * cell.getColumn(); column <= 2 * (cell.getColumn() + 1); column += 2) {
                 int crossProduct = crossProduct(2 * startCell.getRow() + 1, 2 * startCell.getColumn() + 1,
@@ -114,13 +117,7 @@ public class VisionTools {
         return (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
     }
 
-    private boolean isInMap(int cellRow, int cellColumn) {
-        return cellRow >= 0 && cellColumn >= 0 &&
-                cellRow < map.getNumberOfRows() && cellColumn < map.getNumberOfColumns();
-    }
-
-    public Set<Cell> getHeroVision(Hero hero)
-    {
+    public Set<Cell> getHeroVision(Hero hero) {
         Set<Cell> vision = new HashSet<>();
 
         for (int i = 0; i < map.getNumberOfRows(); i++) {

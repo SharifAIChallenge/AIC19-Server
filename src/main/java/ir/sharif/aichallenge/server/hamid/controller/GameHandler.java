@@ -222,8 +222,24 @@ public class GameHandler implements GameLogic {
 
     private Move prepareMove(int player, Event event) { // TODO check in case
         Hero hero;
-        int heroId = Integer.parseInt(event.getArgs()[0]);
-        String[] moves = Json.GSON.fromJson(event.getArgs()[1], String[].class);
+        int heroId;
+        try {
+             heroId = Integer.parseInt(event.getArgs()[0]);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        String onlyMove;                 //because of new changes in game
+        try {
+            onlyMove = Json.GSON.fromJson(event.getArgs()[1], String.class);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        String[] moves = new String[1];
+        moves[0] =onlyMove;                 //because of new changes in game
 
         hero = gameEngine.getPlayers()[player].getHero(heroId);
         if (hero == null)
@@ -457,7 +473,8 @@ public class GameHandler implements GameLogic {
                 clientHero.setCurrentHP(-1);    //not in vision
             else
                 clientHero.setCurrentHP(hero.getHp());  //in vision
-            //cooldowns
+/*
+            //cooldowns     todo ok?
             List<Cooldown> cooldowns = new ArrayList<>();
             for (Ability ability : hero.getAbilities()) {
                 Cooldown cooldown = new Cooldown(ability.getName(), ability.getRemainingCoolDown());
@@ -466,6 +483,7 @@ public class GameHandler implements GameLogic {
             Cooldown[] cool = new Cooldown[cooldowns.size()];
             cool = cooldowns.toArray(cool);
             clientHero.setCooldowns(cool);  //end of cooldowns
+*/
             clientHero.setCurrentCell(players[i].getVision().contains(hero.getCell()) ?
                     new EmptyCell(hero.getCell().getRow(), hero.getCell().getColumn()) : null);
             //recent path

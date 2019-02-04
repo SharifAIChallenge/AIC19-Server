@@ -25,7 +25,7 @@ public class Ability implements Cloneable{
 	private int areaOfEffect;
 	private int power;
 	private boolean isLobbing;
-	private boolean isPiercing;
+	private boolean isPiercing;		//NOTE: this field is for final level in AI Challenge
 
 	public Ability(ClientAbilityConstants abilityConstant)
 	{
