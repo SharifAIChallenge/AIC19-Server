@@ -186,6 +186,14 @@ public class GameHandler implements GameLogic {
 
     @Override
     public void simulateEvents(Event[] environmentEvent, Event[][] clientsEvent) {
+
+        System.out.println();
+        if (gameEngine.getState() == GameState.INIT)
+        {
+            gameEngine.setState(GameState.PICK);
+            return;
+        }
+
         Event[] playerOneEvents = clientsEvent[0];
         Event[] playerTwoEvents = clientsEvent[1];
 
@@ -396,7 +404,7 @@ public class GameHandler implements GameLogic {
 
     @Override
     public Message[] getClientMessages() {
-        if (gameEngine.getCurrentTurn().get() == 0)
+        if (gameEngine.getState() == GameState.INIT)
         {
             return getClientInitialMessages();
         }
