@@ -64,7 +64,7 @@ public class GameEngine {
     }
 
     public void initialize(InitialMessage initialMessage) {
-        state = GameState.PICK;
+        state = GameState.INIT;
 
         Map<String, Integer> gameConstants = initialMessage.getGameConstants();
         setGameConstants(gameConstants);
@@ -227,6 +227,9 @@ public class GameEngine {
     }
 
     private void assignScores() {
+        if (state != GameState.ACTION)
+            return;
+
         for (Player player : players) {
             for (Hero hero : player.getHeroes()) {
                 if (map.getObjectiveZone().contains(hero.getCell())) {      //todo List<Cell> in map --> Set<Cell> for contains
