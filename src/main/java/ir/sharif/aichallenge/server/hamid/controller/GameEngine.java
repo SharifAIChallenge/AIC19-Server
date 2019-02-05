@@ -254,6 +254,7 @@ public class GameEngine {
             } else {
                 respawnAllHeroes();
                 graphicHandler.addPickMessage();
+                serverViewJsons.add(Json.GSON.toJsonTree(graphicHandler.getGraphicPickMessage()));
                 state = GameState.MOVE;
                 updatePlayerVisions();
             }

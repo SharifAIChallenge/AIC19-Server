@@ -43,6 +43,15 @@ public class GraphicHandler {
     }
 
     public void addPickMessage() {
+        GraphicPickMessage graphicPickMessage = getGraphicPickMessage();
+
+        GraphicPickMessage[] graphicPickMessages = new GraphicPickMessage[1];
+        graphicPickMessages[0] = graphicPickMessage;
+        Message message = new Message(Message.NAME_PICK, graphicPickMessages);
+        addMessageToLog(message);
+    }
+
+    public GraphicPickMessage getGraphicPickMessage() {
         GraphicPickMessage graphicPickMessage = new GraphicPickMessage();
         GraphicHero[][] graphicHeroes = new GraphicHero[CLIENT_NUM][CLIENT_HERO_NUM];
         for (int i = 0; i < CLIENT_NUM; i++) {
@@ -53,10 +62,7 @@ public class GraphicHandler {
         }
         graphicPickMessage.setHeroes(graphicHeroes);
 
-        GraphicPickMessage[] graphicPickMessages = new GraphicPickMessage[1];
-        graphicPickMessages[0] = graphicPickMessage;
-        Message message = new Message(Message.NAME_PICK, graphicPickMessages);
-        addMessageToLog(message);
+        return graphicPickMessage;
     }
 
     public void addMoveMessage() {
