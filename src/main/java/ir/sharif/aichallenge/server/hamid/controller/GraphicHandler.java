@@ -57,7 +57,7 @@ public class GraphicHandler {
         for (int i = 0; i < CLIENT_NUM; i++) {
             for (int j = 0; j < CLIENT_HERO_NUM; j++) {
                 Hero hero = gameEngine.getPlayers()[i].getHeroes().get(j);
-                graphicHeroes[i][j] = hero.getGraphicHero();
+                graphicHeroes[i][j] = hero.getGraphicHero(i);
             }
         }
         graphicPickMessage.setHeroes(graphicHeroes);
