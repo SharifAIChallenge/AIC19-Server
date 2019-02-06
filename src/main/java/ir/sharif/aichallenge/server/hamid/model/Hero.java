@@ -76,8 +76,26 @@ public class Hero implements Cloneable{
         return clientHero;
     }
 
-    public GraphicHero getGraphicHero() {
+    public GraphicHero getGraphicHero(int playerId) {
+        String name = getHeroName(playerId);
         return new GraphicHero(id, name, cell.getRow(), cell.getColumn());
+    }
+
+    private String getHeroName(int playerId)
+    {
+        switch (name)
+        {
+            case "SENTRY":
+                return playerId == 0 ? "Ancient Warrior" : "Mechanical Golem";
+            case "BLASTER":
+                return playerId == 0 ? "Red Demon" : "Slayer";
+            case "HEALER":
+                return playerId == 0 ? "Big Ork" : "Elemental Golem";
+            case "GUARDIAN":
+                return playerId == 0 ? "Ancient Queen" : "Mystic";
+        }
+
+        return "";
     }
 
     public void addToRecentPathForOpponent(Cell cell) {
