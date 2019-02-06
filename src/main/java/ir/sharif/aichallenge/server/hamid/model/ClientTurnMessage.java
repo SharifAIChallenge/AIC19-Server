@@ -4,8 +4,10 @@ import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
 import lombok.*;
 
-import java.util.*;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Builder
 @NoArgsConstructor
@@ -15,7 +17,6 @@ import java.util.Map;
 
 public class ClientTurnMessage {
     private GameState type;
-    private List<Integer> heroesId;     //todo what the fuck is it doing here? why we don't have Player instead?
     private List<Move> moves = new ArrayList<>();
     private String heroName;
     private List<Cast> casts = new ArrayList<>();
