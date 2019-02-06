@@ -4,6 +4,7 @@ import lombok.Setter;
 
 @Setter
 public class EndMessage {   //todo set this
-    int[] scores;
-    int winner;     // -1 if draw
+    private int[] scores;
+    private int[] UsedAps;
+    private int winner;     // -1 if draw
 }

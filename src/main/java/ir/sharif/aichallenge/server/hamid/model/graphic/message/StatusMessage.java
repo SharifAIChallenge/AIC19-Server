@@ -10,6 +10,7 @@ import java.util.List;
 @Setter
 @Getter
 public class StatusMessage {
-    List<StatusHero> heroes;
-    List<RespawnedHero> respawnedHeroes;
+    private List<StatusHero> heroes;
+    private List<RespawnedHero> respawnedHeroes;
+    private int[] scores;
 }
