@@ -183,7 +183,7 @@ public class GraphicHandler {
 
         int ap0 = gameEngine.getPlayers()[0].getTotalUsedAp();
         int ap1 = gameEngine.getPlayers()[1].getTotalUsedAp();
-        endMessage.setUsedAps(new int[]{ap0, ap1});
+        endMessage.setUsedAPs(new int[]{ap0, ap1});
 
         if (scores[1] > scores[0]) {
             endMessage.setWinner(1);
