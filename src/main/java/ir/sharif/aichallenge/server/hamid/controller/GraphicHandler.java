@@ -146,7 +146,8 @@ public class GraphicHandler {
     public void addStatusMessage() {
         StatusMessage statusMessage = new StatusMessage();
         List<StatusHero> statusHeroes = new ArrayList<>();
-        for (Player player : gameEngine.getPlayers()) {
+        Player[] players = gameEngine.getPlayers();
+        for (Player player : players) {
             for (Hero hero : player.getHeroes()) {
                 StatusHero statusHero = new StatusHero(hero.getId(), hero.getHp(), hero.getRespawnTime());
                 List<RemainingCooldown> remainingCooldowns = new ArrayList<>();
@@ -163,6 +164,7 @@ public class GraphicHandler {
             respawnedHeroes.add(new RespawnedHero(hero.getId(), hero.getCell().getRow(), hero.getCell().getColumn()));
         }
         statusMessage.setRespawnedHeroes(respawnedHeroes);
+        statusMessage.setScores(new int[]{players[0].getScore(), players[1].getScore()});
 
         StatusMessage[] statusMessages = new StatusMessage[1];
         statusMessages[0] = statusMessage;
@@ -178,14 +180,16 @@ public class GraphicHandler {
         }
         endMessage.setScores(scores);
 
+        int ap0 = gameEngine.getPlayers()[0].getTotalUsedAp();
+        int ap1 = gameEngine.getPlayers()[1].getTotalUsedAp();
+        endMessage.setUsedAps(new int[]{ap0, ap1});
+
         if (scores[1] > scores[0]) {
             endMessage.setWinner(1);
         }
         else if (scores[0] > scores[1]) {
             endMessage.setWinner(0);
         } else {
-            int ap0 = gameEngine.getPlayers()[0].getTotalUsedAp();
-            int ap1 = gameEngine.getPlayers()[1].getTotalUsedAp();
             if (ap0 < ap1)
                 endMessage.setWinner(0);
             else if (ap1 < ap0)
