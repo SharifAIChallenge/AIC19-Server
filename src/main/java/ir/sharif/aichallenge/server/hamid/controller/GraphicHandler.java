@@ -93,10 +93,11 @@ public class GraphicHandler {
 
         for (Player player : gameEngine.getPlayers()) {
             for (Hero hero : player.getHeroes()) {
-                if (hero.getHp() <= 0)
+                int size = hero.getRecentPath().size();
+                if (hero.getHp() <= 0 || size <= 1)
                     continue;
                 int id = hero.getId();
-                for (int i = 1; i < hero.getRecentPath().size(); i++) {
+                for (int i = size - 1; i < size; i++) {
                     Cell cell = hero.getRecentPath().get(i);
                     Cell prevCell = hero.getRecentPath().get(i - 1);
                     switch (prevCell.getDirectionTo(cell)) {
