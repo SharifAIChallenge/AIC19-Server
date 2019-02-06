@@ -76,8 +76,8 @@ public class Hero implements Cloneable{
         return clientHero;
     }
 
-    public GraphicHero getGraphicHero(int playerId) {
-        String name = getHeroName(playerId);
+    public GraphicHero getGraphicHero(int playerId, boolean isGraphic) {
+        String name = isGraphic ? getHeroName(playerId) : this.name;
         return new GraphicHero(id, name, cell.getRow(), cell.getColumn());
     }
 
