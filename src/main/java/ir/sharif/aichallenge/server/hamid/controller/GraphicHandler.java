@@ -43,7 +43,7 @@ public class GraphicHandler {
     }
 
     public void addPickMessage() {
-        GraphicPickMessage graphicPickMessage = getGraphicPickMessage();
+        GraphicPickMessage graphicPickMessage = getGraphicPickMessage(true);
 
         GraphicPickMessage[] graphicPickMessages = new GraphicPickMessage[1];
         graphicPickMessages[0] = graphicPickMessage;
@@ -51,13 +51,13 @@ public class GraphicHandler {
         addMessageToLog(message);
     }
 
-    public GraphicPickMessage getGraphicPickMessage() {
+    public GraphicPickMessage getGraphicPickMessage(boolean isGraphic) {
         GraphicPickMessage graphicPickMessage = new GraphicPickMessage();
         GraphicHero[][] graphicHeroes = new GraphicHero[CLIENT_NUM][CLIENT_HERO_NUM];
         for (int i = 0; i < CLIENT_NUM; i++) {
             for (int j = 0; j < CLIENT_HERO_NUM; j++) {
                 Hero hero = gameEngine.getPlayers()[i].getHeroes().get(j);
-                graphicHeroes[i][j] = hero.getGraphicHero(i);
+                graphicHeroes[i][j] = hero.getGraphicHero(i, isGraphic);
             }
         }
         graphicPickMessage.setHeroes(graphicHeroes);
