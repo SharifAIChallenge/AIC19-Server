@@ -455,6 +455,8 @@ public class GameEngine {
             for (Hero hero : player.getHeroes()) {
                 if (stepNumber < hero.getRecentPath().size()) {
                     hero.moveTo(hero.getRecentPath().get(stepNumber)); // at the end of iteration heroes are at their destination
+                    if (stepNumber != 0)
+                        player.setActionPoint(player.getActionPoint() - hero.getMoveApCost());
                 }
             }
         }
