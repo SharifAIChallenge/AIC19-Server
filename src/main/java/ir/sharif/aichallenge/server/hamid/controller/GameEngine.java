@@ -776,6 +776,8 @@ public class GameEngine {
                 continue;
             }
             Cell targetCell = nextCellIfNotWall(hero.getCell(), directions.get(0));
+            if (targetCell == null)
+                continue;
             HeroMovement heroMovement = new HeroMovement(hero.getCell(), targetCell, hero);
             heroMovement.setAp(hero.getMoveApCost());
             movements.add(heroMovement);
