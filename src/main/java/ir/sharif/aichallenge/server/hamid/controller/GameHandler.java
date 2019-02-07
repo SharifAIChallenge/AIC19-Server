@@ -261,7 +261,7 @@ public class GameHandler implements GameLogic {
         }
 
         String[] moves = new String[1];
-        moves[0] =onlyMove;                 //because of new changes in game
+        moves[0] = onlyMove;                 //because of new changes in game
 
         hero = gameEngine.getPlayers()[player].getHero(heroId);
         if (hero == null)
@@ -304,6 +304,9 @@ public class GameHandler implements GameLogic {
         try {
             targetRow = Integer.parseInt(event.getArgs()[2]);
             targetColumn = Integer.parseInt(event.getArgs()[3]);
+//            if ((gameEngine.getMap().getCell(targetRow, targetColumn).isWall() &&
+//                    ability.getType() == AbilityType.DODGE) || gameEngine.getMap().isInMap(targetRow, targetColumn))
+//                return null;
         } catch (NumberFormatException e) {
             e.printStackTrace();
             return null;
@@ -311,7 +314,32 @@ public class GameHandler implements GameLogic {
         if (!gameEngine.getMap().isInMap(targetRow, targetColumn))
             return null;
 
+        if (ability.getType() == AbilityType.DODGE)
+        {
+            Cell cell = fixDodgeTarget(hero, gameEngine.getMap().getCell(targetRow, targetColumn), ability.getRange());
+            if (cell == null || cell.equals(hero.getCell()))
+            {
+                return null;
+            }
+            return new Cast(hero, ability, cell.getRow(), cell.getColumn());
+        }
+
         return new Cast(hero, ability, targetRow, targetColumn);
+    }
+
+    private Cell fixDodgeTarget(Hero hero, Cell targetCell, int range) // TODO check this
+    {
+        VisionTools visionTools = gameEngine.getVisionTools();
+        Cell[] rayCells = visionTools.getRayCells(hero.getCell(), targetCell, true);
+
+        for (int i = rayCells.length - 1; i >= 0; i--)
+        {
+            if (visionTools.manhattanDistance(hero.getCell(), rayCells[i]) <= range/*&& !rayCells[i].isWall()*/)
+            {
+                return rayCells[i];
+            }
+        }
+        return null;
     }
 
     @Override

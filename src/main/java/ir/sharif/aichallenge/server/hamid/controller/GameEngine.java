@@ -12,6 +12,8 @@ import ir.sharif.aichallenge.server.hamid.model.enums.Direction;
 import ir.sharif.aichallenge.server.hamid.model.enums.GameState;
 import ir.sharif.aichallenge.server.hamid.model.message.InitialMessage;
 import ir.sharif.aichallenge.server.hamid.utils.AbilityTools;
+import ir.sharif.aichallenge.server.hamid.utils.HeroMovement;
+import ir.sharif.aichallenge.server.hamid.utils.MovementHandler;
 import ir.sharif.aichallenge.server.hamid.utils.VisionTools;
 import lombok.Getter;
 import lombok.Setter;
@@ -378,8 +380,8 @@ public class GameEngine {
         player1oppCastedAbilities = new ArrayList<>();
         player2oppCastedAbilities = new ArrayList<>();
 
-        List<Move> moves1 = preprocessMessageMoves(message1, players[0]);
-        List<Move> moves2 = preprocessMessageMoves(message2, players[1]);
+        List<HeroMovement> moves1 = preprocessMessageMoves(message1, players[0]);
+        List<HeroMovement> moves2 = preprocessMessageMoves(message2, players[1]);
 
         //set heroes recentPath
         resetHeroesRecentPaths();
@@ -462,37 +464,77 @@ public class GameEngine {
         for (Player player : players) {
             for (Hero hero : player.getHeroes()) {
                 hero.setRecentPath(new ArrayList<>());
+                hero.getRecentPath().add(hero.getCell());
             }
         }
     }
 
-    private void updateHeroRecentPaths(List<Move> moves) {
-        for (Move move : moves) {
-            Hero hero = move.getHero();
+    private void updateHeroRecentPaths(List<HeroMovement> movements) {
+
+        for (HeroMovement movement : movements)
+        {
+            Hero hero = movement.getHero();
             List<Cell> recentPath = hero.getRecentPath();
             Cell cell = hero.getCell();
-            recentPath.add(cell);
-            for (Direction direction : move.getMoves()) {
-                cell = nextCellIfNotWall(cell, direction); //it's valid
-                recentPath.add(cell);
-            }
+//            recentPath.add(cell);
+            recentPath.add(movement.getEndCell());
         }
+
+//        for (Move move : moves) {
+//            Hero hero = move.getHero();
+//            List<Cell> recentPath = hero.getRecentPath();
+//            Cell cell = hero.getCell();
+//            recentPath.add(cell);
+//            for (Direction direction : move.getMoves()) {
+//                cell = nextCellIfNotWall(cell, direction); //it's valid
+//                recentPath.add(cell);
+//            }
+//        }
     }
 
-    private List<Move> preprocessMessageMoves(ClientTurnMessage message, Player player) {
-        message.mergeMoves();   //filters moves (in new version)
-        List<Move> moves = message.getMoves();
-        for (Move move : moves) {
-            prepareMove(move);
-        }
-        moves = fixMoveMessage(moves, player);  //for ap
-        moves.sort(Comparator.comparingInt(o -> o.getMoves().size()));
-        postPrepare(moves);
+    private List<HeroMovement> preprocessMessageMoves(ClientTurnMessage message, Player player) {
+        List<HeroMovement> heroMovements = getHeroMovements(message.getMoves(), player.getHeroes());
+        List<HeroMovement> validMovements = MovementHandler.getValidMovements(heroMovements, map, player.getHeroes());
+
+//        message.mergeMoves();   //filters moves (in new version)
+//        List<Move> moves = message.getMoves();
+//        for (Move move : moves) {
+//            prepareMove(move);
+//        }
+        //        moves.sort(Comparator.comparingInt(o -> o.getMoves().size()));
+//        postPrepare(moves);
 
         //setting ap for players
-        calculateMoveAp(moves, player);
+//        calculateMoveAp(moves, player);
 
-        return moves;
+        return fixMoveMessage(validMovements, player);
+    }
+
+    private List<HeroMovement> getHeroMovements(List<Move> moves, List<Hero> heroes)
+    {
+        List<HeroMovement> movements = new ArrayList<>();
+
+        for (Move move : moves)
+        {
+            Hero hero = move.getHero();
+            List<Direction> directions = move.getMoves();
+            if (hero.getHp() == 0 || directions.size() < 1)
+            {
+                continue;
+            }
+            Cell targetCell = nextCellIfNotWall(hero.getCell(), directions.get(0));
+            HeroMovement heroMovement = new HeroMovement(hero.getCell(), targetCell, hero);
+            movements.add(heroMovement);
+        }
+
+        for (Hero hero : heroes)
+        {
+            Cell currentCell = hero.getCell();
+            HeroMovement noMove = new HeroMovement(currentCell, currentCell, hero);
+            movements.add(noMove);
+        }
+
+        return movements;
     }
 
     private void calculateMoveAp(List<Move> moves, Player player) {
@@ -501,17 +543,32 @@ public class GameEngine {
         }
     }
 
-    private List<Move> fixMoveMessage(List<Move> moves, Player player) {
-        List<Move> newMoves = new ArrayList<>();
+    private List<HeroMovement> fixMoveMessage(List<HeroMovement> heroMovements, Player player) {
+        List<HeroMovement> finalMovements = new ArrayList<>();
         int ap = player.getActionPoint();
-        for (Move move : moves) {
-            ap -= move.getGreedyApCost();
+
+        for (HeroMovement movement : heroMovements)
+        {
+            int neededAP = movement.getNeededAP();
+            if (neededAP == 0)
+                continue;
+            ap -= movement.getNeededAP();
             if (ap < 0)
                 break;
-            newMoves.add(move);
+            finalMovements.add(movement);
         }
 
-        return newMoves;
+        return finalMovements;
+//        List<Move> newMoves = new ArrayList<>();
+//        int ap = player.getActionPoint();
+//        for (Move move : moves) {
+//            ap -= move.getGreedyApCost();
+//            if (ap < 0)
+//                break;
+//            newMoves.add(move);
+//        }
+//
+//        return newMoves;
     }
 
     private void pick(ClientTurnMessage message1, ClientTurnMessage message2) { // TODO check this
@@ -654,8 +711,14 @@ public class GameEngine {
         castedAbility.setTargetHeroes(targetHeroes);
         castedAbility.setStartCell(cast.getHero().getCell());
         castedAbility.setAbility(cast.getAbility());
-        castedAbility.setEndCell(abilityTools.getImpactCell(cast.getAbility(), cast.getHero().getCell(),
-                map.getCell(cast.getTargetRow(), cast.getTargetColumn())));
+//        if (cast.getAbility().getType() == AbilityType.DODGE)
+//        {
+//            castedAbility.setEndCell();
+//        } else
+//        {
+            castedAbility.setEndCell(abilityTools.getImpactCell(cast.getAbility(), cast.getHero().getCell(),
+                    map.getCell(cast.getTargetRow(), cast.getTargetColumn())));
+//        }
         castedAbilities.add(castedAbility);
 
         ClientCastedAbility clientCastedAbility = new ClientCastedAbility();
