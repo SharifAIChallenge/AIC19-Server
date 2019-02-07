@@ -26,6 +26,7 @@ public class Player {
 	private Set<Cell> vision = new HashSet<>();	// hashcode and equals not matter
 	private Player opponent;
 	private int totalUsedAp = 0;
+	private Set<Cell> respawnZone = new HashSet<>();
 
 	public void addHero(Hero hero) {
 		heroes.add(hero);

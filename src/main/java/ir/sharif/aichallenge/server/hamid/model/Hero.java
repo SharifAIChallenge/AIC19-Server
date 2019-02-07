@@ -32,6 +32,7 @@ public class Hero implements Cloneable{
     private int respawnTime;
     private int id;         // make final
     private String name;    // make final
+    private boolean hasCast = false; // TODO check if this is resetting right
 
     public Hero(ClientHeroConstants heroConstant, List<Ability> abilities)
     {
@@ -124,7 +125,7 @@ public class Hero implements Cloneable{
         }
         ids = ids + 1;
         return new Hero(abilities, moveApCost, maxHp, hp, cell, new ArrayList<>(), new ArrayList<>() , maxRespawnTime,
-                respawnTime, ids, name);
+                respawnTime, ids, name, false);
     }
 
     @Override

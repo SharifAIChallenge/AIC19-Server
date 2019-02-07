@@ -2,6 +2,7 @@ package ir.sharif.aichallenge.server.hamid.utils;
 
 import ir.sharif.aichallenge.server.hamid.model.Cell;
 import ir.sharif.aichallenge.server.hamid.model.Hero;
+import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +14,8 @@ public class HeroMovement
     private Cell startCell;
     private Cell endCell;
     private int priority;
+    private int ap;
+    private Ability ability;
 
     public HeroMovement(Cell startCell, Cell endCell, Hero hero)
     {

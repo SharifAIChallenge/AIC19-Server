@@ -43,7 +43,7 @@ public class AbilityTools {
         Cell[] impactCells = getImpactCells(ability, startCell, targetCell);
         List<Cell> affectedCells = getCellsInAOE(impactCells[impactCells.length - 1],
                 ability.getAreaOfEffect());
-        if (ability.getType() == AbilityType.DEFENSIVE) {
+        if (ability.getType() == AbilityType.DEFENSIVE || ability.getType() == AbilityType.FORTIFY) {
             return getMyHeroesInCells(affectedCells.toArray(new Cell[0]));
         } else {
             return getOppHeroesInCells(affectedCells.toArray(new Cell[0]));

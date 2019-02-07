@@ -35,7 +35,7 @@ public class Map {
 		return (row >= 0 && row < numberOfRows && column >= 0 && column < numberOfColumns);
 	}
 
-	public void init(ClientInitialCell[][] cells)
+	public void init(ClientInitialCell[][] cells, Player[] players)
 	{
 		numberOfRows = cells.length;
 		numberOfColumns = cells[0].length;
@@ -68,12 +68,15 @@ public class Map {
 				this.cells[cell.getRow()][cell.getColumn()] = cell;
 			}
 		}
+
+		players[0].getRespawnZone().addAll(this.player1RespawnZone);
+		players[1].getRespawnZone().addAll(this.player2RespawnZone);
 	}
 
     public JsonObject getClientInitialMap(int clientNum)
     {
-        String firstClientPropertyName = clientNum == 1 ? "isInMyRespawnZone" : "isInOppRespawnZone";
-        String secondClientPropertyName = clientNum == 1 ? "isInOppRespawnZone" : "isInMyRespawnZone";
+        String firstClientPropertyName = clientNum == 0 ? "isInMyRespawnZone" : "isInOppRespawnZone";
+        String secondClientPropertyName = clientNum == 0 ? "isInOppRespawnZone" : "isInMyRespawnZone";
         JsonObject mapObject = new JsonObject();
         mapObject.addProperty("rowNum", numberOfRows);
         mapObject.addProperty("columnNum", numberOfColumns);

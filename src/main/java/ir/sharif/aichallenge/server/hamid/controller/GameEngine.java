@@ -50,6 +50,7 @@ public class GameEngine {
     private List<ClientCastedAbility> player1oppCastedAbilities = new ArrayList<>();
     private List<ClientCastedAbility> player2oppCastedAbilities = new ArrayList<>();
     private Map<Hero, Ability> fortifiedHeroes;
+    private Set<Hero> ruhFortifiedHeroes;
     private List<Hero> respawnedHeroes = new ArrayList<>();
 
     private JsonArray serverViewJsons = new JsonArray();
@@ -74,7 +75,7 @@ public class GameEngine {
 
         ClientInitialCell[][] cells = initialMessage.getMap().getCells();
         map = new ir.sharif.aichallenge.server.hamid.model.Map();
-        map.init(cells);
+        map.init(cells, players);
         visionTools = new VisionTools(map);
         abilityTools = new AbilityTools();
         abilityTools.setMap(map);
@@ -165,6 +166,8 @@ public class GameEngine {
         //cast
         cast(message1, message2);
 
+        resetCasters(); // TODO correct placement?
+
         updateKilledHeroes();
 
         assignScores();
@@ -174,6 +177,17 @@ public class GameEngine {
         postProcess();
 
         updateStateAndTurn();
+    }
+
+    private void resetCasters()
+    {
+        for (Player player : players)
+        {
+            for (Hero hero : player.getHeroes())
+            {
+                hero.setHasCast(false);
+            }
+        }
     }
 
     private void postProcess() {
@@ -276,58 +290,260 @@ public class GameEngine {
         }
     }
 
-    private void cast(ClientTurnMessage message1, ClientTurnMessage message2) {
-        fortifiedHeroes = new HashMap<>();
-
-        if (!state.equals(GameState.ACTION)) {
+    private void cast(ClientTurnMessage firstMessage, ClientTurnMessage secondMessage)
+    {
+        if (!state.equals(GameState.ACTION))
+        {
             return;
         }
-
-        List<Cast> casts1 = message1.getCasts();
-        List<Cast> casts2 = message2.getCasts();
-
-        casts1 = filterCasts(casts1, players[0]);
-        casts2 = filterCasts(casts2, players[1]);
-
-        // TODO implementing a reset method and clearing the lists there is better in my opinion
+        ruhFortifiedHeroes = new HashSet<>();
+        castedAbilities = new ArrayList<>();
         player1castedAbilities = new ArrayList<>();
         player2castedAbilities = new ArrayList<>();
         player1oppCastedAbilities = new ArrayList<>();
         player2oppCastedAbilities = new ArrayList<>();
-        castedAbilities = new ArrayList<>();
 
-        castByAbility(casts1, casts2, AbilityType.FORTIFY);
-        castByAbility(casts1, casts2, AbilityType.DEFENSIVE);
-        List<Cast> validDodgeCasts1 = new ArrayList<>(new DodgeHandler(map, players[0], casts1).getValidDodgeCasts());
-        List<Cast> validDodgeCasts2 = new ArrayList<>(new DodgeHandler(map, players[1], casts2).getValidDodgeCasts());
-        castByAbility(validDodgeCasts1, validDodgeCasts2, AbilityType.DODGE);
-        castByAbility(casts1, casts2, AbilityType.OFFENSIVE);
+        List<Cast> allFirstCasts = firstMessage.getCasts();
+        List<Cast> allSecondCasts = secondMessage.getCasts();
 
-        updatePlayerVisions();  //because of dodges TODO any extra action needed?
-
-/*
-        List<Cast> casts = new ArrayList<>();
-        casts.addAll(casts1);
-        casts.addAll(casts2);
-        Collections.sort(casts);
-*/
-
-/*
-        for (Cast cast : casts) {
-            if (casts1.contains(cast)) {
-                abilityTools.setMyHeroes(players[0].getHeroes());
-                abilityTools.setOppHeroes(players[1].getHeroes());
-                cast(cast, 1, fortifiedHeroes);
-            } else {
-                abilityTools.setMyHeroes(players[1].getHeroes());
-                abilityTools.setOppHeroes(players[0].getHeroes());
-                cast(cast, 2, fortifiedHeroes);
-            }
-        }
-*/
-
-
+        castAbilities(allFirstCasts, allSecondCasts, AbilityType.FORTIFY);
+        castAbilities(allFirstCasts, allSecondCasts, AbilityType.DEFENSIVE);
+        castAbilities(allFirstCasts, allSecondCasts, AbilityType.DODGE);
+        castAbilities(allFirstCasts, allSecondCasts, AbilityType.OFFENSIVE);
     }
+
+    private void castAbilities(List<Cast> allFirstCasts, List<Cast> allSecondCasts, AbilityType abilityType)
+    {
+        List<Cast> firstCasts = Cast.extractCasts(allFirstCasts, abilityType);
+        List<Cast> secondCasts = Cast.extractCasts(allSecondCasts, abilityType);
+
+        if (abilityType == AbilityType.DODGE)
+        {
+            List<HeroMovement> firstMovements = affectDodges(firstCasts, players[0]);
+            List<HeroMovement> secondMovements = affectDodges(secondCasts, players[1]);
+            handleAllMovements(firstMovements, secondMovements);
+            return;
+        }
+
+        affectCasts(firstCasts, players[0]);
+        affectCasts(secondCasts, players[1]);
+    }
+
+    private List<HeroMovement> affectDodges(List<Cast> dodgingCasts, Player player)
+    {
+        List<HeroMovement> dodgeMovements = createMovementsFromDodge(dodgingCasts, player);
+        List<HeroMovement> validMovements = MovementHandler.getValidMovements(dodgeMovements, map, player.getHeroes());
+        List<HeroMovement> finalMovements = fixMoveMessage(validMovements, player);
+
+        for (HeroMovement movement : finalMovements)
+        {
+            CastedAbility castedAbility = new CastedAbility();
+            castedAbility.setAbility(movement.getAbility());
+            castedAbility.setTargetHeroes(new ArrayList<>());
+            castedAbility.setCasterHero(movement.getHero());
+            castedAbility.setStartCell(movement.getStartCell());
+            castedAbility.setEndCell(movement.getEndCell());
+            castedAbilities.add(castedAbility);
+            addCastedAbility(castedAbility, player == players[0] ? 1 : 2);
+        }
+
+        return finalMovements;
+    }
+
+    private List<HeroMovement> createMovementsFromDodge(List<Cast> dodgingCasts, Player player)
+    {
+        List<HeroMovement> movements = new ArrayList<>();
+
+        for (Cast cast : dodgingCasts)
+        {
+            Hero hero = cast.getHero();
+            Ability ability = cast.getAbility();
+            int remCooldown = ability.getRemainingCoolDown();
+            if (remCooldown != 0 || hero.isHasCast())
+            {
+                continue;
+            }
+
+            Cell startCell = hero.getCell();
+            Cell targetCell = map.getCell(cast.getTargetRow(), cast.getTargetColumn());
+
+            HeroMovement movement = new HeroMovement(startCell, targetCell, hero);
+            movement.setAp(cast.getAbility().getApCost());
+            movement.setAbility(ability);
+            movements.add(movement);
+        }
+
+        for (Hero hero : player.getHeroes())
+        {
+            Cell currentCell = hero.getCell();
+            HeroMovement noMove = new HeroMovement(currentCell, currentCell, hero);
+            noMove.setAp(0);
+            movements.add(noMove);
+        }
+
+        return movements;
+    }
+
+    private void affectCasts(List<Cast> casts, Player player)
+    {
+        int ap = player.getActionPoint();
+
+        for (Cast cast : casts)
+        {
+            Hero hero = cast.getHero();
+            Ability ability = cast.getAbility();
+            int neededAP = ability.getApCost();
+            int remCooldown = ability.getRemainingCoolDown();
+            if (remCooldown != 0 || neededAP > ap || hero.isHasCast())
+            {
+                continue;
+            }
+
+            ap -= neededAP;
+            Cell startCell = hero.getCell();
+            Cell targetCell = map.getCell(cast.getTargetRow(), cast.getTargetColumn());
+            List<Hero> targetHeroes = Arrays.asList(abilityTools.getAbilityTargets(ability, startCell, targetCell));
+            Cell realTarget = abilityTools.getImpactCell(ability, startCell, targetCell);
+            hero.setHasCast(true);
+            affectCast(hero, ability, realTarget, targetHeroes, player);
+            ability.setRemainingCoolDown(ability.getCoolDown());
+        }
+
+        player.setActionPoint(ap);
+    }
+
+    private void affectCast(Hero caster, Ability ability, Cell realTarget, List<Hero> targetHeroes, Player player)
+    {
+        CastedAbility castedAbility;
+        Cell casterCell = caster.getCell();
+
+        switch (ability.getType())
+        {
+            case DEFENSIVE:
+                castDefensive(ability, targetHeroes);
+                castedAbility = new CastedAbility();
+                castedAbility.setAbility(ability);
+                castedAbility.setStartCell(casterCell);
+                castedAbility.setEndCell(realTarget);
+                castedAbility.setCasterHero(caster);
+                castedAbility.setTargetHeroes(targetHeroes);
+                castedAbilities.add(castedAbility);
+                addCastedAbility(castedAbility, player == players[0] ? 1 : 2);
+                break;
+            case OFFENSIVE:
+                List<Hero> finalTargets = castOffensive(caster, ability, targetHeroes, player);
+                castedAbility = new CastedAbility();
+                castedAbility.setAbility(ability);
+                castedAbility.setStartCell(casterCell);
+                castedAbility.setEndCell(realTarget);
+                castedAbility.setCasterHero(caster);
+                castedAbility.setTargetHeroes(finalTargets);
+                castedAbilities.add(castedAbility);
+                addCastedAbility(castedAbility, player == players[0] ? 1 : 2);
+                break;
+            case FORTIFY:
+                ruhFortifiedHeroes.addAll(targetHeroes);
+                castedAbility = new CastedAbility();
+                castedAbility.setAbility(ability);
+                castedAbility.setStartCell(casterCell);
+                castedAbility.setEndCell(realTarget);
+                castedAbility.setCasterHero(caster);
+                castedAbility.setTargetHeroes(targetHeroes);
+                castedAbilities.add(castedAbility);
+                addCastedAbility(castedAbility, player == players[0] ? 1 : 2);
+                break;
+        }
+    }
+
+    private void castDefensive(Ability ability, List<Hero> targetHeroes) // TODO should we check if the hero belongs to a specific player?
+    {
+        for (Hero hero : targetHeroes)
+        {
+            int power = ability.getPower();
+            int heroCurrentHP = hero.getHp();
+            int emptyHP = hero.getMaxHp() - heroCurrentHP;
+            int finalPower = Math.min(power, emptyHP);
+            hero.setHp(heroCurrentHP + finalPower);
+        }
+    }
+
+    private List<Hero> castOffensive(Hero caster, Ability ability, List<Hero> targetHeroes, Player player)
+    {
+        List<Hero> finalTargets = new ArrayList<>();
+        Player opp = player.getOpponent();
+        Cell casterCell = caster.getCell();
+
+        for (Hero hero : targetHeroes)
+        {
+            Cell targetCell = hero.getCell();
+
+            if (opp.getRespawnZone().contains(targetCell) || player.getRespawnZone().contains(casterCell) ||
+                    ruhFortifiedHeroes.contains(hero))
+            {
+                continue;
+            }
+
+            int power = ability.getPower();
+            int hp = hero.getHp();
+            hero.setHp(hp - power);
+            finalTargets.add(hero);
+        }
+
+        return finalTargets;
+    }
+
+//    private void cast(ClientTurnMessage message1, ClientTurnMessage message2) {
+//        fortifiedHeroes = new HashMap<>();
+//
+//        if (!state.equals(GameState.ACTION)) {
+//            return;
+//        }
+//
+//        List<Cast> casts1 = message1.getCasts();
+//        List<Cast> casts2 = message2.getCasts();
+//
+//        casts1 = filterCasts(casts1, players[0]);
+//        casts2 = filterCasts(casts2, players[1]);
+//
+//        // TODO implementing a reset method and clearing the lists there is better in my opinion
+//        player1castedAbilities = new ArrayList<>();
+//        player2castedAbilities = new ArrayList<>();
+//        player1oppCastedAbilities = new ArrayList<>();
+//        player2oppCastedAbilities = new ArrayList<>();
+//        castedAbilities = new ArrayList<>();
+//
+//        castByAbility(casts1, casts2, AbilityType.FORTIFY);
+//        castByAbility(casts1, casts2, AbilityType.DEFENSIVE);
+//        List<Cast> validDodgeCasts1 = new ArrayList<>(new DodgeHandler(map, players[0], casts1).getValidDodgeCasts());
+//        List<Cast> validDodgeCasts2 = new ArrayList<>(new DodgeHandler(map, players[1], casts2).getValidDodgeCasts());
+//        castByAbility(validDodgeCasts1, validDodgeCasts2, AbilityType.DODGE);
+//        castByAbility(casts1, casts2, AbilityType.OFFENSIVE);
+//
+//        updatePlayerVisions();  //because of dodges TODO any extra action needed?
+//
+///*
+//        List<Cast> casts = new ArrayList<>();
+//        casts.addAll(casts1);
+//        casts.addAll(casts2);
+//        Collections.sort(casts);
+//*/
+//
+///*
+//        for (Cast cast : casts) {
+//            if (casts1.contains(cast)) {
+//                abilityTools.setMyHeroes(players[0].getHeroes());
+//                abilityTools.setOppHeroes(players[1].getHeroes());
+//                cast(cast, 1, fortifiedHeroes);
+//            } else {
+//                abilityTools.setMyHeroes(players[1].getHeroes());
+//                abilityTools.setOppHeroes(players[0].getHeroes());
+//                cast(cast, 2, fortifiedHeroes);
+//            }
+//        }
+//*/
+//
+//
+//    }
 
     private List<Cast> filterCasts(List<Cast> casts, Player player) {
         Set<Hero> seenHeroes = new HashSet<>();
@@ -382,11 +598,41 @@ public class GameEngine {
 
         List<HeroMovement> moves1 = preprocessMessageMoves(message1, players[0]);
         List<HeroMovement> moves2 = preprocessMessageMoves(message2, players[1]);
+        handleAllMovements(moves1, moves2);
 
+//        //set heroes recentPath
+//        resetHeroesRecentPaths();
+//        updateHeroRecentPaths(moves1);
+//        updateHeroRecentPaths(moves2); // TODO ask ruhollah why is this here
+//
+//
+//        //move and vision
+//        int maxIter = 0;
+//        for (Player player : players) {
+//            for (Hero hero : player.getHeroes()) {
+//                hero.setRecentPathForOpponent(new ArrayList<>()); // TODO this can go to the reset method
+//                maxIter = Math.max(maxIter, hero.getRecentPath().size());
+//            }
+//        }
+//        for (int stepNumber = 0; stepNumber < maxIter; stepNumber++) {
+//            moveHeroesOneStep(stepNumber); // TODO check move ap on prepare
+//            updateHeroVisions();
+//        }
+//        updateOpponentHeroRecentPaths();
+//
+//        // end of move and vision
+//
+//        //vision for players
+//        updatePlayerVisions();
+//        //end of vision for players
+    }
+
+    private void handleAllMovements(List<HeroMovement> firstMovements, List<HeroMovement> secondMovements)
+    {
         //set heroes recentPath
         resetHeroesRecentPaths();
-        updateHeroRecentPaths(moves1);
-        updateHeroRecentPaths(moves2); // TODO ask ruhollah why is this here
+        updateHeroRecentPaths(firstMovements);
+        updateHeroRecentPaths(secondMovements); // TODO ask ruhollah why is this here
 
 
         //move and vision
@@ -476,8 +722,13 @@ public class GameEngine {
         for (HeroMovement movement : movements)
         {
             Hero hero = movement.getHero();
+            Ability ability = movement.getAbility();
+            if (ability != null)
+            {
+                ability.setCoolDown(ability.getCoolDown());
+            }
             List<Cell> recentPath = hero.getRecentPath();
-            Cell cell = hero.getCell();
+//            Cell cell = hero.getCell();
 //            recentPath.add(cell);
             recentPath.add(movement.getEndCell());
         }
@@ -526,6 +777,7 @@ public class GameEngine {
             }
             Cell targetCell = nextCellIfNotWall(hero.getCell(), directions.get(0));
             HeroMovement heroMovement = new HeroMovement(hero.getCell(), targetCell, hero);
+            heroMovement.setAp(hero.getMoveApCost());
             movements.add(heroMovement);
         }
 
@@ -533,6 +785,7 @@ public class GameEngine {
         {
             Cell currentCell = hero.getCell();
             HeroMovement noMove = new HeroMovement(currentCell, currentCell, hero);
+            noMove.setAp(0);
             movements.add(noMove);
         }
 
@@ -551,10 +804,10 @@ public class GameEngine {
 
         for (HeroMovement movement : heroMovements)
         {
-            int neededAP = movement.getNeededAP();
+            int neededAP = movement.getAp();
             if (neededAP == 0)
                 continue;
-            ap -= movement.getNeededAP();
+            ap -= neededAP;
             if (ap < 0)
                 break;
             finalMovements.add(movement);
@@ -707,6 +960,75 @@ public class GameEngine {
         }
     }
 
+    private void addCastedAbility(CastedAbility castedAbility, int playerNum) { // TODO what kind of a shit hell is this?
+
+        ClientCastedAbility clientCastedAbility = new ClientCastedAbility();
+        ClientCastedAbility clientOppCastedAbility = new ClientCastedAbility();
+        if (playerNum == 1) {
+            clientCastedAbility.setCasterId(castedAbility.getCasterHero().getId());
+            clientCastedAbility.setAbilityName(castedAbility.getAbility().getName());
+            clientCastedAbility.setStartCell(new EmptyCell(castedAbility.getStartCell()));
+            clientCastedAbility.setEndCell(new EmptyCell(castedAbility.getEndCell()));
+            List<Integer> targetHeroIds = new ArrayList<>();
+            for (Hero hero : castedAbility.getTargetHeroes()) {
+                if (players[0].getVision().contains(hero.getCell())) {
+                    targetHeroIds.add(hero.getId());
+                }
+            }
+            clientCastedAbility.setTargetHeroIds(targetHeroIds);
+            player1castedAbilities.add(clientCastedAbility);
+
+            clientOppCastedAbility.setCasterId(players[1].getVision().contains(castedAbility.getCasterHero().getCell()) ?
+                    castedAbility.getCasterHero().getId() : -1);
+            clientOppCastedAbility.setAbilityName(castedAbility.getAbility().getName());
+            clientOppCastedAbility.setEndCell(players[1].getVision().contains(castedAbility.getEndCell()) ?
+                    new EmptyCell(castedAbility.getEndCell()) : null);
+            clientOppCastedAbility.setStartCell(players[1].getVision().contains(castedAbility.getStartCell()) ?
+                    new EmptyCell(castedAbility.getStartCell()) : null);
+            targetHeroIds = new ArrayList<>();
+            for (Hero hero : castedAbility.getTargetHeroes()) {
+                if (players[0].getVision().contains(hero.getCell())) {
+                    targetHeroIds.add(hero.getId());
+                }
+            }
+            clientOppCastedAbility.setTargetHeroIds(targetHeroIds);
+            if (clientOppCastedAbility.getStartCell() != null || clientOppCastedAbility.getEndCell() != null ||
+                    clientOppCastedAbility.getTargetHeroIds().size() > 0)
+                player2oppCastedAbilities.add(clientOppCastedAbility);
+        } else {
+            clientCastedAbility.setCasterId(castedAbility.getCasterHero().getId());
+            clientCastedAbility.setAbilityName(castedAbility.getAbility().getName());
+            clientCastedAbility.setStartCell(new EmptyCell(castedAbility.getStartCell()));
+            clientCastedAbility.setEndCell(new EmptyCell(castedAbility.getEndCell()));
+            List<Integer> targetHeroIds = new ArrayList<>();
+            for (Hero hero : castedAbility.getTargetHeroes()) {
+                if (players[1].getVision().contains(hero.getCell())) {
+                    targetHeroIds.add(hero.getId());
+                }
+            }
+            clientCastedAbility.setTargetHeroIds(targetHeroIds);
+            player2castedAbilities.add(clientCastedAbility);
+
+            clientOppCastedAbility.setCasterId(players[0].getVision().contains(castedAbility.getCasterHero().getCell()) ?
+                    castedAbility.getCasterHero().getId() : -1);
+            clientOppCastedAbility.setAbilityName(castedAbility.getAbility().getName());
+            clientOppCastedAbility.setEndCell(players[0].getVision().contains(castedAbility.getEndCell()) ?
+                    new EmptyCell(castedAbility.getEndCell()) : null);
+            clientOppCastedAbility.setStartCell(players[0].getVision().contains(castedAbility.getStartCell()) ?
+                    new EmptyCell(castedAbility.getStartCell()) : null);
+            targetHeroIds = new ArrayList<>();
+            for (Hero hero : castedAbility.getTargetHeroes()) {
+                if (players[1].getVision().contains(hero.getCell())) {
+                    targetHeroIds.add(hero.getId());
+                }
+            }
+            clientOppCastedAbility.setTargetHeroIds(targetHeroIds);
+            if (clientOppCastedAbility.getStartCell() != null || clientOppCastedAbility.getEndCell() != null ||
+                    clientOppCastedAbility.getTargetHeroIds().size() > 0)
+                player1oppCastedAbilities.add(clientOppCastedAbility);
+        }
+    }
+
     private void addCastedAbility(Cast cast, int playerNum, List<Hero> targetHeroes) { // TODO what kind of a shit hell is this?
         CastedAbility castedAbility = new CastedAbility();
         castedAbility.setCasterHero(cast.getHero());
@@ -718,8 +1040,8 @@ public class GameEngine {
 //            castedAbility.setEndCell();
 //        } else
 //        {
-            castedAbility.setEndCell(abilityTools.getImpactCell(cast.getAbility(), cast.getHero().getCell(),
-                    map.getCell(cast.getTargetRow(), cast.getTargetColumn())));
+        castedAbility.setEndCell(abilityTools.getImpactCell(cast.getAbility(), cast.getHero().getCell(),
+                map.getCell(cast.getTargetRow(), cast.getTargetColumn())));
 //        }
         castedAbilities.add(castedAbility);
 
