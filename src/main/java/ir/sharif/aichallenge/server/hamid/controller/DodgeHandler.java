@@ -59,19 +59,21 @@ public class DodgeHandler {
             return false;
 
         for (Hero hero : player.getHeroes()) {
-            if (hero.getCell() == endCell) {
-                for (Cast nextCast : dodgeCasts) {  //todo dodgeCasts ok?
-                    if (nextCast.getHero() == hero) {
-                        dodgerHero.setCell(endCell);
-                        if (dfs(nextCast, ap - cast.getAbility().getApCost())) {    // then all dodges get ok
-                            tmpCasts.add(cast);
-                            return true;
-                        }
-                        else {
-                            resetPlace(dodgerHero);
-                            return false;       //todo reset hero cell? --> up
-                        }
-                    }
+            if (hero.getCell() != endCell) {
+                continue;
+            }
+            for (Cast nextCast : dodgeCasts) {  //todo dodgeCasts ok?
+                if (nextCast.getHero() != hero) {
+                    continue;
+                }
+                dodgerHero.setCell(endCell);
+                if (dfs(nextCast, ap - cast.getAbility().getApCost())) {    // then all dodges get ok
+                    tmpCasts.add(cast);
+                    return true;
+                }
+                else {
+                    resetPlace(dodgerHero);
+                    return false;       //todo reset hero cell? --> up
                 }
             }
         }
