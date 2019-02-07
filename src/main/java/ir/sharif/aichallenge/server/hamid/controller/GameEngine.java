@@ -325,7 +325,13 @@ public class GameEngine {
             return;
         }
 
+        abilityTools.setMyHeroes(players[0].getHeroes());
+        abilityTools.setOppHeroes(players[1].getHeroes());
+
         affectCasts(firstCasts, players[0]);
+
+        abilityTools.setMyHeroes(players[1].getHeroes());
+        abilityTools.setOppHeroes(players[0].getHeroes());
         affectCasts(secondCasts, players[1]);
     }
 
