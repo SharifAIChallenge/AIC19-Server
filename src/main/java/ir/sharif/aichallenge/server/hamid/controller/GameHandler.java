@@ -10,10 +10,7 @@ import ir.sharif.aichallenge.server.engine.config.FileParam;
 import ir.sharif.aichallenge.server.engine.core.GameLogic;
 import ir.sharif.aichallenge.server.hamid.model.*;
 import ir.sharif.aichallenge.server.hamid.model.ability.Ability;
-import ir.sharif.aichallenge.server.hamid.model.client.ClientAbilityConstants;
-import ir.sharif.aichallenge.server.hamid.model.client.ClientCell;
-import ir.sharif.aichallenge.server.hamid.model.client.ClientMap;
-import ir.sharif.aichallenge.server.hamid.model.client.EmptyCell;
+import ir.sharif.aichallenge.server.hamid.model.client.*;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.ClientHero;
 import ir.sharif.aichallenge.server.hamid.model.client.hero.EmptyHero;
 import ir.sharif.aichallenge.server.hamid.model.enums.AbilityType;
@@ -52,6 +49,7 @@ public class GameHandler implements GameLogic {
     private GameEngine gameEngine = new GameEngine();
 
     private InitialMessage initialMessage; // we need this field when we are sending it to the clients
+    private InitialMessage graphicInitial;
 
     public GameHandler(AtomicInteger currentTurn)
     {
@@ -83,23 +81,52 @@ public class GameHandler implements GameLogic {
     public void init() {
         String initStr = readMapFile(PARAM_MAP);
         InitialMessage initialMessage = null;
+        InitialMessage graphicInitial = null;
         try {
             JsonObject initJson = cleanCells(initStr);
             initialMessage = Json.GSON.fromJson(initJson, InitialMessage.class);
+            graphicInitial = Json.GSON.fromJson(initJson, InitialMessage.class);
         } catch (JsonSyntaxException e) {
             System.err.println("Invalid map file!");
             System.exit(0);
         }
         gameEngine.initialize(initialMessage);
         this.initialMessage = initialMessage;
-        this.initialMessage.getGameConstants().put("preprocessTimeout", CLIENT_FIRST_TURN_RESPONSE_TIME);
-        this.initialMessage.getGameConstants().put("firstMoveTimeout", CLIENT_FIRST_MOVE_RESPONSE_TIME);
-        this.initialMessage.getGameConstants().put("normalTimeout", CLIENT_RESPONSE_TIME);
-        fixFortify();
-        gameEngine.getGraphicHandler().addInitMessage(initialMessage);
+        this.graphicInitial = graphicInitial;
+
+        fixInitial(initialMessage);
+        fixInitial(graphicInitial);
+
+        fixGraphicHeroNames();
+
+        gameEngine.getGraphicHandler().addInitMessage(graphicInitial);
     }
 
-    private void fixFortify()
+    private void fixGraphicHeroNames()
+    {
+        List<ClientHeroConstants> finalConstants = new ArrayList<>();
+        List<ClientHeroConstants> heroConstants = graphicInitial.getHeroConstants();
+        for (ClientHeroConstants heroConstant : heroConstants)
+        {
+            ClientHeroConstants constants = new ClientHeroConstants(heroConstant);
+            ClientHeroConstants otherConstants = new ClientHeroConstants(constants);
+
+            finalConstants.add(constants);
+            finalConstants.add(otherConstants);
+        }
+
+        graphicInitial.setHeroConstants(finalConstants);
+    }
+
+    private void fixInitial(InitialMessage initialMessage)
+    {
+        initialMessage.getGameConstants().put("preprocessTimeout", CLIENT_FIRST_TURN_RESPONSE_TIME);
+        initialMessage.getGameConstants().put("firstMoveTimeout", CLIENT_FIRST_MOVE_RESPONSE_TIME);
+        initialMessage.getGameConstants().put("normalTimeout", CLIENT_RESPONSE_TIME);
+        fixFortify(initialMessage);
+    }
+
+    private void fixFortify(InitialMessage initialMessage)
     {
         for (ClientAbilityConstants abilityConstants : initialMessage.getAbilityConstants())
         {
