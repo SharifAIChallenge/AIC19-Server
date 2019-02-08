@@ -50,5 +50,6 @@ public class ClientHeroConstants
         this.abilityNames = heroConstant.getAbilityNames();
         this.moveAPCost = heroConstant.getMoveAPCost();
         this.respawnTime = heroConstant.getRespawnTime();
+        this.maxHP = heroConstant.maxHP;
     }
 }
