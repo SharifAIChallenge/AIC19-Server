@@ -78,6 +78,7 @@ public class DodgeHandler {
                     return false;       //todo reset hero cell? --> up
                 }
             }
+            return false;
         }
 
         dodgerHero.setCell(endCell);
