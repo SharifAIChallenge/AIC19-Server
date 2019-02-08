@@ -35,6 +35,7 @@ public class GraphicHandler {
         Message message = new Message(Message.NAME_INIT, initialMessages);
         try {
             logFile = new RandomAccessFile(LOG_FILE, "rw");
+            logFile.setLength(0);
             String logStr = "[" + Json.GSON.toJson(message) + "]";
             logFile.write(logStr.getBytes());
         } catch (IOException e) {

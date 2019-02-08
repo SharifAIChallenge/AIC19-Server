@@ -323,7 +323,7 @@ public class GameHandler implements GameLogic {
 
         String abilityName = event.getArgs()[1];
         Ability ability = hero.getAbility(abilityName);
-        if (ability == null)
+        if (ability == null || ability.getRemainingCoolDown() > 0)
             return null;
 
         int targetRow;
