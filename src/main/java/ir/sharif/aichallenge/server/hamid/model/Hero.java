@@ -66,9 +66,12 @@ public class Hero implements Cloneable{
         }
         //recent path
         List<EmptyCell> recentPathList = new ArrayList<>();
-        for (Cell cell : this.getRecentPath()) {
-            EmptyCell emptyCell = new EmptyCell(cell.getRow(), cell.getColumn());
-            recentPathList.add(emptyCell);
+        if (this.getCell() != null)
+        {
+            for (Cell cell : this.getRecentPath()) {
+                EmptyCell emptyCell = new EmptyCell(cell.getRow(), cell.getColumn());
+                recentPathList.add(emptyCell);
+            }
         }
         EmptyCell[] recentPath = new EmptyCell[recentPathList.size()];
         recentPath = recentPathList.toArray(recentPath);

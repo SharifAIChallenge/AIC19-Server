@@ -16,7 +16,7 @@ public class VisionTools {
     private Map map;
 
     public boolean isInVision(Cell startCell, Cell endCell) {
-        if (startCell.isWall() || endCell.isWall())
+        if (startCell == null || endCell == null || startCell.isWall() || endCell.isWall())
             return false;
         Cell[] rayCells = getRayCells(startCell, endCell, false);
         Cell lastCell = rayCells[rayCells.length - 1];

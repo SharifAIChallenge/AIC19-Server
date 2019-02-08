@@ -543,16 +543,19 @@ public class GameHandler implements GameLogic {
     }
 
     private List<ClientHero> getClientOppHeroes(int i) {
+        if (gameEngine.getState() == GameState.ACTION)
+            System.out.println();
         Player[] players = gameEngine.getPlayers();
         Player opponent = players[1 - i];
         List<ClientHero> clientHeroes = new ArrayList<>();
         for (Hero hero : opponent.getHeroes()) {
+            boolean isInVision = players[i].getVision().contains(hero.getCell());
             ClientHero clientHero = new ClientHero();
             clientHero.setId(hero.getId());
             clientHero.setType(hero.getName());
             if (hero.getCell() == null)
                 clientHero.setCurrentHP(0);     //dead
-            else if (players[i].getVision().contains(hero.getCell()))
+            else if (!isInVision)
                 clientHero.setCurrentHP(-1);    //not in vision
             else
                 clientHero.setCurrentHP(hero.getHp());  //in vision
@@ -567,8 +570,8 @@ public class GameHandler implements GameLogic {
             cool = cooldowns.toArray(cool);
             clientHero.setCooldowns(cool);  //end of cooldowns
 */
-            clientHero.setCurrentCell(players[i].getVision().contains(hero.getCell()) ?
-                    new EmptyCell(hero.getCell().getRow(), hero.getCell().getColumn()) : null);
+            clientHero.setCurrentCell(isInVision ? new EmptyCell(hero.getCell().getRow(), hero.getCell().getColumn())
+                    : null);
             //recent path
             List<EmptyCell> recentPathList = new ArrayList<>();
             for (Cell cell : hero.getRecentPathForOpponent()) {
@@ -578,7 +581,7 @@ public class GameHandler implements GameLogic {
             EmptyCell[] recentPath = new EmptyCell[recentPathList.size()];
             recentPath = recentPathList.toArray(recentPath);
             clientHero.setRecentPath(recentPath);
-            clientHero.setRespawnTime(hero.getMaxRespawnTime());
+            clientHero.setRespawnTime(hero.getRespawnTime());
             clientHeroes.add(clientHero);
         }
         return clientHeroes;
