@@ -19,7 +19,7 @@ public class MovementHandler
         Set<Cell> heroCurrentCells = extractHeroCurrentCells(playerHeroes);
         if (!isValid(topFour))
         {
-            return sequentialMovement(heroMovements, map, heroCurrentCells);
+            return sequentialMovement(heroMovements, player, heroCurrentCells);
         }
         return topFour;
     }
@@ -36,23 +36,26 @@ public class MovementHandler
         return currentCells;
     }
 
-    private static List<HeroMovement> sequentialMovement(List<HeroMovement> heroMovements, Map map, Set<Cell> heroCurrentCells)
+    private static List<HeroMovement> sequentialMovement(List<HeroMovement> heroMovements, Player player,
+                                                         Set<Cell> heroCurrentCells)
     {
         Set<Cell> emptyCells = new HashSet<>();
         Set<Cell> fullCells = new HashSet<>();
         Set<Hero> movedHeroes = new HashSet<>();
         List<HeroMovement> finalMovements = new ArrayList<>();
+        int ap = player.getActionPoint();
 
         for (HeroMovement movement : heroMovements)
         {
             Hero hero = movement.getHero();
             Cell targetCell = movement.getEndCell();
             if (fullCells.contains(targetCell) || targetCell.isWall() || movedHeroes.contains(hero) ||
-                    (!emptyCells.contains(targetCell) && heroCurrentCells.contains(targetCell)))
+                    (!emptyCells.contains(targetCell) && heroCurrentCells.contains(targetCell)) || ap < movement.getAp())
             {
                 continue;
             }
 
+            ap -= movement.getAp();
             emptyCells.add(hero.getCell());
             fullCells.add(targetCell);
             finalMovements.add(movement);
