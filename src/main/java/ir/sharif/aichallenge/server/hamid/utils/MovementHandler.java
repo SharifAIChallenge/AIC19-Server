@@ -3,6 +3,7 @@ package ir.sharif.aichallenge.server.hamid.utils;
 import ir.sharif.aichallenge.server.hamid.model.Cell;
 import ir.sharif.aichallenge.server.hamid.model.Hero;
 import ir.sharif.aichallenge.server.hamid.model.Map;
+import ir.sharif.aichallenge.server.hamid.model.Player;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,10 +12,10 @@ import java.util.Set;
 
 public class MovementHandler
 {
-    public static List<HeroMovement> getValidMovements(List<HeroMovement> heroMovements, Map map,
-                                                       List<Hero> playerHeroes) // TODO add no movement
+    public static List<HeroMovement> getValidMovements(List<HeroMovement> heroMovements, Map map, Player player)
     {
-        List<HeroMovement> topFour = extractTopFourMovements(heroMovements);
+        List<Hero> playerHeroes = player.getHeroes();
+        List<HeroMovement> topFour = extractTopFourMovements(heroMovements, player);
         Set<Cell> heroCurrentCells = extractHeroCurrentCells(playerHeroes);
         if (!isValid(topFour))
         {
@@ -78,10 +79,11 @@ public class MovementHandler
         return true;
     }
 
-    private static List<HeroMovement> extractTopFourMovements(List<HeroMovement> heroMovements)
+    private static List<HeroMovement> extractTopFourMovements(List<HeroMovement> heroMovements, Player player)
     {
         List<HeroMovement> finalMovements = new ArrayList<>();
         Set<Hero> heroes = new HashSet<>();
+        int ap = player.getActionPoint();
 
         for (HeroMovement movement : heroMovements)
         {
@@ -90,6 +92,10 @@ public class MovementHandler
             {
                 continue;
             }
+
+            if (ap - movement.getAp() < 0)
+                continue;
+            ap -= movement.getAp();
             heroes.add(hero);
             finalMovements.add(movement);
         }

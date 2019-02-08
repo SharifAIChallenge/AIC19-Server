@@ -338,7 +338,7 @@ public class GameEngine {
     private List<HeroMovement> affectDodges(List<Cast> dodgingCasts, Player player)
     {
         List<HeroMovement> dodgeMovements = createMovementsFromDodge(dodgingCasts, player);
-        List<HeroMovement> validMovements = MovementHandler.getValidMovements(dodgeMovements, map, player.getHeroes());
+        List<HeroMovement> validMovements = MovementHandler.getValidMovements(dodgeMovements, map, player);
         List<HeroMovement> finalMovements = fixMoveMessage(validMovements, player);
 
         for (HeroMovement movement : finalMovements)
@@ -426,45 +426,38 @@ public class GameEngine {
 
     private void affectCast(Hero caster, Ability ability, Cell realTarget, List<Hero> targetHeroes, Player player)
     {
-        CastedAbility castedAbility;
+        CastedAbility castedAbility = new CastedAbility();;
         Cell casterCell = caster.getCell();
 
         switch (ability.getType())
         {
             case DEFENSIVE:
                 castDefensive(ability, targetHeroes);
-                castedAbility = new CastedAbility();
                 castedAbility.setAbility(ability);
                 castedAbility.setStartCell(casterCell);
                 castedAbility.setEndCell(realTarget);
                 castedAbility.setCasterHero(caster);
                 castedAbility.setTargetHeroes(targetHeroes);
-                castedAbilities.add(castedAbility);
-                addCastedAbility(castedAbility, player == players[0] ? 1 : 2);
                 break;
             case OFFENSIVE:
                 List<Hero> finalTargets = castOffensive(caster, ability, targetHeroes, player);
-                castedAbility = new CastedAbility();
                 castedAbility.setAbility(ability);
                 castedAbility.setStartCell(casterCell);
                 castedAbility.setEndCell(realTarget);
                 castedAbility.setCasterHero(caster);
                 castedAbility.setTargetHeroes(finalTargets);
-                castedAbilities.add(castedAbility);
-                addCastedAbility(castedAbility, player == players[0] ? 1 : 2);
                 break;
             case FORTIFY:
                 ruhFortifiedHeroes.addAll(targetHeroes);
-                castedAbility = new CastedAbility();
                 castedAbility.setAbility(ability);
                 castedAbility.setStartCell(casterCell);
                 castedAbility.setEndCell(realTarget);
                 castedAbility.setCasterHero(caster);
                 castedAbility.setTargetHeroes(targetHeroes);
-                castedAbilities.add(castedAbility);
-                addCastedAbility(castedAbility, player == players[0] ? 1 : 2);
                 break;
         }
+        castedAbilities.add(castedAbility);
+        addCastedAbility(castedAbility, player == players[0] ? 1 : 2);
     }
 
     private void castDefensive(Ability ability, List<Hero> targetHeroes) // TODO should we check if the hero belongs to a specific player?
@@ -761,7 +754,7 @@ public class GameEngine {
 
     private List<HeroMovement> preprocessMessageMoves(ClientTurnMessage message, Player player) {
         List<HeroMovement> heroMovements = getHeroMovements(message.getMoves(), player.getHeroes());
-        List<HeroMovement> validMovements = MovementHandler.getValidMovements(heroMovements, map, player.getHeroes());
+        List<HeroMovement> validMovements = MovementHandler.getValidMovements(heroMovements, map, player);
 
 //        message.mergeMoves();   //filters moves (in new version)
 //        List<Move> moves = message.getMoves();
