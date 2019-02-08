@@ -92,9 +92,9 @@ public class Hero implements Cloneable{
             case "SENTRY":
                 return playerId == 0 ? "Ancient Warrior" : "Mechanical Golem";
             case "BLASTER":
-                return playerId == 0 ? "Red Demon" : "Slayer";
+                return playerId == 0 ? "Slayer" : "Red Demon";
             case "HEALER":
-                return playerId == 0 ? "Big Ork" : "Elemental Golem";
+                return playerId == 0 ? "Elemental Golem" : "Big Ork";
             case "GUARDIAN":
                 return playerId == 0 ? "Ancient Queen" : "Mystic";
         }
