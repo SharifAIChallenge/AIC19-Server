@@ -57,6 +57,7 @@ public class GameEngine {
     private GraphicHandler graphicHandler = new GraphicHandler(this);
     private Random random = new Random();
     private int moveTurnNumber = 0;
+    private Set<Hero> castedHeroes; //todo initialize
 
 
     public static void main(String[] args) throws InterruptedException {
@@ -319,9 +320,16 @@ public class GameEngine {
 
         if (abilityType == AbilityType.DODGE)
         {
-            List<HeroMovement> firstMovements = affectDodges(firstCasts, players[0]);
+            castDodges(firstCasts, players[0]);
+            castDodges(secondCasts, players[1]);
+
+            castRemainingDodges(firstCasts, players[0]);
+            castRemainingDodges(secondCasts, players[1]);
+
+
+            /*List<HeroMovement> firstMovements = affectDodges(firstCasts, players[0]);
             List<HeroMovement> secondMovements = affectDodges(secondCasts, players[1]);
-            handleAllMovements(firstMovements, secondMovements);
+            handleAllMovements(firstMovements, secondMovements);*/
             return;
         }
 
@@ -333,6 +341,51 @@ public class GameEngine {
         abilityTools.setMyHeroes(players[1].getHeroes());
         abilityTools.setOppHeroes(players[0].getHeroes());
         affectCasts(secondCasts, players[1]);
+    }
+
+    private void castDodges(List<Cast> dodgeCasts, Player player) {
+        DodgeHandler dodgeHandler = new DodgeHandler(map, player, extractTopFourDodges(dodgeCasts, player));
+        Set<Cast> validDodgeCasts = dodgeHandler.getValidDodgeCasts();
+
+        for (Cast cast : validDodgeCasts) {
+            castDodgeCertain(cast, player);
+        }
+    }
+
+    private void castRemainingDodges(List<Cast> dodgeCasts, Player player) {
+        for (Cast cast : dodgeCasts) {
+            if (cast.getHero().isHasCast() || cast.getAbility().getApCost() > player.getActionPoint())
+                continue;
+            Cell targetCell = map.getCell(cast.getTargetRow(), cast.getTargetColumn());
+            Set<Cell> fullCells = new HashSet<>();
+            for (Hero hero : player.getHeroes())
+                if (hero.getCell() != null)
+                    fullCells.add(hero.getCell());
+            if (targetCell.isWall() || fullCells.contains(targetCell))
+                continue;
+            castDodgeCertain(cast, player);
+        }
+    }
+
+    private List<Cast> extractTopFourDodges(List<Cast> dodgeCasts, Player player) {
+        Set<Hero> chosenHeroes = new HashSet<>();
+        List<Cast> ans = new ArrayList<>();
+        for (Cast cast : dodgeCasts) {
+            Hero hero = cast.getHero();
+            if (hero.isHasCast() || chosenHeroes.contains(hero))
+                continue;
+            ans.add(cast);
+            chosenHeroes.add(hero);
+        }
+        return ans;
+    }
+
+    private void castDodgeCertain(Cast cast, Player player) {
+        cast(cast, player, fortifiedHeroes);    //fortifiedHeroes not important here
+        player.setActionPoint(player.getActionPoint() - cast.getAbility().getApCost());
+        cast.getAbility().setRemainingCoolDown(cast.getAbility().getCoolDown());
+        cast.getHero().setHasCast(true);    //todo asap is it enough?
+        updatePlayerVisions();
     }
 
     private List<HeroMovement> affectDodges(List<Cast> dodgingCasts, Player player)
@@ -915,11 +968,17 @@ public class GameEngine {
         return map.getPlayer2RespawnZone();
     }
 
+    private void cast(Cast cast, Player player, Map<Hero, Ability> fortifiedHeroes) {
+        if (players[0] == player)
+            cast(cast, 1, fortifiedHeroes);
+        else
+            cast(cast, 2, fortifiedHeroes);
+    }
+
     private void cast(Cast cast, int player, Map<Hero, Ability> fortifiedHeroes) { // TODO this method needs serious cleaning
         AbilityType abilityType = cast.getAbility().getType();
         Ability ability = cast.getAbility();
         Player player1 = players[player - 1];
-        Player opponent = player1.getOpponent();
 
         List<Hero> targetHeroes = Arrays.asList(abilityTools.getAbilityTargets(ability, cast.getHero().getCell(),
                 map.getCell(cast.getTargetRow(), cast.getTargetColumn())));
