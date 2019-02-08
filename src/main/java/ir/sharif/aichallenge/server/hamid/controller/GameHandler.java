@@ -246,7 +246,7 @@ public class GameHandler implements GameLogic {
                         break;
                     case "move":
                         Move move = prepareMove(player, event);
-                        if (move == null)
+                        if (move == null || move.getMoves().size() == 0)
                         {
                             continue;
                         }

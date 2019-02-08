@@ -647,6 +647,16 @@ public class GameEngine {
             return;
         }
 
+        //todo castAbilities(List<Cast> allFirstCasts, List<Cast> allSecondCasts, AbilityType abilityType)
+        List<Move> allMoves1 = message1.getMoves();
+        List<Move> allMoves2 = message2.getMoves();
+
+        resetHeroesRecentPaths();
+        List<Cast> moveDodgeCasts1 = createDodgeCastsFromMoves(allMoves1, players[0]);
+        List<Cast> moveDodgeCasts2 = createDodgeCastsFromMoves(allMoves2, players[1]);
+
+        castAbilities(moveDodgeCasts1, moveDodgeCasts2, AbilityType.DODGE);
+
         //these must be empty after move
         castedAbilities = new ArrayList<>();
         player1castedAbilities = new ArrayList<>();
@@ -654,9 +664,9 @@ public class GameEngine {
         player1oppCastedAbilities = new ArrayList<>();
         player2oppCastedAbilities = new ArrayList<>();
 
-        List<HeroMovement> moves1 = preprocessMessageMoves(message1, players[0]);
+        /*List<HeroMovement> moves1 = preprocessMessageMoves(message1, players[0]);
         List<HeroMovement> moves2 = preprocessMessageMoves(message2, players[1]);
-        handleAllMovements(moves1, moves2);
+        handleAllMovements(moves1, moves2);*/
 
 //        //set heroes recentPath
 //        resetHeroesRecentPaths();
@@ -683,6 +693,34 @@ public class GameEngine {
 //        //vision for players
 //        updatePlayerVisions();
 //        //end of vision for players
+    }
+
+    private List<Cast> createDodgeCastsFromMoves(List<Move> moves, Player player) {
+        List<Cast> dodgeCasts = new ArrayList<>();
+        for (Move move : moves) {
+            Hero hero = move.getHero();
+            if (hero.getCell() == null)
+                continue;
+
+            Ability ability = new Ability();
+            ability.setApCost(hero.getMoveApCost());
+            ability.setRemainingCoolDown(0);
+            ability.setCoolDown(0);             //not matters
+            ability.setAreaOfEffect(0);         //not matters
+            ability.setLobbing(true);
+            ability.setName("this is move");    //not matters
+            ability.setPiercing(false);         //not matters
+            ability.setPower(0);                //not matters
+            ability.setRange(1);
+            ability.setType(AbilityType.DODGE);
+
+            Cell cell = nextCellIfNotWall(hero.getCell(), move.getMoves().get(0));  //null pointer exception is handled in prepareClientMessage
+            if (cell == null)
+                continue;
+
+            dodgeCasts.add(new Cast(hero, ability, cell.getRow(), cell.getColumn()));
+        }
+        return dodgeCasts;
     }
 
     private void handleAllMovements(List<HeroMovement> firstMovements, List<HeroMovement> secondMovements)
@@ -976,12 +1014,15 @@ public class GameEngine {
     }
 
     private void cast(Cast cast, int player, Map<Hero, Ability> fortifiedHeroes) { // TODO this method needs serious cleaning
-        AbilityType abilityType = cast.getAbility().getType();
         Ability ability = cast.getAbility();
+        AbilityType abilityType = ability.getType();
         Player player1 = players[player - 1];
 
-        List<Hero> targetHeroes = Arrays.asList(abilityTools.getAbilityTargets(ability, cast.getHero().getCell(),
-                map.getCell(cast.getTargetRow(), cast.getTargetColumn())));
+        List<Hero> targetHeroes = new ArrayList<>();
+        if (abilityType != AbilityType.DODGE) {
+            targetHeroes = Arrays.asList(abilityTools.getAbilityTargets(ability, cast.getHero().getCell(),
+                    map.getCell(cast.getTargetRow(), cast.getTargetColumn())));
+        }
         addCastedAbility(cast, player, targetHeroes);
 
         for (Hero hero : targetHeroes) {
@@ -1112,8 +1153,12 @@ public class GameEngine {
 //            castedAbility.setEndCell();
 //        } else
 //        {
-        castedAbility.setEndCell(abilityTools.getImpactCell(cast.getAbility(), cast.getHero().getCell(),
-                map.getCell(cast.getTargetRow(), cast.getTargetColumn())));
+        if (cast.getAbility().getType() != AbilityType.DODGE) {
+            castedAbility.setEndCell(abilityTools.getImpactCell(cast.getAbility(), cast.getHero().getCell(),
+                    map.getCell(cast.getTargetRow(), cast.getTargetColumn())));
+        } else {
+            castedAbility.setEndCell(map.getCell(cast.getTargetRow(), cast.getTargetColumn()));
+        }
 //        }
         castedAbilities.add(castedAbility);
 
