@@ -66,6 +66,8 @@ public class DodgeHandler {
                 if (nextCast.getHero() != hero) {
                     continue;
                 }
+                if (nextCast.getHero().getCell() == map.getCell(nextCast.getTargetRow(), nextCast.getTargetColumn()))
+                    continue;
                 dodgerHero.setCell(endCell);
                 if (dfs(nextCast, ap - cast.getAbility().getApCost())) {    // then all dodges get ok
                     tmpCasts.add(cast);
