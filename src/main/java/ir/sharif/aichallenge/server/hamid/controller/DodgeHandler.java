@@ -13,7 +13,7 @@ public class DodgeHandler {
     private List<Cast> dodgeCasts;
     private Set<Cast> tmpCasts;
     private Player player;
-    private java.util.Map<Hero, Cell> mainHeroCells = new HashMap<>();
+    private java.util.Map<Hero, Cell> mainHeroCells;
 
     public DodgeHandler(Map map, Player player, List<Cast> casts) {
         this.map = map;
@@ -78,6 +78,7 @@ public class DodgeHandler {
             }
         }
 
+        dodgerHero.setCell(endCell);
         tmpCasts.add(cast);
         return true;
     }
@@ -87,6 +88,7 @@ public class DodgeHandler {
     }
 
     private void fillMainHeroCells() {
+        mainHeroCells = new HashMap<>();
         for (Hero hero : player.getHeroes()) {
             mainHeroCells.put(hero, hero.getCell());
         }
