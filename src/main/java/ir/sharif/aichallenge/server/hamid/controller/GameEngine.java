@@ -351,6 +351,7 @@ public class GameEngine {
             castedAbility.setEndCell(movement.getEndCell());
             castedAbilities.add(castedAbility);
             addCastedAbility(castedAbility, player == players[0] ? 1 : 2);
+            movement.getHero().setHasCast(true);
         }
 
         return finalMovements;
