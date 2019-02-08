@@ -382,6 +382,8 @@ public class GameEngine {
         for (Hero hero : player.getHeroes())
         {
             Cell currentCell = hero.getCell();
+            if (currentCell == null)
+                continue;
             HeroMovement noMove = new HeroMovement(currentCell, currentCell, hero);
             noMove.setAp(0);
             movements.add(noMove);
@@ -405,9 +407,12 @@ public class GameEngine {
                 continue;
             }
 
-            ap -= neededAP;
             Cell startCell = hero.getCell();
             Cell targetCell = map.getCell(cast.getTargetRow(), cast.getTargetColumn());
+            if (startCell == null || targetCell == null)
+                continue;
+
+            ap -= neededAP;
             List<Hero> targetHeroes = Arrays.asList(abilityTools.getAbilityTargets(ability, startCell, targetCell));
             Cell realTarget = abilityTools.getImpactCell(ability, startCell, targetCell);
             hero.setHasCast(true);
@@ -718,6 +723,8 @@ public class GameEngine {
         for (Player player : players) {
             for (Hero hero : player.getHeroes()) {
                 hero.setRecentPath(new ArrayList<>());
+                if (hero.getCell() == null)
+                    continue;
                 hero.getRecentPath().add(hero.getCell());
             }
         }
@@ -731,7 +738,7 @@ public class GameEngine {
             Ability ability = movement.getAbility();
             if (ability != null)
             {
-                ability.setCoolDown(ability.getCoolDown());
+                ability.setRemainingCoolDown(ability.getCoolDown());
             }
             List<Cell> recentPath = hero.getRecentPath();
 //            Cell cell = hero.getCell();
@@ -792,6 +799,10 @@ public class GameEngine {
         for (Hero hero : heroes)
         {
             Cell currentCell = hero.getCell();
+            if (currentCell == null)
+            {
+                continue;
+            }
             HeroMovement noMove = new HeroMovement(currentCell, currentCell, hero);
             noMove.setAp(0);
             movements.add(noMove);
