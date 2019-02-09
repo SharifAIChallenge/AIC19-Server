@@ -205,7 +205,6 @@ public class GameHandler implements GameLogic {
             initialJsonObject.add("map", mapJsonObject);
 
             clientInitialJsonArray.add(initialJsonObject);
-            System.out.println(clientInitialJsonArray.toString());
             messages[i] = new Message(Message.NAME_INIT, clientInitialJsonArray);
         }
         return messages;
@@ -214,7 +213,6 @@ public class GameHandler implements GameLogic {
     @Override
     public void simulateEvents(Event[] environmentEvent, Event[][] clientsEvent) {
 
-        System.out.println();
         if (gameEngine.getState() == GameState.INIT)
         {
             gameEngine.setState(GameState.PICK);
@@ -543,8 +541,6 @@ public class GameHandler implements GameLogic {
     }
 
     private List<ClientHero> getClientOppHeroes(int i) {
-        if (gameEngine.getState() == GameState.ACTION)
-            System.out.println();
         Player[] players = gameEngine.getPlayers();
         Player opponent = players[1 - i];
         List<ClientHero> clientHeroes = new ArrayList<>();

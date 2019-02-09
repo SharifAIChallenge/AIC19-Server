@@ -110,7 +110,7 @@ public class JsonSocket {
     public void send(Object obj) throws IOException {
         String json = Json.GSON.toJson(obj);
         byte buffer[] = json.getBytes(ENCODING);
-        Log.i(TAG, "Sending message: " + json);
+//        Log.i(TAG, "Sending message: " + json);
         mOut.write(buffer, 0, buffer.length);
         mOut.write('\0');
         Log.i(TAG, "Message sent.");

@@ -258,9 +258,9 @@ public class GameEngine {
 
     private void updateStateAndTurn() {
         int turn = currentTurn.get();
-        System.out.println(turn);
+//        System.out.println(turn);
         if (turn >= PICK_OFFSET) {
-            System.out.println(state);
+//            System.out.println(state);
             if (state == GameState.ACTION) {
                 graphicHandler.addActionMessage();
                 graphicHandler.addStatusMessage();
