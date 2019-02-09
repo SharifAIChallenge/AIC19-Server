@@ -228,7 +228,6 @@ public class ClientHandler {
                         if (lastReceivedEvent.getType().equals("end")) {
                             int eventTurn = Integer.parseInt(lastReceivedEvent.getArgs()[0]);
                             if (eventTurn == currentTurn.get()) {
-                                System.out.println("event received from client and turn incremented");
                                 simulationSemaphore.release();
                             }
                             continue;

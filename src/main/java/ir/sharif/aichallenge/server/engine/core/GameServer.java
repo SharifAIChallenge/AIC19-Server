@@ -333,9 +333,9 @@ public class GameServer {
                 long start = System.currentTimeMillis();
                 try {
                     simulate.run();
-                    System.err.println("Before Acquire() function");
+//                    System.err.println("Before Acquire() function");
                     simulationSemaphore.acquire();
-                    System.err.println("After Acquire() function");
+//                    System.err.println("After Acquire() function");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
