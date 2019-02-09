@@ -32,7 +32,7 @@
                     <!-- MainClass in mainfest make a executable jar -->
                     <archive>
                         <manifest>
-                            <mainClass>ir.sharif.aichallenge.server.hamid.controller.GameEngine</mainClass>
+                            <mainClass>ir.sharif.aichallenge.server.thefinalbattle.controller.GameEngine</mainClass>
                         </manifest>
                     </archive>
 
