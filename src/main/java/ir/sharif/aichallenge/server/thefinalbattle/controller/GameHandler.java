@@ -40,8 +40,8 @@ public class GameHandler implements GameLogic {
 
     public static final int CLIENT_NUM = 2;
     public static final int CLIENT_RESPONSE_TIME = 850;
-    public static final int CLIENT_FIRST_TURN_RESPONSE_TIME = 1150;
-    public static final int CLIENT_FIRST_MOVE_RESPONSE_TIME = 5150;
+    public static final int CLIENT_FIRST_MOVE_RESPONSE_TIME = 1150;
+    public static final int CLIENT_FIRST_TURN_RESPONSE_TIME = 5150;
 
     public static final int CLIENT_HERO_NUM = 4;
     private GameEngine gameEngine = new GameEngine();
