@@ -10,6 +10,7 @@ import ir.sharif.aichallenge.server.engine.config.Configs;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -60,24 +61,33 @@ public class ClientNetwork extends NetServer {
     //Current Turn of game
     private AtomicInteger currentTurn;
 
+    //Current move phase of game
+    private AtomicInteger currentMovePhase;
+
+    //End flags for clients
+    private ArrayList<AtomicBoolean> endReceivedFlags;
+
     /**
      * Constructor
      */
     public ClientNetwork() {
         mTokens = new HashMap<>();
         mClients = new ArrayList<>();
+        endReceivedFlags = new ArrayList<>();
         sendExecutor = Executors.newCachedThreadPool();
         receiveExecutor = Executors.newCachedThreadPool();
     }
 
-    public ClientNetwork(Semaphore simulationSemaphore, AtomicInteger currentTurn) {
+    public ClientNetwork(Semaphore simulationSemaphore, AtomicInteger currentTurn, AtomicInteger currentMovePhase) {
         mTokens = new HashMap<>();
         mClients = new ArrayList<>();
+        endReceivedFlags = new ArrayList<>();
         sendExecutor = Executors.newCachedThreadPool();
         receiveExecutor = Executors.newCachedThreadPool();
 
         this.simulationSemaphore = simulationSemaphore;
         this.currentTurn = currentTurn;
+        this.currentMovePhase = currentMovePhase;
     }
 
     /**
@@ -116,8 +126,10 @@ public class ClientNetwork extends NetServer {
      * @return new handler
      */
     private ClientHandler newClient() {
-        ClientHandler client = new ClientHandler(simulationSemaphore, currentTurn);
+        AtomicBoolean endReceivedFlag = new AtomicBoolean(false);
+        ClientHandler client = new ClientHandler(simulationSemaphore, currentTurn, currentMovePhase, endReceivedFlag);
         sendExecutor.submit(client.getSender());
+        endReceivedFlags.add(endReceivedFlag);
         return client;
     }
 
@@ -192,6 +204,8 @@ public class ClientNetwork extends NetServer {
      */
     public void stopReceivingAll() {
         receiveTimeFlag = false;
+        endReceivedFlags.get(0).set(true);
+        endReceivedFlags.get(1).set(true);
     }
 
     /**
@@ -203,6 +217,8 @@ public class ClientNetwork extends NetServer {
      */
     public void startReceivingAll() {
         receiveTimeFlag = true;
+        endReceivedFlags.get(0).set(false);
+        endReceivedFlags.get(1).set(false);
     }
 
     /**
