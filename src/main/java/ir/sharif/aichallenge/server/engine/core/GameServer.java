@@ -74,7 +74,8 @@ public class GameServer {
         initGame();
     }
 
-    public GameServer(GameLogic gameLogic, String[] cmdArgs, AtomicInteger currentTurn) {
+    public GameServer(GameLogic gameLogic, String[] cmdArgs, AtomicInteger currentTurn,
+                      AtomicInteger currentMovePhase) {
         Configs.handleCMDArgs(cmdArgs);
         mGameLogic = gameLogic;
         mGameLogic.init();
@@ -83,7 +84,7 @@ public class GameServer {
 
         serverSemaphore = new Semaphore(0);
         simulationSemaphore = new Semaphore(0);
-        mClientNetwork = new ClientNetwork(serverSemaphore, currentTurn);
+        mClientNetwork = new ClientNetwork(serverSemaphore, currentTurn, currentMovePhase);
 
         mUINetwork = new UINetwork();
         mOutputController = new OutputController(mUINetwork);
@@ -272,11 +273,14 @@ public class GameServer {
                 mClientNetwork.startReceivingAll();
                 mClientNetwork.sendAllBlocking();
                 long timeout = mGameLogic.getClientResponseTimeout();
+                long t1 = System.currentTimeMillis();
                 try {
                     serverSemaphore.tryAcquire(2, timeout, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                long t2 = System.currentTimeMillis();
+                System.err.println(t2 - t1 + " time went by with timeout " + timeout);
                 mClientNetwork.stopReceivingAll();
 
 

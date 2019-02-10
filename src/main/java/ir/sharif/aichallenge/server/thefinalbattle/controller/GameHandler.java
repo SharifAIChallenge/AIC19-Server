@@ -39,21 +39,20 @@ public class GameHandler implements GameLogic {
     public static final FileParam PARAM_MAP = new FileParam("Map", null, ".*\\.map");
 
     public static final int CLIENT_NUM = 2;
-    public static final int CLIENT_RESPONSE_TIME = 200;
-    public static final int CLIENT_FIRST_TURN_RESPONSE_TIME = 2000;
-    public static final int CLIENT_FIRST_MOVE_RESPONSE_TIME = 500;
+    public static final int CLIENT_RESPONSE_TIME = 850;
+    public static final int CLIENT_FIRST_TURN_RESPONSE_TIME = 1150;
+    public static final int CLIENT_FIRST_MOVE_RESPONSE_TIME = 5150;
 
-    public static int TURN_TIMEOUT = 0;
-    public static int PICK_TURN_TIMEOUT = 0;
     public static final int CLIENT_HERO_NUM = 4;
     private GameEngine gameEngine = new GameEngine();
 
     private InitialMessage initialMessage; // we need this field when we are sending it to the clients
     private InitialMessage graphicInitial;
 
-    public GameHandler(AtomicInteger currentTurn)
+    public GameHandler(AtomicInteger currentTurn, AtomicInteger currentMovePhase)
     {
         gameEngine.setCurrentTurn(currentTurn);
+        gameEngine.setCurrentMovePhase(currentMovePhase);
     }
 
     @Override
@@ -65,16 +64,16 @@ public class GameHandler implements GameLogic {
     public long getClientResponseTimeout() {
         int turn = gameEngine.getCurrentTurn().get();
         GameState state = gameEngine.getState();
-        if (turn == 0)  //todo asap is correct?
+        if (turn == 0 && state == GameState.INIT)  //todo asap is correct?
             return CLIENT_FIRST_TURN_RESPONSE_TIME;
-        if (state == GameState.MOVE && gameEngine.getMoveTurnNumber() == 0)
+        if (state == GameState.MOVE && gameEngine.getCurrentMovePhase().get() == 0)
             return CLIENT_FIRST_MOVE_RESPONSE_TIME;
         return CLIENT_RESPONSE_TIME;
     }
 
     @Override
     public long getTurnTimeout() {
-        return getClientResponseTimeout() + 50;
+        return getClientResponseTimeout() + 200;
     }
 
     @Override
@@ -260,8 +259,8 @@ public class GameHandler implements GameLogic {
                         message.setType(GameState.PICK);
                         break;
                 }
-            } catch (Exception ignore) {
-
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return message;
@@ -511,7 +510,8 @@ public class GameHandler implements GameLogic {
             turnMessage.setMyScore(player.getScore());
             turnMessage.setOppScore(players[1 - i].getScore()); // client_num must be 2
             turnMessage.setCurrentPhase(gameEngine.getState().name());
-            turnMessage.setMovePhaseNum(gameEngine.getState() == GameState.MOVE ? gameEngine.getMoveTurnNumber() + 1 : -1);
+            turnMessage.setMovePhaseNum(gameEngine.getState() == GameState.MOVE ?
+                    gameEngine.getCurrentMovePhase().get() + 1 : -1);
             turnMessage.setCurrentTurn(gameEngine.getCurrentTurn().get());
             turnMessage.setAP(players[i].getActionPoint());
             turnMessage.setMap(getClientMap(i).getCells());

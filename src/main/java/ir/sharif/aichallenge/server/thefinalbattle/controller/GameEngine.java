@@ -56,13 +56,15 @@ public class GameEngine {
     private JsonArray serverViewJsons = new JsonArray();
     private GraphicHandler graphicHandler = new GraphicHandler(this);
     private Random random = new Random();
-    private int moveTurnNumber = 0;
+    private AtomicInteger currentMovePhase;
     private Set<Hero> castedHeroes; //todo initialize
 
 
     public static void main(String[] args) throws InterruptedException {
         AtomicInteger currentTurn = new AtomicInteger(0);
-        GameServer gameServer = new GameServer(new GameHandler(currentTurn), args, currentTurn);
+        AtomicInteger currentMovePhase = new AtomicInteger(0);
+        GameServer gameServer = new GameServer(new GameHandler(currentTurn, currentMovePhase), args, currentTurn,
+                currentMovePhase);
         gameServer.start();
         gameServer.waitForFinish();
     }
@@ -267,9 +269,9 @@ public class GameEngine {
                 currentTurn.incrementAndGet();
                 state = GameState.MOVE;
             } else if (state == GameState.MOVE) {
-                moveTurnNumber = (moveTurnNumber + 1) % NUM_OF_MOVE_TURN;
+                currentMovePhase.set((currentMovePhase.get() + 1) % NUM_OF_MOVE_TURN);
                 graphicHandler.addMoveMessage();
-                if (moveTurnNumber == 0)
+                if (currentMovePhase.get() == 0)
                     state = GameState.ACTION;
             } else {
                 respawnAllHeroes();

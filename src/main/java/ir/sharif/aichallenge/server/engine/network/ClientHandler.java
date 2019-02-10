@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
@@ -88,7 +89,7 @@ public class ClientHandler {
     private int numOfExceptions;
 
     /**
-     * current Turn in game
+     * Current Turn in game
      */
     private AtomicInteger currentTurn;
 
@@ -97,6 +98,15 @@ public class ClientHandler {
      */
     private Semaphore simulationSemaphore;
 
+    /**
+     * True if client has finished his/her current turn
+     */
+    private AtomicBoolean endReceived;
+
+    /**
+     * Current move phase in game
+     */
+    private AtomicInteger currentMovePhase;
 
     /**
      * Constructor.
@@ -109,7 +119,8 @@ public class ClientHandler {
         messageNotifier = new Object();
     }
 
-    public ClientHandler(Semaphore simulationSemaphore, AtomicInteger currentTurn) {
+    public ClientHandler(Semaphore simulationSemaphore, AtomicInteger currentTurn, AtomicInteger currentMovePhase,
+                         AtomicBoolean endReceived) {
         messagesToSend = new LinkedBlockingDeque<>();
         receivedMessages = new ArrayList<>();
         messagesQueued = new ArrayList<>();
@@ -118,6 +129,8 @@ public class ClientHandler {
 
         this.simulationSemaphore = simulationSemaphore;
         this.currentTurn = currentTurn;
+        this.currentMovePhase = currentMovePhase;
+        this.endReceived = endReceived;
     }
 
     /**
@@ -225,14 +238,23 @@ public class ClientHandler {
                     receive();
                     if (lastReceivedMessage != null) {
                         Event lastReceivedEvent = Json.GSON.fromJson(lastReceivedMessage.args.get(0), Event.class);
-                        if (lastReceivedEvent.getType().equals("end")) {
-                            int eventTurn = Integer.parseInt(lastReceivedEvent.getArgs()[0]);
-                            if (eventTurn == currentTurn.get()) {
+                        String type = lastReceivedEvent.getType();
+                        String[] args = lastReceivedEvent.getArgs();
+
+                        if (type.endsWith("end")) {
+                            if (isValidEnd(type, args))
+                            {
                                 simulationSemaphore.release();
+                                endReceived.set(true);
+                                continue;
                             }
+                            System.err.println(lastReceivedEvent.getType() + " rejected.");
                             continue;
                         }
-                        if (timeValidator.get()) {
+                        int turn = extractTurn(type, args);
+                        int movePhase = extractMovePhase(type, args);
+
+                        if (timeValidator.get() && turn == currentTurn.get() && movePhase == currentMovePhase.get() + 1) {
                             synchronized (receivedMessages) {
                                 receivedMessages.add(lastReceivedMessage);
                             }
@@ -248,6 +270,60 @@ public class ClientHandler {
                 }
             }
         };
+    }
+
+    private int extractMovePhase(String type, String[] args)
+    {
+        if (!type.equals("move") || args.length == 2)
+            return currentMovePhase.get() + 1;
+
+        return Integer.parseInt(args[args.length - 1]);
+    }
+
+    private int extractTurn(String type, String[] args)
+    {
+        if ((type.equals("pick") && args.length == 1) || (type.equals("move") && args.length == 2) ||
+                (type.equals("action") && args.length == 3))
+            return currentTurn.get();
+
+        if (type.equals("move"))
+            return Integer.parseInt(args[args.length - 2]);
+        return Integer.parseInt(args[args.length - 1]);
+    }
+
+    private boolean isValidEnd(String type, String[] args)
+    {
+        int turnNum;
+        int movePhaseNum;
+
+        if (type.equals("init-end") && args.length == 0 && !endReceived.get())
+        {
+            System.err.println("init received");
+            return true;
+        }
+        else if (type.equals("pick-end") && args.length == 1 && !endReceived.get())
+        {
+            turnNum = Integer.parseInt(args[0]);
+            System.err.println("pick received, turn: " + currentTurn.get());
+            return turnNum == currentTurn.get();
+        } else if (type.equals("move-end") && args.length == 2 && !endReceived.get())
+        {
+            turnNum = Integer.parseInt(args[0]);
+            movePhaseNum = Integer.parseInt(args[1]);
+            System.err.println("move received, turn: " + currentTurn.get() + ", phase: " + currentMovePhase.get());
+            return turnNum == currentTurn.get() && movePhaseNum == currentMovePhase.get() + 1;
+        } else if (type.equals("action-end") && args.length == 1 && !endReceived.get())
+        {
+            turnNum = Integer.parseInt(args[0]);
+            System.err.println("action received, turn: " + currentTurn.get());
+            return turnNum == currentTurn.get();
+        } else if (type.equals("end") && args.length == 1 && !endReceived.get())
+        {
+            turnNum = Integer.parseInt(args[0]);
+            return turnNum == currentTurn.get();
+        }
+
+        return false;
     }
 
     /**
