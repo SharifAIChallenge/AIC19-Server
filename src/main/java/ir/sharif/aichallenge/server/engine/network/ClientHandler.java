@@ -254,7 +254,7 @@ public class ClientHandler {
                         int turn = extractTurn(type, args);
                         int movePhase = extractMovePhase(type, args);
 
-                        if (timeValidator.get() && turn == currentTurn.get() && movePhase == currentMovePhase.get() + 1) {
+                        if (timeValidator.get() && turn == currentTurn.get() && movePhase == currentMovePhase.get()) {
                             synchronized (receivedMessages) {
                                 receivedMessages.add(lastReceivedMessage);
                             }
@@ -275,7 +275,7 @@ public class ClientHandler {
     private int extractMovePhase(String type, String[] args)
     {
         if (!type.equals("move") || args.length == 2)
-            return currentMovePhase.get() + 1;
+            return currentMovePhase.get();
 
         return Integer.parseInt(args[args.length - 1]);
     }
@@ -283,7 +283,7 @@ public class ClientHandler {
     private int extractTurn(String type, String[] args)
     {
         if ((type.equals("pick") && args.length == 1) || (type.equals("move") && args.length == 2) ||
-                (type.equals("action") && args.length == 3))
+                (type.equals("cast") && args.length == 3))
             return currentTurn.get();
 
         if (type.equals("move"))
@@ -311,7 +311,7 @@ public class ClientHandler {
             turnNum = Integer.parseInt(args[0]);
             movePhaseNum = Integer.parseInt(args[1]);
             System.err.println("move received, turn: " + currentTurn.get() + ", phase: " + currentMovePhase.get());
-            return turnNum == currentTurn.get() && movePhaseNum == currentMovePhase.get() + 1;
+            return turnNum == currentTurn.get() && movePhaseNum == currentMovePhase.get();
         } else if (type.equals("action-end") && args.length == 1 && !endReceived.get())
         {
             turnNum = Integer.parseInt(args[0]);
