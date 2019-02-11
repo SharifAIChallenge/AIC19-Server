@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import ir.sharif.aichallenge.server.common.network.Json;
 import ir.sharif.aichallenge.server.engine.core.GameServer;
+import ir.sharif.aichallenge.server.thefinalbattle.UI.HtmlViewer;
 import ir.sharif.aichallenge.server.thefinalbattle.model.*;
 import ir.sharif.aichallenge.server.thefinalbattle.model.ability.Ability;
 import ir.sharif.aichallenge.server.thefinalbattle.model.client.*;
@@ -59,17 +60,21 @@ public class GameEngine {
     private AtomicInteger currentMovePhase;
     private Set<Hero> castedHeroes; //todo initialize
 
+    private HtmlViewer viewer;
+    private boolean view = false;
+
 
     public static void main(String[] args) throws InterruptedException {
         AtomicInteger currentTurn = new AtomicInteger(0);
         AtomicInteger currentMovePhase = new AtomicInteger(0);
-        GameServer gameServer = new GameServer(new GameHandler(currentTurn, currentMovePhase), args, currentTurn,
+        boolean view = Arrays.asList(args).contains("--view");
+        GameServer gameServer = new GameServer(new GameHandler(currentTurn, currentMovePhase, view), args, currentTurn,
                 currentMovePhase);
         gameServer.start();
         gameServer.waitForFinish();
     }
 
-    public void initialize(InitialMessage initialMessage) {
+    public void initialize(InitialMessage initialMessage, String mapName) {
         state = GameState.INIT;
 
         Map<String, Integer> gameConstants = initialMessage.getGameConstants();
@@ -90,7 +95,17 @@ public class GameEngine {
         List<ClientHeroConstants> heroConstants = initialMessage.getHeroConstants();
         initHeroes(heroConstants);
 
-        serverViewJsons.add(Json.GSON.toJsonTree(initialMessage));
+        JsonObject serverViewInit = Json.GSON.toJsonTree(initialMessage).getAsJsonObject();
+        JsonObject serverViewGameConstants = serverViewInit.get("gameConstants").getAsJsonObject();
+        serverViewGameConstants.addProperty("mapName", mapName);
+        serverViewInit.remove("gameConstants");
+        serverViewInit.add("gameConstants", serverViewGameConstants);
+
+        serverViewJsons.add(serverViewInit);
+        if (view)
+        {
+            viewer = new HtmlViewer();
+        }
     }
 
     private void initPlayers() {
@@ -169,7 +184,7 @@ public class GameEngine {
         //cast
         cast(message1, message2);
 
-        resetCasters(); // TODO correct placement?
+        resetCasters();
 
         updateKilledHeroes();
 
@@ -218,6 +233,12 @@ public class GameEngine {
     private void updateLogs() {
         if (state != GameState.PICK) {
             updateServerViewLog();
+        }
+
+        if (view)
+        {
+            viewer.updateData(currentTurn.get(), currentMovePhase.get(), state, castedAbilities, players, map);
+            viewer.viewTurn();
         }
     }
 
@@ -710,7 +731,7 @@ public class GameEngine {
             ability.setCoolDown(0);             //not matters
             ability.setAreaOfEffect(0);         //not matters
             ability.setLobbing(true);
-            ability.setName("this is move");    //not matters
+            ability.setName("move");    //not matters
             ability.setPiercing(false);         //not matters
             ability.setPower(0);                //not matters
             ability.setRange(1);

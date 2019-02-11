@@ -309,6 +309,7 @@ public class GameServer {
 //                        }
 //                        mClientNetwork.sendAllBlocking();
                         mClientNetwork.shutdownAll();
+                        Thread.sleep(1000);
                         mClientNetwork.terminate();
                         Message uiShutdown = new Message(Message.NAME_SHUTDOWN, new Object[]{});
                         mOutputController.putMessage(uiShutdown);

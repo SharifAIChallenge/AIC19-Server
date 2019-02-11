@@ -49,10 +49,11 @@ public class GameHandler implements GameLogic {
     private InitialMessage initialMessage; // we need this field when we are sending it to the clients
     private InitialMessage graphicInitial;
 
-    public GameHandler(AtomicInteger currentTurn, AtomicInteger currentMovePhase)
+    public GameHandler(AtomicInteger currentTurn, AtomicInteger currentMovePhase, boolean view)
     {
         gameEngine.setCurrentTurn(currentTurn);
         gameEngine.setCurrentMovePhase(currentMovePhase);
+        gameEngine.setView(view);
     }
 
     @Override
@@ -89,7 +90,7 @@ public class GameHandler implements GameLogic {
             System.err.println("Invalid map file!");
             System.exit(0);
         }
-        gameEngine.initialize(initialMessage);
+        gameEngine.initialize(initialMessage, PARAM_MAP.getValue().getName());
         this.initialMessage = initialMessage;
         this.graphicInitial = graphicInitial;
 
@@ -511,7 +512,7 @@ public class GameHandler implements GameLogic {
             turnMessage.setOppScore(players[1 - i].getScore()); // client_num must be 2
             turnMessage.setCurrentPhase(gameEngine.getState().name());
             turnMessage.setMovePhaseNum(gameEngine.getState() == GameState.MOVE ?
-                    gameEngine.getCurrentMovePhase().get() + 1 : -1);
+                    gameEngine.getCurrentMovePhase().get() : -1);
             turnMessage.setCurrentTurn(gameEngine.getCurrentTurn().get());
             turnMessage.setAP(players[i].getActionPoint());
             turnMessage.setMap(getClientMap(i).getCells());

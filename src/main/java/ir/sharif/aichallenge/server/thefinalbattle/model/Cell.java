@@ -65,4 +65,10 @@ public class Cell {
 
 		return null;
 	}
+
+	@Override
+	public String toString()
+	{
+		return "(Row: " + row + ", Column: " + column + ")";
+	}
 }
