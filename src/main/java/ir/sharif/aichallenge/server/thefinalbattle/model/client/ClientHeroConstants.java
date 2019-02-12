@@ -27,10 +27,10 @@ public class ClientHeroConstants
             case "BLASTER":
                 this.name = "Red Demon";
                 break;
-            case "HEALER":
+            case "GUARDIAN":
                 this.name = "Big Ork";
                 break;
-            case "GUARDIAN":
+            case "HEALER":
                 this.name = "Ancient Queen";
                 break;
             case "Ancient Warrior":

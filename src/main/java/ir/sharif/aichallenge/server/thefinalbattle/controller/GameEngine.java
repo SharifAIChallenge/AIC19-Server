@@ -1359,6 +1359,9 @@ public class GameEngine {
     public void close()
     {
         graphicHandler.close();
-        viewer.close();
+        if (view)
+        {
+            viewer.close();
+        }
     }
 }
