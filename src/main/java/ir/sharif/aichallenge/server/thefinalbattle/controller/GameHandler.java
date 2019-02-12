@@ -354,6 +354,9 @@ public class GameHandler implements GameLogic {
 
     private Cell fixDodgeTarget(Hero hero, Cell targetCell, int range) // TODO check this
     {
+        if (hero.getCell() == null)
+            return null;
+
         VisionTools visionTools = gameEngine.getVisionTools();
         Cell[] rayCells = visionTools.getRayCells(hero.getCell(), targetCell, true);
 
