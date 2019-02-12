@@ -638,5 +638,6 @@ public class GameHandler implements GameLogic {
     @Override
     public void terminate() {
         gameEngine.getGraphicHandler().addEndMessage();
+        gameEngine.close();
     }
 }

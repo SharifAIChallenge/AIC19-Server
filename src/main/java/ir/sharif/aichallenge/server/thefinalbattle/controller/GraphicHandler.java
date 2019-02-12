@@ -218,4 +218,15 @@ public class GraphicHandler {
             e.printStackTrace();
         }
     }
+
+    public void close()
+    {
+        try
+        {
+            logFile.close();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
 }

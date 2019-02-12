@@ -237,7 +237,8 @@ public class GameEngine {
 
         if (view)
         {
-            viewer.updateData(currentTurn.get(), currentMovePhase.get(), state, castedAbilities, players, map);
+            int turn = state == GameState.PICK ? currentTurn.get() - 1 : currentTurn.get();
+            viewer.updateData(turn, currentMovePhase.get(), state, castedAbilities, players, map);
             viewer.viewTurn();
         }
     }
@@ -1353,5 +1354,11 @@ public class GameEngine {
                     break;
             }
         }
+    }
+
+    public void close()
+    {
+        graphicHandler.close();
+        viewer.close();
     }
 }
