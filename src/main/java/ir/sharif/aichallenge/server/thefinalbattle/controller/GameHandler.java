@@ -7,6 +7,7 @@ import ir.sharif.aichallenge.server.common.model.Event;
 import ir.sharif.aichallenge.server.common.network.Json;
 import ir.sharif.aichallenge.server.common.network.data.Message;
 import ir.sharif.aichallenge.server.engine.config.FileParam;
+import ir.sharif.aichallenge.server.engine.config.StringParam;
 import ir.sharif.aichallenge.server.engine.core.GameLogic;
 import ir.sharif.aichallenge.server.thefinalbattle.model.*;
 import ir.sharif.aichallenge.server.thefinalbattle.model.ability.Ability;
@@ -37,6 +38,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GameHandler implements GameLogic {
 
     public static final FileParam PARAM_MAP = new FileParam("Map", null, ".*\\.map");
+    public static final StringParam CLIENT_ONE = new StringParam("TeamName1", "");
+    public static final StringParam CLIENT_TWO = new StringParam("TeamName2", "");
 
     public static final int CLIENT_NUM = 2;
     public static final int CLIENT_RESPONSE_TIME = 850;
@@ -93,7 +96,8 @@ public class GameHandler implements GameLogic {
             System.err.println("Invalid map file!");
             System.exit(0);
         }
-        gameEngine.initialize(initialMessage, PARAM_MAP.getValue().getName());
+        gameEngine.initialize(initialMessage, PARAM_MAP.getValue().getName(), CLIENT_ONE.getValue(),
+                CLIENT_TWO.getValue());
         this.initialMessage = initialMessage;
         this.graphicInitial = graphicInitial;
 

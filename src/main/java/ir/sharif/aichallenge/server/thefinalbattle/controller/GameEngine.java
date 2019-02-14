@@ -97,7 +97,7 @@ public class GameEngine {
         return extraTime;
     }
 
-    public void initialize(InitialMessage initialMessage, String mapName) {
+    public void initialize(InitialMessage initialMessage, String mapName, String firstTeam, String secondTeam) {
         state = GameState.INIT;
 
         Map<String, Integer> gameConstants = initialMessage.getGameConstants();
@@ -121,6 +121,8 @@ public class GameEngine {
         JsonObject serverViewInit = Json.GSON.toJsonTree(initialMessage).getAsJsonObject();
         JsonObject serverViewGameConstants = serverViewInit.get("gameConstants").getAsJsonObject();
         serverViewGameConstants.addProperty("mapName", mapName);
+        serverViewGameConstants.addProperty("firstTeam", firstTeam);
+        serverViewGameConstants.addProperty("secondTeam", secondTeam);
         serverViewInit.remove("gameConstants");
         serverViewInit.add("gameConstants", serverViewGameConstants);
 
