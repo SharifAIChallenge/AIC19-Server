@@ -4,6 +4,10 @@
 
 It is recomended to use Intellij IDEA (JetBrains)
 
-You can run the programm by downloading the server.jar file and using the following instruction:
+You can run the program by downloading the server.jar file and using the following instruction:
 
 ```java -jar server.jar```
+
+By using the option ```--view``` as shown below, file view.html will be created to help observing the game:
+
+```java -jar server.jar --view```
