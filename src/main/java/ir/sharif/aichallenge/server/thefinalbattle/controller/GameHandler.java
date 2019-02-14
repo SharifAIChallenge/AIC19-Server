@@ -38,8 +38,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GameHandler implements GameLogic {
 
     public static final FileParam PARAM_MAP = new FileParam("Map", null, ".*\\.map");
-    public static final StringParam CLIENT_ONE = new StringParam("TeamName1", "");
-    public static final StringParam CLIENT_TWO = new StringParam("TeamName2", "");
+    public static final StringParam CLIENT_ONE = new StringParam("TeamName0", "");
+    public static final StringParam CLIENT_TWO = new StringParam("TeamName1", "");
 
     public static final int CLIENT_NUM = 2;
     public static final int CLIENT_RESPONSE_TIME = 850;

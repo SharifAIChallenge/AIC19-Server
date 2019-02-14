@@ -283,7 +283,7 @@ public class ClientHandler {
     private int extractTurn(String type, String[] args)
     {
         if ((type.equals("pick") && args.length == 1) || (type.equals("move") && args.length == 2) ||
-                (type.equals("cast") && args.length == 3))
+                (type.equals("cast") && args.length == 4))
             return currentTurn.get();
 
         if (type.equals("move"))
