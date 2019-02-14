@@ -43,17 +43,20 @@ public class GameHandler implements GameLogic {
     public static final int CLIENT_FIRST_MOVE_RESPONSE_TIME = 1150;
     public static final int CLIENT_FIRST_TURN_RESPONSE_TIME = 5150;
 
+    private final int extraTime;
+
     public static final int CLIENT_HERO_NUM = 4;
     private GameEngine gameEngine = new GameEngine();
 
     private InitialMessage initialMessage; // we need this field when we are sending it to the clients
     private InitialMessage graphicInitial;
 
-    public GameHandler(AtomicInteger currentTurn, AtomicInteger currentMovePhase, boolean view)
+    public GameHandler(AtomicInteger currentTurn, AtomicInteger currentMovePhase, boolean view, int extraTime)
     {
         gameEngine.setCurrentTurn(currentTurn);
         gameEngine.setCurrentMovePhase(currentMovePhase);
         gameEngine.setView(view);
+        this.extraTime = extraTime;
     }
 
     @Override
@@ -66,10 +69,10 @@ public class GameHandler implements GameLogic {
         int turn = gameEngine.getCurrentTurn().get();
         GameState state = gameEngine.getState();
         if (turn == 0 && state == GameState.INIT)  //todo asap is correct?
-            return CLIENT_FIRST_TURN_RESPONSE_TIME;
+            return CLIENT_FIRST_TURN_RESPONSE_TIME + extraTime;
         if (state == GameState.MOVE && gameEngine.getCurrentMovePhase().get() == 0)
-            return CLIENT_FIRST_MOVE_RESPONSE_TIME;
-        return CLIENT_RESPONSE_TIME;
+            return CLIENT_FIRST_MOVE_RESPONSE_TIME + extraTime;
+        return CLIENT_RESPONSE_TIME + extraTime;
     }
 
     @Override
