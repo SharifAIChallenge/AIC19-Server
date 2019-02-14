@@ -68,10 +68,33 @@ public class GameEngine {
         AtomicInteger currentTurn = new AtomicInteger(0);
         AtomicInteger currentMovePhase = new AtomicInteger(0);
         boolean view = Arrays.asList(args).contains("--view");
-        GameServer gameServer = new GameServer(new GameHandler(currentTurn, currentMovePhase, view), args, currentTurn,
-                currentMovePhase);
+        int extraTime = extractExtraTime(args);
+        GameServer gameServer = new GameServer(new GameHandler(currentTurn, currentMovePhase, view, extraTime), args,
+                currentTurn, currentMovePhase);
         gameServer.start();
         gameServer.waitForFinish();
+    }
+
+    private static int extractExtraTime(String[] args)
+    {
+        int extraTime = 0;
+        try
+        {
+            for (String arg : args)
+            {
+                if (!arg.startsWith("--extra=") && !arg.startsWith("--extra:"))
+                {
+                    continue;
+                }
+                extraTime = Integer.parseInt(arg.substring(8));
+                return extraTime;
+            }
+        } catch (Exception e)
+        {
+            return extraTime;
+        }
+
+        return extraTime;
     }
 
     public void initialize(InitialMessage initialMessage, String mapName) {
