@@ -76,7 +76,7 @@ public class Hero implements Cloneable{
         EmptyCell[] recentPath = new EmptyCell[recentPathList.size()];
         recentPath = recentPathList.toArray(recentPath);
         clientHero.setRecentPath(recentPath);
-        clientHero.setRespawnTime(this.getMaxRespawnTime());
+        clientHero.setRespawnTime(this.getRespawnTime());
         return clientHero;
     }
 
