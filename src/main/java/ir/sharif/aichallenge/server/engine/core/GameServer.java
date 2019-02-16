@@ -276,6 +276,7 @@ public class GameServer {
                 long t1 = System.currentTimeMillis();
                 try {
                     serverSemaphore.tryAcquire(2, timeout, TimeUnit.MILLISECONDS);
+                    serverSemaphore.drainPermits();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
