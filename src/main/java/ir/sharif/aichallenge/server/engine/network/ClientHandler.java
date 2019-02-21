@@ -269,6 +269,9 @@ public class ClientHandler {
                     Log.i(TAG, "message receiving failure", e);
                 }
             }
+            if (!endReceived.get())
+                simulationSemaphore.release();
+            System.err.println("Client Terminated at turn " + currentTurn.get() + ".");
         };
     }
 

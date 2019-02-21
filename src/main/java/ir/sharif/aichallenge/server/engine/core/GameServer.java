@@ -241,7 +241,8 @@ public class GameServer {
 
 //                mOutputController.putMessage(mGameLogic.getUIMessage());
 //                mOutputController.putMessage(mGameLogic.getStatusMessage());
-
+                long start, end;
+                start = System.currentTimeMillis();
                 Message[] output = mGameLogic.getClientMessages();
 //                mOutputController.putMessage(mGameLogic.getStatusMessage());
                 for (int i = 0; i < output.length; ++i) {
@@ -272,18 +273,25 @@ public class GameServer {
 
                 mClientNetwork.startReceivingAll();
                 mClientNetwork.sendAllBlocking();
+                end = System.currentTimeMillis();
+                System.err.println((end - start) + " time spent to send the message.");
                 long timeout = mGameLogic.getClientResponseTimeout();
-                long t1 = System.currentTimeMillis();
+                start = System.currentTimeMillis();
                 try {
-                    serverSemaphore.tryAcquire(2, timeout, TimeUnit.MILLISECONDS);
-                    serverSemaphore.drainPermits();
+                    if (mClientNetwork.getNumberOfConnected() != 0)
+                    {
+                        serverSemaphore.tryAcquire(mClientNetwork.getNumberOfConnected(), timeout, TimeUnit.MILLISECONDS);
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                long t2 = System.currentTimeMillis();
-                System.err.println(t2 - t1 + " time went by with timeout " + timeout);
+                end = System.currentTimeMillis();
+                System.err.println(end - start + " time spent to receive client messages with timeout " + timeout);
                 mClientNetwork.stopReceivingAll();
-
+                if (mClientNetwork.getNumberOfConnected() != 0)
+                {
+                    serverSemaphore.drainPermits();
+                }
 
                 clientEvents = new Event[mClientsNum][];
                 for (int i = 0; i < mClientsNum; ++i) {
@@ -292,7 +300,11 @@ public class GameServer {
                 }
 
                 try {
+                    Thread.sleep(10);
+                    start = System.currentTimeMillis();
                     mGameLogic.simulateEvents(environmentEvents, clientEvents);
+                    end = System.currentTimeMillis();
+                    System.err.println(end - start + " time spent to simulate events.");
 //                    mOutputController.putMessage(mGameLogic.getUIMessage()); TODO don't forget these
 //                    mOutputController.putMessage(mGameLogic.getStatusMessage());
                 } catch (Exception e) {
@@ -310,7 +322,7 @@ public class GameServer {
 //                        }
 //                        mClientNetwork.sendAllBlocking();
                         mClientNetwork.shutdownAll();
-                        Thread.sleep(1000);
+                        Thread.sleep(1000); // wait for clients to shutdown
                         mClientNetwork.terminate();
                         Message uiShutdown = new Message(Message.NAME_SHUTDOWN, new Object[]{});
                         mOutputController.putMessage(uiShutdown);
@@ -348,7 +360,7 @@ public class GameServer {
                 long end = System.currentTimeMillis();
                 long remaining = mGameLogic.getTurnTimeout() - (end - start);
                 if (remaining <= 0) {
-                    Log.i("GameServer", "Simulation timeout passed!");
+                    Log.i("GameServer", "Simulation timeout passed by spending " + (end - start) + " time!");
                 } /*else {
                     try {
                         Thread.sleep(remaining);
