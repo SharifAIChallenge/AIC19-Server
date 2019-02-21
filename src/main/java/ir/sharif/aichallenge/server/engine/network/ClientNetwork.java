@@ -176,8 +176,13 @@ public class ClientNetwork extends NetServer {
      * @see {@link #queue}
      */
     public void sendAllBlocking() {
-        CyclicBarrier sendBarrier = new CyclicBarrier(mClients.size() + 1);
+//        CyclicBarrier sendBarrier = new CyclicBarrier(mClients.size() + 1);
+        CyclicBarrier sendBarrier = new CyclicBarrier(getNumberOfConnected() + 1);
         for (ClientHandler client : mClients) {
+            if (!client.isConnected())
+            {
+                continue;
+            }
             sendExecutor.submit(() -> {
                 try {
                     sendBarrier.await();
@@ -193,6 +198,14 @@ public class ClientNetwork extends NetServer {
             sendBarrier.await(); // wait to send
         } catch (Exception e) {
             Log.d(TAG, "waiting barrier interrupted.", e);
+        }
+        try
+        {
+            Thread.sleep(10);
+        } catch (InterruptedException e)
+        {
+            System.err.println("I don't feel so good...");
+            e.printStackTrace();
         }
     }
 

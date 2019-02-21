@@ -55,7 +55,7 @@ public class Configs {
     }
 
     public static void handleCMDArgs(String[] args) {
-        if (args.length != 1)
+        if (args.length == 0)
             return;
         String[] split = args[0].split("=");
         if (split.length != 2)
@@ -75,7 +75,8 @@ public class Configs {
                     PrintWriter out = new PrintWriter(new FileOutputStream(configFile));
                     out.println("{");
                     for (int i = 0; i < params.length; i++) {
-                        out.printf("\t\"%s\": \"%s\"%s\n", params[i].getParamName(), params[i].getDefaultValue() == null ? "" : params[i].getDefaultValue().toString(), i == params.length - 1 ? "" : ",");
+                        out.printf("\t\"%s\": \"%s\"%s\n", params[i].getParamName(), params[i].getDefaultValue() == null
+                                ? "" : params[i].getDefaultValue().toString(), i == params.length - 1 ? "" : ",");
                     }
                     out.println("}");
                     out.close();

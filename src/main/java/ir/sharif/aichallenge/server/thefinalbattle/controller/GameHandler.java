@@ -92,7 +92,8 @@ public class GameHandler implements GameLogic {
             JsonObject initJson = cleanCells(initStr);
             initialMessage = Json.GSON.fromJson(initJson, InitialMessage.class);
             graphicInitial = Json.GSON.fromJson(initJson, InitialMessage.class);
-        } catch (JsonSyntaxException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             System.err.println("Invalid map file!");
             System.exit(0);
         }
