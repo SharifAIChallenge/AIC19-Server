@@ -5,9 +5,7 @@ import ir.sharif.aichallenge.server.thefinalbattle.model.client.EmptyCell;
 import ir.sharif.aichallenge.server.thefinalbattle.model.enums.Direction;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Data
 @Builder
@@ -22,6 +20,7 @@ public class Cell {
 	private List<Hero> heroes = new ArrayList<>();
 	private int row;
 	private int column;
+	private Set<Cell> inVisionCells = new HashSet<>();
 
 	public Cell(ClientInitialCell clientCell)
 	{
