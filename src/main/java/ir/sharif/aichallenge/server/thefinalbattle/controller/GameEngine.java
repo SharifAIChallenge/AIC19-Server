@@ -112,6 +112,8 @@ public class GameEngine {
         abilityTools.setMap(map);
         abilityTools.setVisionTools(visionTools);
 
+        setCellsVision();
+
         List<ClientAbilityConstants> abilityConstants = initialMessage.getAbilityConstants();
         initAbilities(abilityConstants);
 
@@ -130,6 +132,22 @@ public class GameEngine {
         if (view)
         {
             viewer = new HtmlViewer();
+        }
+    }
+
+    private void setCellsVision() {
+        Cell[][] cells = map.getCells();
+        List<Cell> cellList = new ArrayList<>();
+        for (Cell[] rowCells : cells)
+            cellList.addAll(Arrays.asList(rowCells));
+
+        for (Cell cell : cellList) {
+            Set<Cell> inVisionCells = new HashSet<>();
+            for (Cell targetCell : cellList) {
+                if (visionTools.isInVision(cell, targetCell))
+                    inVisionCells.add(targetCell);
+            }
+            cell.setInVisionCells(inVisionCells);
         }
     }
 
@@ -808,7 +826,7 @@ public class GameEngine {
                 if (hero.getHp() == 0) {
                     continue;
                 }
-                vision.addAll(visionTools.getHeroVision(hero));
+                vision.addAll(hero.getCell().getInVisionCells());
             }
             player.setVision(vision);
         }
@@ -1317,7 +1335,7 @@ public class GameEngine {
     }
 
     private Cell getEmptyCell(int row, int column) { // TODO static method for cell
-        return new Cell(false, false, null, row, column);
+        return new Cell(false, false, null, row, column, null);
     }
 
     private void postPrepare(List<Move> moves) {
