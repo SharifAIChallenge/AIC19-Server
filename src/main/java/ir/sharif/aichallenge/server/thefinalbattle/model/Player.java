@@ -3,6 +3,7 @@ package ir.sharif.aichallenge.server.thefinalbattle.model;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import ir.sharif.aichallenge.server.common.network.Json;
+import ir.sharif.aichallenge.server.thefinalbattle.model.client.ClientCastedAbility;
 import ir.sharif.aichallenge.server.thefinalbattle.model.client.EmptyCell;
 import ir.sharif.aichallenge.server.thefinalbattle.model.client.hero.ClientHero;
 import lombok.*;
@@ -22,11 +23,13 @@ import java.util.Set;
 public class Player {
 	private int score;
 	private List<Hero> heroes = new ArrayList<>();
-	private int actionPoint;	//todo reset each turn
+	private int actionPoint;
 	private Set<Cell> vision = new HashSet<>();	// hashcode and equals not matter
 	private Player opponent;
 	private int totalUsedAp = 0;
 	private Set<Cell> respawnZone = new HashSet<>();
+	private List<ClientCastedAbility> myCastedAbilities = new ArrayList<>();
+	private List<ClientCastedAbility> oppCastedAbilities = new ArrayList<>();
 
 	public void addHero(Hero hero) {
 		heroes.add(hero);
@@ -59,5 +62,10 @@ public class Player {
 		playerJson.add("vision", Json.GSON.toJsonTree(vision).getAsJsonArray());
 
 		playersJson.add(playerJson);
+	}
+
+	public void clearCastedAbilities() {
+		myCastedAbilities.clear();
+		oppCastedAbilities.clear();
 	}
 }
