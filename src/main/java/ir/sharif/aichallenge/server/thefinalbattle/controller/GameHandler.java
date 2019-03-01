@@ -257,7 +257,7 @@ public class GameHandler implements GameLogic {
         return message;
     }
 
-    private Move prepareMove(int player, Event event) { // TODO check in case
+    private Move prepareMove(int player, Event event) {
         Hero hero;
         int heroId;
         try {
@@ -319,9 +319,6 @@ public class GameHandler implements GameLogic {
         try {
             targetRow = Integer.parseInt(event.getArgs()[2]);
             targetColumn = Integer.parseInt(event.getArgs()[3]);
-//            if ((gameEngine.getMap().getCell(targetRow, targetColumn).isWall() &&
-//                    ability.getType() == AbilityType.DODGE) || gameEngine.getMap().isInMap(targetRow, targetColumn))
-//                return null;
         } catch (NumberFormatException e) {
             e.printStackTrace();
             return null;
@@ -397,7 +394,7 @@ public class GameHandler implements GameLogic {
             for (int j = 0; j < CLIENT_HERO_NUM; j++) {
                 Hero hero = gameEngine.getPlayers()[i].getHeroes().get(j);
                 heroes[i][j] = new GraphicHero(hero.getId(), hero.getName(),
-                        hero.getCell().getRow(), hero.getCell().getColumn());   //todo respawn heroes just after last pick
+                        hero.getCell().getRow(), hero.getCell().getColumn());
             }
         }
         graphicPickMessage.setHeroes(heroes);
@@ -408,11 +405,11 @@ public class GameHandler implements GameLogic {
     }
 
     private Message getUIMoveMessage() {
-        return null; //todo
+        return null;
     }
 
     private Message getUIActionMessage() {
-        return null; //todo
+        return null;
     }
 
     @Override
@@ -470,18 +467,18 @@ public class GameHandler implements GameLogic {
 
     private void setMessagesForTurn(Player[] players, Message[] messages) {
         for (int i = 0; i < CLIENT_NUM; i++) {
-            TurnMessage turnMessage = new TurnMessage();
             Player player = players[i];
+            TurnMessage turnMessage = new TurnMessage();
             turnMessage.setMyScore(player.getScore());
-            turnMessage.setOppScore(players[1 - i].getScore()); // client_num must be 2
+            turnMessage.setOppScore(player.getOpponent().getScore()); // client_num must be 2
             turnMessage.setCurrentPhase(gameEngine.getState().name());
             turnMessage.setMovePhaseNum(gameEngine.getState() == GameState.MOVE ?
                     gameEngine.getCurrentMovePhase().get() : -1);
             turnMessage.setCurrentTurn(gameEngine.getCurrentTurn().get());
-            turnMessage.setAP(players[i].getActionPoint());
-            turnMessage.setMap(getClientMap(i).getCells());
-            turnMessage.setMyHeroes(getClientHeroes(i));
-            turnMessage.setOppHeroes(getClientOppHeroes(i));
+            turnMessage.setAP(player.getActionPoint());
+            turnMessage.setMap(getClientMap(player).getCells());
+            turnMessage.setMyHeroes(getClientHeroes(player));
+            turnMessage.setOppHeroes(getClientOppHeroes(player));
             turnMessage.setMyCastAbilities(player.getMyCastedAbilities());
             turnMessage.setOppCastAbilities(player.getOppCastedAbilities());
             // make json array and message[i]
@@ -491,21 +488,19 @@ public class GameHandler implements GameLogic {
         }
     }
 
-    private List<ClientHero> getClientHeroes(int i) {
-        Player[] players = gameEngine.getPlayers();
+    private List<ClientHero> getClientHeroes(Player player) {
         List<ClientHero> clientHeroes = new ArrayList<>();
-        for (Hero hero : players[i].getHeroes()) {
+        for (Hero hero : player.getHeroes()) {
             clientHeroes.add(hero.getClientHero());
         }
         return clientHeroes;
     }
 
-    private List<ClientHero> getClientOppHeroes(int i) {
-        Player[] players = gameEngine.getPlayers();
-        Player opponent = players[1 - i];
+    private List<ClientHero> getClientOppHeroes(Player player) {
+        Player opponent = player.getOpponent();
         List<ClientHero> clientHeroes = new ArrayList<>();
         for (Hero hero : opponent.getHeroes()) {
-            boolean isInVision = players[i].getVision().contains(hero.getCell());
+            boolean isInVision = player.getVision().contains(hero.getCell());
             ClientHero clientHero = new ClientHero();
             clientHero.setId(hero.getId());
             clientHero.setType(hero.getName());
@@ -515,17 +510,7 @@ public class GameHandler implements GameLogic {
                 clientHero.setCurrentHP(-1);    //not in vision
             else
                 clientHero.setCurrentHP(hero.getHp());  //in vision
-/*
-            //cooldowns     todo ok?
-            List<Cooldown> cooldowns = new ArrayList<>();
-            for (Ability ability : hero.getAbilities()) {
-                Cooldown cooldown = new Cooldown(ability.getName(), ability.getRemainingCoolDown());
-                cooldowns.add(cooldown);
-            }
-            Cooldown[] cool = new Cooldown[cooldowns.size()];
-            cool = cooldowns.toArray(cool);
-            clientHero.setCooldowns(cool);  //end of cooldowns
-*/
+
             clientHero.setCurrentCell(isInVision ? new EmptyCell(hero.getCell().getRow(), hero.getCell().getColumn())
                     : null);
             //recent path
@@ -543,24 +528,18 @@ public class GameHandler implements GameLogic {
         return clientHeroes;
     }
 
-    private ClientMap getClientMap(int playerNum) {
+    private ClientMap getClientMap(Player player) {
         Map map = gameEngine.getMap();
         VisionTools visionTools = new VisionTools(map);
-        Player[] players = gameEngine.getPlayers();
-        List<Hero> heroes = players[playerNum].getHeroes();
+        List<Hero> heroes = player.getHeroes();
         ClientCell[][] clientCells = new ClientCell[map.getNumberOfRows()][map.getNumberOfColumns()];
         for (int i = 0; i < map.getNumberOfRows(); i++) {
             for (int j = 0; j < map.getNumberOfColumns(); j++) {
                 Cell cell = map.getCell(i, j);
                 ClientCell clientCell = new ClientCell();
                 clientCell.setWall(cell.isWall());
-                if (playerNum == 0) {
-                    clientCell.setInMyRespawnZone(map.getPlayer1RespawnZone().contains(cell));
-                    clientCell.setInOppRespawnZone(map.getPlayer2RespawnZone().contains(cell));
-                } else {
-                    clientCell.setInMyRespawnZone(map.getPlayer2RespawnZone().contains(cell));
-                    clientCell.setInOppRespawnZone(map.getPlayer1RespawnZone().contains(cell));
-                }
+                clientCell.setInMyRespawnZone(player.getRespawnZone().contains(cell));
+                clientCell.setInOppRespawnZone(player.getOpponent().getRespawnZone().contains(cell));
                 clientCell.setInObjectiveZone(map.getObjectiveZone().contains(cell));
                 //vision
                 clientCell.setInVision(false);
