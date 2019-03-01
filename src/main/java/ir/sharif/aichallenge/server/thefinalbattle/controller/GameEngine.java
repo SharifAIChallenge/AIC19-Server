@@ -378,7 +378,7 @@ public class GameEngine {
     }
 
     private void castDodges(List<Cast> dodgeCasts, Player player) {
-        DodgeHandler dodgeHandler = new DodgeHandler(map, player, extractTopFourDodges(dodgeCasts, player));
+        DodgeHandler dodgeHandler = new DodgeHandler(map, player, extractTopFourDodges(dodgeCasts));
         Set<Cast> validDodgeCasts = dodgeHandler.getValidDodgeCasts();
 
         for (Cast cast : validDodgeCasts) {
@@ -401,7 +401,7 @@ public class GameEngine {
         }
     }
 
-    private List<Cast> extractTopFourDodges(List<Cast> dodgeCasts, Player player) {
+    private List<Cast> extractTopFourDodges(List<Cast> dodgeCasts) {
         Set<Hero> chosenHeroes = new HashSet<>();
         List<Cast> ans = new ArrayList<>();
         for (Cast cast : dodgeCasts) {
