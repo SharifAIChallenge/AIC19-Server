@@ -53,7 +53,7 @@ public class DodgeHandler {
     private boolean dfs(Cast cast, int ap) {
         Hero dodgerHero = cast.getHero();
         Cell endCell = map.getCell(cast.getTargetRow(), cast.getTargetColumn());
-        if (endCell.isWall())   //todo is a valid cell in the map? i.e. not out of map
+        if (endCell.isWall())
             return false;
         if (cast.getAbility().getApCost() > ap)
             return false;
@@ -62,7 +62,7 @@ public class DodgeHandler {
             if (hero.getCell() != endCell) {
                 continue;
             }
-            for (Cast nextCast : dodgeCasts) {  //todo dodgeCasts ok?
+            for (Cast nextCast : dodgeCasts) {
                 if (nextCast.getHero() != hero) {
                     continue;
                 }
@@ -75,7 +75,7 @@ public class DodgeHandler {
                 }
                 else {
                     resetPlace(dodgerHero);
-                    return false;       //todo reset hero cell? --> up
+                    return false;
                 }
             }
             return false;
