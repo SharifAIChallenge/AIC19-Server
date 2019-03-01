@@ -1,15 +1,12 @@
 package ir.sharif.aichallenge.server.thefinalbattle.utils;
 
 import ir.sharif.aichallenge.server.thefinalbattle.model.Cell;
-import ir.sharif.aichallenge.server.thefinalbattle.model.Hero;
 import ir.sharif.aichallenge.server.thefinalbattle.model.Map;
 import ir.sharif.aichallenge.server.thefinalbattle.model.enums.Direction;
 import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 @AllArgsConstructor
 public class VisionTools {
@@ -115,20 +112,5 @@ public class VisionTools {
 
     private int crossProduct(int x1, int y1, int x2, int y2, int x3, int y3) {
         return (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
-    }
-
-    public Set<Cell> getHeroVision(Hero hero) {
-        Set<Cell> vision = new HashSet<>();
-
-        for (int i = 0; i < map.getNumberOfRows(); i++) {
-            for (int j = 0; j < map.getNumberOfColumns(); j++) {
-                Cell cell = map.getCell(i, j);
-                if (isInVision(cell, hero.getCell())) {
-                    vision.add(cell);
-                }
-            }
-        }
-
-        return vision;
     }
 }

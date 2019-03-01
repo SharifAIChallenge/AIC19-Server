@@ -369,7 +369,6 @@ public class GameEngine {
 
         abilityTools.setMyHeroes(players[0].getHeroes());
         abilityTools.setOppHeroes(players[1].getHeroes());
-
         affectCasts(firstCasts, players[0]);
 
         abilityTools.setMyHeroes(players[1].getHeroes());
