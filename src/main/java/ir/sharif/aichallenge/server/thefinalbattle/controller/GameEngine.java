@@ -522,8 +522,8 @@ public class GameEngine {
         List<Move> allMoves2 = message2.getMoves();
 
         resetHeroesRecentPaths();
-        List<Cast> moveDodgeCasts1 = createDodgeCastsFromMoves(allMoves1, players[0]);
-        List<Cast> moveDodgeCasts2 = createDodgeCastsFromMoves(allMoves2, players[1]);
+        List<Cast> moveDodgeCasts1 = createDodgeCastsFromMoves(allMoves1);
+        List<Cast> moveDodgeCasts2 = createDodgeCastsFromMoves(allMoves2);
 
         castAbilities(moveDodgeCasts1, moveDodgeCasts2, AbilityType.DODGE);
 
@@ -533,7 +533,7 @@ public class GameEngine {
         players[1].clearCastedAbilities();
     }
 
-    private List<Cast> createDodgeCastsFromMoves(List<Move> moves, Player player) {
+    private List<Cast> createDodgeCastsFromMoves(List<Move> moves) {
         List<Cast> dodgeCasts = new ArrayList<>();
         for (Move move : moves) {
             Hero hero = move.getHero();
@@ -546,7 +546,7 @@ public class GameEngine {
             ability.setCoolDown(0);             //not matters
             ability.setAreaOfEffect(0);         //not matters
             ability.setLobbing(true);
-            ability.setName("move");    //not matters
+            ability.setName("move");            //not matters
             ability.setPiercing(false);         //not matters
             ability.setPower(0);                //not matters
             ability.setRange(1);
@@ -650,7 +650,6 @@ public class GameEngine {
         }
         return cell;
     }
-
 
     private void castDodge(Cast cast, Player player) {
         List<Hero> targetHeroes = new ArrayList<>();
