@@ -69,7 +69,7 @@ public class GameHandler implements GameLogic {
     public long getClientResponseTimeout() {
         int turn = gameEngine.getCurrentTurn().get();
         GameState state = gameEngine.getState();
-        if (turn == 0 && state == GameState.INIT)  //todo asap is correct?
+        if (turn == 0 && state == GameState.INIT)
             return CLIENT_FIRST_TURN_RESPONSE_TIME + extraTime;
         if (state == GameState.MOVE && gameEngine.getCurrentMovePhase().get() == 0)
             return CLIENT_FIRST_MOVE_RESPONSE_TIME + extraTime;
@@ -283,14 +283,19 @@ public class GameHandler implements GameLogic {
             return null;
         List<Direction> directions = new ArrayList<>();
         for (String move : moves) {
-            if (move.equals("UP")) {
-                directions.add(Direction.UP);
-            } else if (move.equals("DOWN")) {
-                directions.add(Direction.DOWN);
-            } else if (move.equals("RIGHT")) {
-                directions.add(Direction.RIGHT);
-            } else if (move.equals("LEFT")) {
-                directions.add(Direction.LEFT);
+            switch (move) {
+                case "UP":
+                    directions.add(Direction.UP);
+                    break;
+                case "DOWN":
+                    directions.add(Direction.DOWN);
+                    break;
+                case "RIGHT":
+                    directions.add(Direction.RIGHT);
+                    break;
+                case "LEFT":
+                    directions.add(Direction.LEFT);
+                    break;
             }
         }
         return new Move(directions, hero);

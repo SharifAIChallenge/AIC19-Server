@@ -11,13 +11,11 @@ import lombok.Setter;
 import java.util.List;
 
 @Data
-//@Builder
-//@AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
 
-public class TurnMessage extends Message{
+public class TurnMessage {
     private int myScore;
     private int oppScore;
     private String currentPhase;

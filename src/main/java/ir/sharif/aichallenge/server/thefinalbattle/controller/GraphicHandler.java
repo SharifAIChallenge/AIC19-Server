@@ -88,7 +88,7 @@ public class GraphicHandler {
                 num = Math.max(num, hero.getRecentPath().size());
             }
         }
-        StringBuilder[] stringBuilders = new StringBuilder[Math.max(0, num - 1)]; //todo correct?
+        StringBuilder[] stringBuilders = new StringBuilder[Math.max(0, num - 1)];
         for (int i = 0; i < num - 1; i++)
             stringBuilders[i] = new StringBuilder("nnnnnnnn");
 

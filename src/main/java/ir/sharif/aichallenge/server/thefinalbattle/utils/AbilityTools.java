@@ -19,13 +19,6 @@ public class AbilityTools {
     private List<Hero> myHeroes;
     private List<Hero> oppHeroes;
 
-    public AbilityTools(Map map, List<Hero> myHeroes, List<Hero> oppHeroes) {
-        this.map = map;
-        visionTools = new VisionTools(map);
-        this.myHeroes = myHeroes;
-        this.oppHeroes = oppHeroes;
-    }
-
     /*public Hero[] getAbilityTargets(Ability ability, Cell startCell, Cell targetCell) {
         Cell[] impactCells = getImpactCells(ability, startCell, targetCell);
         Set<Cell> affectedCells = new HashSet<>();
@@ -55,7 +48,7 @@ public class AbilityTools {
         return impactCells[impactCells.length - 1];
     }
 
-    public Cell[] getImpactCells(Ability ability, Cell startCell, Cell targetCell) {
+    private Cell[] getImpactCells(Ability ability, Cell startCell, Cell targetCell) {
         if ((!ability.isLobbing() && startCell.isWall()) || startCell == targetCell) {
             return new Cell[]{startCell};
         }
@@ -77,7 +70,7 @@ public class AbilityTools {
         return impactCells.toArray(new Cell[0]);
     }
 
-    public Hero getOppHero(Cell cell) {
+    private Hero getOppHero(Cell cell) {
         for (Hero hero : oppHeroes) {
             if (hero.getCell() == cell)
                 return hero;
@@ -85,12 +78,7 @@ public class AbilityTools {
         return null;
     }
 
-    public Hero getOppHero(int cellRow, int cellColumn) {
-        if (!map.isInMap(cellRow, cellColumn)) return null;
-        return getOppHero(map.getCell(cellRow, cellColumn));
-    }
-
-    public Hero getMyHero(Cell cell) {
+    private Hero getMyHero(Cell cell) {
         for (Hero hero : myHeroes) {
             if (hero.getCell() == cell)
                 return hero;
