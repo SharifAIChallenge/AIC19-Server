@@ -32,6 +32,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -45,17 +46,14 @@ public class GameHandler implements GameLogic {
     public static final int CLIENT_RESPONSE_TIME = 850;
     public static final int CLIENT_FIRST_MOVE_RESPONSE_TIME = 1150;
     public static final int CLIENT_FIRST_TURN_RESPONSE_TIME = 5150;
-
-    private final int extraTime;
-
     public static final int CLIENT_HERO_NUM = 4;
+    private final int extraTime;
     private GameEngine gameEngine = new GameEngine();
 
     private InitialMessage initialMessage; // we need this field when we are sending it to the clients
     private InitialMessage graphicInitial;
 
-    public GameHandler(AtomicInteger currentTurn, AtomicInteger currentMovePhase, boolean view, int extraTime)
-    {
+    public GameHandler(AtomicInteger currentTurn, AtomicInteger currentMovePhase, boolean view, int extraTime) {
         gameEngine.setCurrentTurn(currentTurn);
         gameEngine.setCurrentMovePhase(currentMovePhase);
         gameEngine.setView(view);
@@ -110,12 +108,10 @@ public class GameHandler implements GameLogic {
         gameEngine.getGraphicHandler().addInitMessage(graphicInitial);
     }
 
-    private void fixGraphicHeroNames()
-    {
+    private void fixGraphicHeroNames() {
         List<ClientHeroConstants> finalConstants = new ArrayList<>();
         List<ClientHeroConstants> heroConstants = graphicInitial.getHeroConstants();
-        for (ClientHeroConstants heroConstant : heroConstants)
-        {
+        for (ClientHeroConstants heroConstant : heroConstants) {
             ClientHeroConstants constants = new ClientHeroConstants(heroConstant);
             ClientHeroConstants otherConstants = new ClientHeroConstants(constants);
 
@@ -126,27 +122,22 @@ public class GameHandler implements GameLogic {
         graphicInitial.setHeroConstants(finalConstants);
     }
 
-    private void fixInitial(InitialMessage initialMessage)
-    {
+    private void fixInitial(InitialMessage initialMessage) {
         initialMessage.getGameConstants().put("preprocessTimeout", CLIENT_FIRST_TURN_RESPONSE_TIME);
         initialMessage.getGameConstants().put("firstMoveTimeout", CLIENT_FIRST_MOVE_RESPONSE_TIME);
         initialMessage.getGameConstants().put("normalTimeout", CLIENT_RESPONSE_TIME);
         fixFortify(initialMessage);
     }
 
-    private void fixFortify(InitialMessage initialMessage)
-    {
-        for (ClientAbilityConstants abilityConstants : initialMessage.getAbilityConstants())
-        {
-            if (abilityConstants.getType() == AbilityType.FORTIFY)
-            {
+    private void fixFortify(InitialMessage initialMessage) {
+        for (ClientAbilityConstants abilityConstants : initialMessage.getAbilityConstants()) {
+            if (abilityConstants.getType() == AbilityType.FORTIFY) {
                 abilityConstants.setType(AbilityType.DEFENSIVE);
             }
         }
     }
 
-    private JsonObject cleanCells(String initStr)
-    {
+    private JsonObject cleanCells(String initStr) {
         JsonObject initJson = Json.GSON.fromJson(initStr, JsonObject.class);
         JsonObject map = initJson.getAsJsonObject("map");
         JsonArray oldCells = map.get("cells").getAsJsonArray();
@@ -154,13 +145,11 @@ public class GameHandler implements GameLogic {
         int rowNum = map.get("rowNum").getAsInt();
         int columnNum = map.get("columnNum").getAsInt();
 
-        for (int i = 0; i < rowNum; i++)
-        {
+        for (int i = 0; i < rowNum; i++) {
             JsonArray newRow = new JsonArray();
 
-            for (int j = 0; j < columnNum; j++)
-            {
-                JsonObject oldCell = oldCells.get(i*columnNum + j).getAsJsonObject();
+            for (int j = 0; j < columnNum; j++) {
+                JsonObject oldCell = oldCells.get(i * columnNum + j).getAsJsonObject();
                 newRow.add(oldCell);
             }
 
@@ -204,8 +193,7 @@ public class GameHandler implements GameLogic {
     public Message[] getClientInitialMessages() {
         Message[] messages = new Message[2];
 
-        for (int i = 0; i < CLIENT_NUM; i++)
-        {
+        for (int i = 0; i < CLIENT_NUM; i++) {
             JsonArray clientInitialJsonArray = new JsonArray();
             JsonObject initialJsonObject = Json.GSON.toJsonTree(initialMessage).getAsJsonObject();
             initialJsonObject.remove("map");
@@ -220,19 +208,14 @@ public class GameHandler implements GameLogic {
 
     @Override
     public void simulateEvents(Event[] environmentEvent, Event[][] clientsEvent) {
-
-        if (gameEngine.getState() == GameState.INIT)
-        {
+        if (gameEngine.getState() == GameState.INIT) {
             gameEngine.setState(GameState.PICK);
             return;
         }
-
         Event[] playerOneEvents = clientsEvent[0];
         Event[] playerTwoEvents = clientsEvent[1];
-
         ClientTurnMessage message1 = prepareClientMessage(playerOneEvents, 0);
         ClientTurnMessage message2 = prepareClientMessage(playerTwoEvents, 1);
-
         gameEngine.doTurn(message1, message2);
     }
 
@@ -243,8 +226,7 @@ public class GameHandler implements GameLogic {
                 switch (event.getType()) {
                     case "cast":
                         Cast cast = prepareCast(player, event);
-                        if (cast == null)
-                        {
+                        if (cast == null) {
                             continue;
                         }
                         message.getCasts().add(cast);
@@ -252,17 +234,17 @@ public class GameHandler implements GameLogic {
                         break;
                     case "move":
                         Move move = prepareMove(player, event);
-                        if (move == null || move.getMoves().size() == 0)
-                        {
+                        if (move == null || move.getMoves().size() == 0) {
                             continue;
                         }
                         message.getMoves().add(move);
                         message.setType(GameState.MOVE);
 
                         break;
-                    case "pick": // TODO check this
+                    case "pick":
                         String heroName = event.getArgs()[0];
-                        if (!gameEngine.getHeroes().keySet().contains(heroName))
+                        Set<String> heroes = gameEngine.getHeroes().keySet();
+                        if (!heroes.contains(heroName))
                             break;
                         message.setHeroName(heroName);
                         message.setType(GameState.PICK);
@@ -279,7 +261,7 @@ public class GameHandler implements GameLogic {
         Hero hero;
         int heroId;
         try {
-             heroId = Integer.parseInt(event.getArgs()[0]);
+            heroId = Integer.parseInt(event.getArgs()[0]);
         } catch (NumberFormatException e) {
             e.printStackTrace();
             return null;
@@ -347,11 +329,9 @@ public class GameHandler implements GameLogic {
         if (!gameEngine.getMap().isInMap(targetRow, targetColumn))
             return null;
 
-        if (ability.getType() == AbilityType.DODGE)
-        {
+        if (ability.getType() == AbilityType.DODGE) {
             Cell cell = fixDodgeTarget(hero, gameEngine.getMap().getCell(targetRow, targetColumn), ability.getRange());
-            if (cell == null || cell.equals(hero.getCell()))
-            {
+            if (cell == null || cell.equals(hero.getCell())) {
                 return null;
             }
             return new Cast(hero, ability, cell.getRow(), cell.getColumn());
@@ -368,10 +348,8 @@ public class GameHandler implements GameLogic {
         VisionTools visionTools = gameEngine.getVisionTools();
         Cell[] rayCells = visionTools.getRayCells(hero.getCell(), targetCell, true);
 
-        for (int i = rayCells.length - 1; i >= 0; i--)
-        {
-            if (visionTools.manhattanDistance(hero.getCell(), rayCells[i]) <= range/*&& !rayCells[i].isWall()*/)
-            {
+        for (int i = rayCells.length - 1; i >= 0; i--) {
+            if (visionTools.manhattanDistance(hero.getCell(), rayCells[i]) <= range/*&& !rayCells[i].isWall()*/) {
                 return rayCells[i];
             }
         }
@@ -383,8 +361,7 @@ public class GameHandler implements GameLogic {
         // statistical logs
         StringBuilder context = new StringBuilder();
         context.append("[");
-        for (int i = 0; i < gameEngine.getServerViewJsons().size(); i++)
-        {
+        for (int i = 0; i < gameEngine.getServerViewJsons().size(); i++) {
             context.append(Json.GSON.toJson(gameEngine.getServerViewJsons().get(i)));
             if (i == gameEngine.getServerViewJsons().size() - 1)
                 break;
@@ -392,11 +369,9 @@ public class GameHandler implements GameLogic {
         }
         context.append("]");
 
-        try
-        {
+        try {
             Files.write(Paths.get("server_view.log"), context.toString().getBytes());
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -442,34 +417,12 @@ public class GameHandler implements GameLogic {
 
     @Override
     public Message getStatusMessage() {
-        /*StatusMessage statusMessage = new StatusMessage();
-        StatusHero[][] heroes = new StatusHero[CLIENT_NUM][CLIENT_HERO_NUM];
-        for (int i = 0; i < CLIENT_NUM; i++) {
-            for (int j = 0; j < CLIENT_HERO_NUM; j++) {
-                Hero hero = gameEngine.getPlayers()[i].getHeroes().get(j);
-                StatusHero statusHero = new StatusHero();
-                statusHero.setId(hero.getId());
-                statusHero.setCurrentHP(hero.getHp());
-                List<RemainingCooldown> remainingCooldowns = new ArrayList<>();
-                for (Ability ability : hero.getAbilities()) {
-                    remainingCooldowns.add(new RemainingCooldown(ability.getName(), ability.getRemainingCoolDown()));
-                }
-                statusHero.setRemainingCooldowns(remainingCooldowns);
-                heroes[i][j] = statusHero;
-            }
-        }
-        statusMessage.setHeroes(heroes);
-
-        StatusMessage[] statusMessages = new StatusMessage[1];
-        statusMessages[0] = statusMessage;
-        return new Message(Message.NAME_STATUS, Json.GSON.toJsonTree(statusMessages).getAsJsonArray());*/
         return null;
     }
 
     @Override
     public Message[] getClientMessages() {
-        if (gameEngine.getState() == GameState.INIT)
-        {
+        if (gameEngine.getState() == GameState.INIT) {
             return getClientInitialMessages();
         }
 
