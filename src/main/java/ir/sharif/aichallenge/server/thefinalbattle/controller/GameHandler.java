@@ -332,7 +332,8 @@ public class GameHandler implements GameLogic {
             return null;
 
         if (ability.getType() == AbilityType.DODGE) {
-            Cell cell = fixDodgeTarget(hero, gameEngine.getMap().getCell(targetRow, targetColumn), ability.getRange());
+            Cell cell = fixDodgeTarget(hero, gameEngine.getMap().getCell(targetRow, targetColumn), ability.getRange(),
+                    ability.isLobbing());
             if (cell == null || cell.equals(hero.getCell())) {
                 return null;
             }
@@ -342,13 +343,13 @@ public class GameHandler implements GameLogic {
         return new Cast(hero, ability, targetRow, targetColumn);
     }
 
-    private Cell fixDodgeTarget(Hero hero, Cell targetCell, int range) // TODO check this
+    private Cell fixDodgeTarget(Hero hero, Cell targetCell, int range, boolean isLobbing) // TODO check this
     {
         if (hero.getCell() == null)
             return null;
 
         VisionTools visionTools = gameEngine.getVisionTools();
-        Cell[] rayCells = visionTools.getRayCells(hero.getCell(), targetCell, true);
+        Cell[] rayCells = visionTools.getRayCells(hero.getCell(), targetCell, isLobbing);
 
         for (int i = rayCells.length - 1; i >= 0; i--) {
             if (visionTools.manhattanDistance(hero.getCell(), rayCells[i]) <= range/*&& !rayCells[i].isWall()*/) {
