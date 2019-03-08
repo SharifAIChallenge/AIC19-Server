@@ -334,7 +334,7 @@ public class GameHandler implements GameLogic {
         if (ability.getType() == AbilityType.DODGE) {
             Cell cell = fixDodgeTarget(hero, gameEngine.getMap().getCell(targetRow, targetColumn), ability.getRange(),
                     ability.isLobbing());
-            if (cell == null || cell.equals(hero.getCell())) {
+            if (cell == null/* || cell.equals(hero.getCell())*/) {
                 return null;
             }
             return new Cast(hero, ability, cell.getRow(), cell.getColumn());

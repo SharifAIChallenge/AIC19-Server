@@ -364,6 +364,8 @@ public class GameEngine {
 
             castRemainingDodges(firstCasts, players[0]);
             castRemainingDodges(secondCasts, players[1]);
+
+            //todo damages
             return;
         }
 
