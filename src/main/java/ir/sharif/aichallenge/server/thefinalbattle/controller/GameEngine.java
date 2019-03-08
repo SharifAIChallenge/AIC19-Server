@@ -166,7 +166,7 @@ public class GameEngine {
             try {
                 wantedAbilities.add((Ability) abilities.get(abilityName).clone());
             } catch (CloneNotSupportedException e) {
-                e.printStackTrace(); //TODO someone handle this pls
+                e.printStackTrace();
             }
         }
 
@@ -365,7 +365,7 @@ public class GameEngine {
             castRemainingDodges(firstCasts, players[0]);
             castRemainingDodges(secondCasts, players[1]);
 
-            //todo damages
+            affectNotLobbingDodges();
             return;
         }
 
@@ -376,6 +376,42 @@ public class GameEngine {
         abilityTools.setMyHeroes(players[1].getHeroes());
         abilityTools.setOppHeroes(players[0].getHeroes());
         affectCasts(secondCasts, players[1]);
+    }
+
+    private void affectNotLobbingDodges() {
+        Collection<Hero> immuneHeroes = new HashSet<>(ruhFortifiedHeroes);
+        for (CastedAbility castedAbility : castedAbilities) {
+            if (castedAbility.getAbility().getType() == AbilityType.DODGE)
+                immuneHeroes.add(castedAbility.getCasterHero());
+        }
+
+        for (CastedAbility castedAbility : castedAbilities) {
+            Ability ability = castedAbility.getAbility();
+            if (ability.getType() != AbilityType.DODGE || ability.isLobbing())
+                continue;
+
+            Player player;
+            List<Hero> targetHeroes = new ArrayList<>();
+            if (players[0].getHeroes().contains(castedAbility.getCasterHero()))
+                player = players[0];
+            else
+                player = players[1];
+            Cell[] rayCells = visionTools.getRayCells(castedAbility.getStartCell(), castedAbility.getEndCell(),
+                    true);  //wall piercing not matters (there is no wall between start and end cell)
+            for (Cell rayCell : rayCells) {
+                List<Hero> heroes = rayCell.getHeroes();
+                for (Hero hero : heroes) {
+                    if (immuneHeroes.contains(hero) || player.getHeroes().contains(hero))
+                        continue;
+                    hero.setHp(hero.getHp() - ability.getPower());
+                    if (hero.getHp() <= 0)
+                        hero.moveTo(null);      //todo is it enough?
+                    targetHeroes.add(hero);
+                }
+            }
+            castedAbility.setTargetHeroes(targetHeroes);
+            addClientCastedAbility(castedAbility, player);  //update castAbilities for players
+        }
     }
 
     private void castDodges(List<Cast> dodgeCasts, Player player) {
@@ -482,7 +518,7 @@ public class GameEngine {
                 break;
         }
         castedAbilities.add(castedAbility);
-        addCastedAbility(castedAbility, player);
+        addClientCastedAbility(castedAbility, player);
     }
 
     private void castDefensive(Ability ability, List<Hero> targetHeroes)
@@ -661,7 +697,7 @@ public class GameEngine {
         hero.getRecentPath().add(cell);
     }
 
-    private void addCastedAbility(CastedAbility castedAbility, Player player) {
+    private void addClientCastedAbility(CastedAbility castedAbility, Player player) {
         ClientCastedAbility clientCastedAbility = new ClientCastedAbility();
         ClientCastedAbility clientOppCastedAbility = new ClientCastedAbility();
 
@@ -709,7 +745,8 @@ public class GameEngine {
         castedAbility.setAbility(cast.getAbility());
         castedAbility.setEndCell(map.getCell(cast.getTargetRow(), cast.getTargetColumn()));
         castedAbilities.add(castedAbility);
-        addCastedAbility(castedAbility, player);
+        if (cast.getAbility().isLobbing())      //if added for not lobbing dodges (they are handled later)
+            addClientCastedAbility(castedAbility, player);
     }
 
     // deletes invalid moves
