@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class OvertimeHandler {
     private GameEngine gameEngine;
     private Player behindPlayer;
-    public static final int MAX_DIFF_SCORE = 30;    //todo set this
+    public static int MAX_DIFF_SCORE;
     public static final int INF_SCORE = 100000;
 
     public OvertimeHandler(GameEngine gameEngine) {

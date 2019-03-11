@@ -193,6 +193,7 @@ public class GameEngine {
         this.maxScore = gameConstants.get("maxScore");
         this.maxOvertime = gameConstants.get("initOvertime");
         this.remainingOvertime = -1;
+        OvertimeHandler.MAX_DIFF_SCORE = gameConstants.get("maxScoreDiff");
     }
 
     private void doPickTurn(String firstHero, String secondHero) {
