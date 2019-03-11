@@ -33,6 +33,9 @@ public class GameEngine {
     private int maxAP;
     private int maxTurns;
     private int maxScore;
+    private int maxOvertime;
+    private int remainingOvertime;
+    private OvertimeHandler overtimeHandler = new OvertimeHandler(this);
 
     private AtomicInteger currentTurn;
     private Player[] players = new Player[2];
@@ -188,6 +191,8 @@ public class GameEngine {
         this.maxAP = gameConstants.get("maxAP");
         this.maxTurns = gameConstants.get("maxTurns");
         this.maxScore = gameConstants.get("maxScore");
+        this.maxOvertime = gameConstants.get("initOvertime");
+        this.remainingOvertime = -1;
     }
 
     private void doPickTurn(String firstHero, String secondHero) {
@@ -313,6 +318,7 @@ public class GameEngine {
                 graphicHandler.addActionMessage();
                 graphicHandler.addStatusMessage();
                 currentTurn.incrementAndGet();
+                overtimeHandler.updateOvertime();
                 state = GameState.MOVE;
             } else if (state == GameState.MOVE) {
                 currentMovePhase.set((currentMovePhase.get() + 1) % NUM_OF_MOVE_TURN);

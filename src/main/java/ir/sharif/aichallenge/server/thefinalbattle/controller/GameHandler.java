@@ -571,12 +571,7 @@ public class GameHandler implements GameLogic {
 
     @Override
     public boolean isGameFinished() {
-        Player[] players = gameEngine.getPlayers();
-        int maxScore = gameEngine.getMaxScore();
-        int maxTurns = gameEngine.getMaxTurns();
-
-        return gameEngine.getCurrentTurn().get() >= maxTurns || players[0].getScore() >= maxScore ||
-                players[1].getScore() >= maxScore;
+        return gameEngine.getMaxOvertime() == 0 || gameEngine.getRemainingOvertime() == 0;
     }
 
     @Override

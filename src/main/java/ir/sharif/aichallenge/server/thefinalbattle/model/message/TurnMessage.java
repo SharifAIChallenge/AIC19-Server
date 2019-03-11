@@ -27,4 +27,6 @@ public class TurnMessage {
     private List<ClientHero> oppHeroes;
     private List<ClientCastedAbility> myCastAbilities;
     private List<ClientCastedAbility> oppCastAbilities;
+    private int maxOvertime;
+    private int remainingOvertime;
 }
