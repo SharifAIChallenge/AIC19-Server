@@ -111,6 +111,8 @@ public class GameEngine {
         List<ClientHeroConstants> heroConstants = initialMessage.getHeroConstants();
         initHeroes(heroConstants);
 
+        ruhFortifiedHeroes = new HashSet<>();
+
         JsonObject serverViewInit = Json.GSON.toJsonTree(initialMessage).getAsJsonObject();
         JsonObject serverViewGameConstants = serverViewInit.get("gameConstants").getAsJsonObject();
         serverViewGameConstants.addProperty("mapName", mapName);

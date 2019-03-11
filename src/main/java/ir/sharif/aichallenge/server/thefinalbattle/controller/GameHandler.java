@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GameHandler implements GameLogic {
 
     public static final FileParam PARAM_MAP = new FileParam("Map", null, ".*\\.map");
+    public static final StringParam PARAM_MAP_NAME = new StringParam("MapName", "");
     public static final StringParam CLIENT_ONE = new StringParam("TeamName0", "");
     public static final StringParam CLIENT_TWO = new StringParam("TeamName1", "");
 
@@ -95,7 +96,7 @@ public class GameHandler implements GameLogic {
             System.err.println("Invalid map file!");
             System.exit(0);
         }
-        gameEngine.initialize(initialMessage, PARAM_MAP.getValue().getName(), CLIENT_ONE.getValue(),
+        gameEngine.initialize(initialMessage, PARAM_MAP_NAME.getValue(), CLIENT_ONE.getValue(),
                 CLIENT_TWO.getValue());
         this.initialMessage = initialMessage;
         this.graphicInitial = graphicInitial;
