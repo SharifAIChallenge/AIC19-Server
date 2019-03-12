@@ -27,7 +27,7 @@ public class GameEngine {
     public static final int PICK_OFFSET = 4;
     public static final int NUM_OF_CAST_TURN = 1;
 
-    private int movePhaseNum = 6;
+    private int totalMovePhases;
     private int killScore;
     private int objectiveZoneScore;
     private int maxAP;
@@ -196,7 +196,7 @@ public class GameEngine {
         this.maxScore = gameConstants.get("maxScore");
         this.maxOvertime = gameConstants.get("initOvertime");
         this.remainingOvertime = -1;
-//        this.movePhaseNum = gameConstants.get("movePhaseNum");
+        this.totalMovePhases = gameConstants.get("totalMovePhases");
         OvertimeHandler.MAX_DIFF_SCORE = gameConstants.get("maxScoreDiff");
     }
 
@@ -326,7 +326,7 @@ public class GameEngine {
                 overtimeHandler.updateOvertime();
                 state = GameState.MOVE;
             } else if (state == GameState.MOVE) {
-                currentMovePhase.set((currentMovePhase.get() + 1) % movePhaseNum);
+                currentMovePhase.set((currentMovePhase.get() + 1) % totalMovePhases);
                 graphicHandler.addMoveMessage();
                 if (currentMovePhase.get() == 0)
                     state = GameState.ACTION;
@@ -425,8 +425,7 @@ public class GameEngine {
 
                 for (Hero hero : deadHeroes)
                 {
-                    hero.moveTo(null);
-                    hero.setHp(0);
+                    updateDashDeaths(player.getOpponent(), hero);
                 }
             }
             castedAbility.setTargetHeroes(targetHeroes);
@@ -584,23 +583,23 @@ public class GameEngine {
 
         castAbilities(moveDodgeCasts1, moveDodgeCasts2, AbilityType.DODGE);
 
-        for (Player player : players)
-        {
-            HashSet<Cell> set = new HashSet<>();
-
-            for (Hero hero : player.getHeroes())
-            {
-                Cell cell = hero.getCell();
-                if (set.contains(cell))
-                {
-                    System.out.println();
-                }
-
-                if (cell == null)
-                    continue;
-                set.add(cell);
-            }
-        }
+//        for (Player player : players)
+//        {
+//            HashSet<Cell> set = new HashSet<>();
+//
+//            for (Hero hero : player.getHeroes())
+//            {
+//                Cell cell = hero.getCell();
+//                if (set.contains(cell))
+//                {
+//                    System.out.println();
+//                }
+//
+//                if (cell == null)
+//                    continue;
+//                set.add(cell);
+//            }
+//        }
 
         //these must be empty after move
         castedAbilities = new ArrayList<>();
@@ -700,6 +699,13 @@ public class GameEngine {
         if (hero.getRespawnTime() <= 0) {
             respawnHero(hero, player);
         }
+    }
+
+    private void updateDashDeaths(Player player, Hero hero) {
+        hero.setHp(0);
+        hero.moveTo(null);
+        hero.setRespawnTime(hero.getMaxRespawnTime() + 1);
+        player.getOpponent().setScore(player.getOpponent().getScore() + killScore);
     }
 
     private void respawnHero(Hero hero, Player player) {
