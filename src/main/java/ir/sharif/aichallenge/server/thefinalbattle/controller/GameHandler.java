@@ -488,6 +488,8 @@ public class GameHandler implements GameLogic {
             turnMessage.setOppHeroes(getClientOppHeroes(player));
             turnMessage.setMyCastAbilities(player.getMyCastedAbilities());
             turnMessage.setOppCastAbilities(player.getOppCastedAbilities());
+            turnMessage.setMaxOvertime(gameEngine.getMaxOvertime());
+            turnMessage.setRemainingOvertime(gameEngine.getRemainingOvertime());
             // make json array and message[i]
             TurnMessage[] turnMessages = new TurnMessage[1];
             turnMessages[0] = turnMessage;
