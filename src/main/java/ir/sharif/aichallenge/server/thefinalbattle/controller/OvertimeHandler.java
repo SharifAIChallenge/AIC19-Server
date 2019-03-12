@@ -9,6 +9,7 @@ public class OvertimeHandler {
     private Player behindPlayer;
     public static int MAX_DIFF_SCORE;
     public static final int INF_SCORE = 100000;
+    private boolean arePlayersEqual = false;
 
     public OvertimeHandler(GameEngine gameEngine) {
         this.gameEngine = gameEngine;
@@ -38,25 +39,44 @@ public class OvertimeHandler {
             remainingOvertime = maxOvertime;
             maxTurns = currentTurn.get() + maxOvertime;
             maxScore = INF_SCORE;
-            if (players[0].getScore() > players[1].getScore()) {
+            int score0 = players[0].getScore();
+            int score1 = players[1].getScore();
+            int totalUsedAp0 = players[0].getTotalUsedAp();
+            int totalUsedAp1 = players[1].getTotalUsedAp();
+
+            if (score0 > score1 || (score0 == score1 && totalUsedAp0 < totalUsedAp1)) {
                 behindPlayer = players[1];
             }
-            else if (players[0].getScore() < players[1].getScore()) {
+            else if (score0 < score1 || (score0 == score1 && totalUsedAp0 > totalUsedAp1)) {
                 behindPlayer = players[0];
             }
-            else {      //todo used ap (better not to be)
+            else {
+                //arePlayersEqual = true;
                 maxOvertime -= 1;
                 remainingOvertime = -1;
             }
         }
         else {      //behindPlayer is set
+            /*if (arePlayersEqual) {
+                remainingOvertime -= 1;
+                if (remainingOvertime == 0) {
+                    maxOvertime -= 1;
+                    remainingOvertime = -1;
+                }
+                gameEngine.setMaxOvertime(maxOvertime);
+                gameEngine.setRemainingOvertime(remainingOvertime);
+                return;
+            }*/
+
             if (Math.abs(players[0].getScore() - players[1].getScore()) >= MAX_DIFF_SCORE) {
                 gameEngine.setMaxOvertime(0);
                 gameEngine.setRemainingOvertime(0);
                 return;
             }    //todo whenever difference gets more than a limit game ends ok?
 
-            if (behindPlayer.getScore() > behindPlayer.getOpponent().getScore()) {  //todo used ap (better not to be)
+            if (behindPlayer.getScore() > behindPlayer.getOpponent().getScore() ||
+                    (behindPlayer.getScore() == behindPlayer.getOpponent().getScore() &&
+                            behindPlayer.getTotalUsedAp() < behindPlayer.getOpponent().getTotalUsedAp())) {
                 maxOvertime -= 1;
                 remainingOvertime = maxOvertime;
                 behindPlayer = behindPlayer.getOpponent();
