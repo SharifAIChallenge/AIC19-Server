@@ -72,7 +72,7 @@ public class OvertimeHandler {
                 gameEngine.setMaxOvertime(0);
                 gameEngine.setRemainingOvertime(0);
                 return;
-            }    //todo whenever difference gets more than a limit game ends ok?
+            }
 
             if (behindPlayer.getScore() > behindPlayer.getOpponent().getScore() ||
                     (behindPlayer.getScore() == behindPlayer.getOpponent().getScore() &&

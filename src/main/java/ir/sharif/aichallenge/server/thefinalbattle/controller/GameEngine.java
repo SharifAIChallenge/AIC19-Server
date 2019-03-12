@@ -413,7 +413,8 @@ public class GameEngine {
                 List<Hero> heroes = rayCell.getHeroes();
                 Set<Hero> deadHeroes = new HashSet<>();
                 for (Hero hero : heroes) {
-                    if (immuneHeroes.contains(hero) || player.getHeroes().contains(hero))
+                    List<Cell> respawnZone = (player == players[0] ? map.getPlayer2RespawnZone() : map.getPlayer1RespawnZone());
+                    if (immuneHeroes.contains(hero) || player.getHeroes().contains(hero) || respawnZone.contains(hero.getCell()))
                         continue;
                     hero.setHp(hero.getHp() - ability.getPower());
                     if (hero.getHp() <= 0)
@@ -578,6 +579,10 @@ public class GameEngine {
         List<Move> allMoves2 = message2.getMoves();
 
         resetHeroesRecentPaths();
+        castedAbilities = new ArrayList<>();
+        players[0].clearCastedAbilities();
+        players[1].clearCastedAbilities();
+
         List<Cast> moveDodgeCasts1 = createDodgeCastsFromMoves(allMoves1);
         List<Cast> moveDodgeCasts2 = createDodgeCastsFromMoves(allMoves2);
 
