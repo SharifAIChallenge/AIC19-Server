@@ -26,7 +26,7 @@ public class OvertimeHandler {
             return;
 
         if (remainingOvertime == -1) {
-            if (currentTurn.get() <= maxTurns && players[0].getScore() < maxScore && players[1].getScore() < maxScore)
+            if (currentTurn.get() < maxTurns && players[0].getScore() < maxScore && players[1].getScore() < maxScore)
                 return;
 
             if (Math.abs(players[0].getScore() - players[1].getScore()) >= MAX_DIFF_SCORE) {
