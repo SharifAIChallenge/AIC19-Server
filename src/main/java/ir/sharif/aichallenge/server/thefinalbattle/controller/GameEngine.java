@@ -25,9 +25,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Setter
 public class GameEngine {
     public static final int PICK_OFFSET = 4;
-    public static final int NUM_OF_MOVE_TURN = 6;
     public static final int NUM_OF_CAST_TURN = 1;
 
+    private int movePhaseNum = 6;
     private int killScore;
     private int objectiveZoneScore;
     private int maxAP;
@@ -53,6 +53,7 @@ public class GameEngine {
     private JsonArray serverViewJsons = new JsonArray();
     private GraphicHandler graphicHandler = new GraphicHandler(this);
     private Random random = new Random();
+
     private AtomicInteger currentMovePhase;
     private Set<Hero> castedHeroes;
 
@@ -195,6 +196,7 @@ public class GameEngine {
         this.maxScore = gameConstants.get("maxScore");
         this.maxOvertime = gameConstants.get("initOvertime");
         this.remainingOvertime = -1;
+//        this.movePhaseNum = gameConstants.get("movePhaseNum");
         OvertimeHandler.MAX_DIFF_SCORE = gameConstants.get("maxScoreDiff");
     }
 
@@ -324,7 +326,7 @@ public class GameEngine {
                 overtimeHandler.updateOvertime();
                 state = GameState.MOVE;
             } else if (state == GameState.MOVE) {
-                currentMovePhase.set((currentMovePhase.get() + 1) % NUM_OF_MOVE_TURN);
+                currentMovePhase.set((currentMovePhase.get() + 1) % movePhaseNum);
                 graphicHandler.addMoveMessage();
                 if (currentMovePhase.get() == 0)
                     state = GameState.ACTION;
@@ -409,13 +411,22 @@ public class GameEngine {
                     true);  //wall piercing not matters (there is no wall between start and end cell)
             for (Cell rayCell : rayCells) {
                 List<Hero> heroes = rayCell.getHeroes();
+                Set<Hero> deadHeroes = new HashSet<>();
                 for (Hero hero : heroes) {
                     if (immuneHeroes.contains(hero) || player.getHeroes().contains(hero))
                         continue;
                     hero.setHp(hero.getHp() - ability.getPower());
                     if (hero.getHp() <= 0)
-                        hero.moveTo(null);      //todo is it enough?
+                    {
+                        deadHeroes.add(hero);
+                    }
                     targetHeroes.add(hero);
+                }
+
+                for (Hero hero : deadHeroes)
+                {
+                    hero.moveTo(null);
+                    hero.setHp(0);
                 }
             }
             castedAbility.setTargetHeroes(targetHeroes);
@@ -572,6 +583,24 @@ public class GameEngine {
         List<Cast> moveDodgeCasts2 = createDodgeCastsFromMoves(allMoves2);
 
         castAbilities(moveDodgeCasts1, moveDodgeCasts2, AbilityType.DODGE);
+
+        for (Player player : players)
+        {
+            HashSet<Cell> set = new HashSet<>();
+
+            for (Hero hero : player.getHeroes())
+            {
+                Cell cell = hero.getCell();
+                if (set.contains(cell))
+                {
+                    System.out.println();
+                }
+
+                if (cell == null)
+                    continue;
+                set.add(cell);
+            }
+        }
 
         //these must be empty after move
         castedAbilities = new ArrayList<>();
