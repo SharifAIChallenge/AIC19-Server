@@ -98,7 +98,7 @@ public class Hero implements Cloneable{
             case "HEALER":
                 return playerId == 0 ? "Ancient Queen" : "Mystic";
             case "SHADOW":
-                return playerId == 0 ? "Spirit Demon" : "Evil God";
+                return playerId == 0 ? "Evil God" : "Spirit Demon";
         }
 
         return "";

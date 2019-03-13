@@ -34,7 +34,7 @@ public class ClientHeroConstants
                 this.name = "Ancient Queen";
                 break;
             case "SHADOW":
-                this.name = "Evil God";
+                this.name = "Spirit Demon";
                 break;
             case "Ancient Warrior":
                 this.name = "Mechanical Golem";
@@ -48,8 +48,8 @@ public class ClientHeroConstants
             case "Ancient Queen":
                 this.name = "Mystic";
                 break;
-            case "Evil God":
-                this.name = "Spirit Demon";
+            case "Spirit Demon":
+                this.name = "Evil God";
                 break;
         }
 
