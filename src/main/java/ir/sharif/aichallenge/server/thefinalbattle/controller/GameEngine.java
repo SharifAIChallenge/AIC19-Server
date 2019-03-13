@@ -783,7 +783,7 @@ public class GameEngine {
         clientOppCastedAbility.setTargetHeroIds(targetHeroIds);
         if (clientOppCastedAbility.getStartCell() != null || clientOppCastedAbility.getEndCell() != null ||
                 clientOppCastedAbility.getTargetHeroIds().size() > 0)
-            player.getOppCastedAbilities().add(clientOppCastedAbility);
+            player.getOpponent().getOppCastedAbilities().add(clientOppCastedAbility);
     }
 
     private void addDodgeCastedAbility(Cast cast, Player player, List<Hero> targetHeroes) {
