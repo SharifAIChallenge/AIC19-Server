@@ -1,6 +1,6 @@
 # AI Challenge 2019 - Server
 
-## setup instructios
+## setup instructions
 
 It is recomended to use Intellij IDEA (JetBrains)
 
